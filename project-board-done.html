@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0A">
+<title>youbet — Project Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#FF2B2B;--grad:linear-gradient(135deg,#FF2B2B,#ff6b3d);
+  --bg:#FFF6F4;--card:#fff;--br:rgba(0,0,0,.07);
+  --tx:#0D0D0D;--tx2:#555;--tx3:#999;--green:#22c55e;
+  --sh:0 2px 24px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.04);
+  --sh-lg:0 12px 48px rgba(0,0,0,.12);
+  --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{min-height:100%;background:#F8F7F4;font-family:'Inter',sans-serif;overflow-x:hidden;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;background:rgba(248,247,244,.96);backdrop-filter:blur(24px);border-bottom:1px solid rgba(0,0,0,.07);transition:all .3s;}
+nav.lit{background:rgba(255,246,244,.96);border-bottom-color:var(--br);}
+.logo{font-weight:900;font-size:20px;letter-spacing:-.5px;color:#0D0D0D;text-decoration:none;transition:color .3s;}
+nav.lit .logo{color:var(--tx);}
+.logo em{color:var(--red);font-style:normal;}
+.nav-r{display:flex;align-items:center;gap:8px;}
+.np{font-size:13px;font-weight:700;padding:8px 16px;border-radius:100px;text-decoration:none;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:all .2s;}
+.np.g{color:#555;border:1.5px solid rgba(0,0,0,.1);background:rgba(0,0,0,.04);}
+nav.lit .np.g{color:var(--tx2);border-color:var(--br);background:transparent;}
+.np.r{background:var(--grad);color:#fff;box-shadow:0 4px 16px rgba(255,43,43,.32);}
+
+/* ═══════════════════════════════════
+   BOARD VIEW
+═══════════════════════════════════ */
+#boardView{display:block;}
+
+/* Hero */
+.bh{background:#0A0A0A;padding:80px 24px 28px;position:relative;overflow:hidden;}
+.bh-glow{position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:700px;height:560px;background:radial-gradient(ellipse,rgba(255,43,43,.18) 0%,transparent 60%);pointer-events:none;}
+.bh-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse at 50% 50%,black 20%,transparent 70%);mask-image:radial-gradient(ellipse at 50% 50%,black 20%,transparent 70%);pointer-events:none;}
+.bh-in{max-width:680px;margin:0 auto;position:relative;z-index:1;}
+.bh-live{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:6px 14px;margin-bottom:16px;}
+.ldot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:lp 2s infinite;flex-shrink:0;}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:.3}}
+.ltxt{font-size:12px;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:.2px;}
+.lnum{color:rgba(255,255,255,.85);font-weight:700;}
+.bh h1{font-size:clamp(26px,6vw,44px);font-weight:900;letter-spacing:-1.8px;line-height:.96;color:#fff;margin-bottom:12px;}
+.bh h1 .red{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.bh h1 .dim{color:rgba(255,255,255,.22);}
+.bh-sub{font-size:14px;color:rgba(255,255,255,.4);line-height:1.55;margin-bottom:0;max-width:340px;font-weight:500;}
+.bh-pills{display:flex;gap:8px;margin-top:16px;}
+.bhpill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:8px 14px;}
+.bhpill-n{font-size:13px;font-weight:800;color:#fff;letter-spacing:-.2px;}
+.bhpill-dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.2);}
+.bhpill-l{font-size:12px;color:rgba(255,255,255,.35);font-weight:500;}
+
+/* Wave */
+.wave{display:none;}
+
+/* Filters */
+.fbar{background:#F8F7F4;border-bottom:1px solid rgba(0,0,0,.07);position:sticky;top:60px;z-index:100;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.fbar::-webkit-scrollbar{display:none;}
+.fbar-in{display:flex;max-width:680px;margin:0 auto;padding:0 24px;}
+.fc{padding:12px 14px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:#aaa;cursor:pointer;border:none;background:none;white-space:nowrap;border-bottom:2px solid transparent;transition:all .18s;}
+.fc.on{color:var(--red);border-bottom-color:var(--red);}
+
+/* Feed */
+.feed-bg{background:#F8F7F4;min-height:60vh;}
+.feed{max-width:680px;margin:0 auto;padding:18px 20px 120px;display:flex;flex-direction:column;gap:14px;}
+.feed-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#bbb;padding:2px 4px;}
+
+/* ── PROJECT CARD ── */
+.pcard{background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:22px;overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s;box-shadow:0 4px 24px rgba(0,0,0,.4);animation:up .35s ease both;}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.pcard:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.12);}
+.pcard:active{transform:scale(.985);}
+.pc-cover{height:108px;position:relative;display:flex;align-items:flex-end;padding:13px 16px;overflow:hidden;}
+.pc-cbg{position:absolute;inset:0;}
+.pc-cwm{position:absolute;right:-6px;top:-6px;font-size:90px;opacity:.14;line-height:1;pointer-events:none;}
+.pc-av{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;background:rgba(255,255,255,.2);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,.3);position:relative;z-index:1;flex-shrink:0;}
+.pc-ci{margin-left:11px;flex:1;position:relative;z-index:1;}
+.pc-name{font-size:22px;font-weight:900;letter-spacing:-.6px;color:#fff;line-height:1;text-shadow:0 1px 8px rgba(0,0,0,.2);}
+.pc-badges{display:flex;gap:5px;margin-top:5px;}
+.badge{font-size:9px;font-weight:800;padding:3px 8px;border-radius:100px;}
+.b-hot{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(4px);}
+.b-new{background:rgba(34,197,94,.28);color:#fff;border:1px solid rgba(34,197,94,.35);backdrop-filter:blur(4px);}
+.pc-cat{position:absolute;top:11px;right:13px;display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:100px;padding:4px 10px;z-index:1;font-size:11px;font-weight:700;color:#fff;}
+.pc-body{padding:16px 18px 18px;background:#fff;}
+.pot{display:inline-flex;align-items:center;gap:4px;border-radius:9px;padding:5px 11px;font-size:11px;font-weight:800;margin-bottom:11px;border:1px solid transparent;}
+.pot1{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.18);color:#16a34a;}
+.pot2{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.18);color:#2563eb;}
+.pot3{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2);color:#d97706;}
+.pot4{background:rgba(255,43,43,.08);border-color:rgba(255,43,43,.2);color:var(--red);}
+.pc-desc{font-size:13px;color:#666;line-height:1.6;margin-bottom:12px;}
+.pc-roles{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.pc-role-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;background:var(--rl);border:1px solid rgba(255,43,43,.15);font-size:11px;font-weight:700;color:var(--red);}
+.pc-role{border-left:3px solid var(--rc,var(--red));padding-left:11px;margin-bottom:13px;}
+.pc-rlbl{font-size:9px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--rc,var(--red));margin-bottom:3px;opacity:.75;}
+.pc-rval{font-size:13px;font-weight:700;color:#0D0D0D;line-height:1.3;}
+.pc-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.cm{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.05);border-radius:100px;padding:5px 10px;font-size:11px;font-weight:600;color:#888;}
+.pc-foot{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(0,0,0,.07);}
+.pc-int{display:flex;align-items:center;gap:8px;font-size:13px;color:#aaa;font-weight:600;}
+.btn-like{background:none;border:1.5px solid var(--br);border-radius:100px;padding:5px 12px;font-size:12px;font-weight:700;color:var(--tx3);cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .2s;-webkit-tap-highlight-color:transparent;}
+.btn-like:active{transform:scale(.93);}
+.btn-like.liked{background:var(--rl);border-color:rgba(255,43,43,.2);color:var(--red);}
+.pc-int strong{color:#0D0D0D;}
+.btn-join{background:var(--grad);color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:13px;padding:10px 20px;border-radius:100px;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(255,43,43,.28);}
+
+/* ═══════════════════════════════════
+   PROJECT PAGE VIEW
+═══════════════════════════════════ */
+#projectView{display:none;background:#F8F7F4;min-height:100vh;}
+
+/* Page Hero */
+.pp-hero{position:relative;overflow:hidden;padding:calc(var(--sat)+70px) 24px 0;min-height:280px;display:flex;flex-direction:column;justify-content:flex-end;}
+.pp-hero-bg{position:absolute;inset:0;}
+.pp-hero-glow{position:absolute;top:-40px;right:-40px;width:280px;height:280px;background:radial-gradient(ellipse,rgba(255,255,255,.12) 0%,transparent 70%);pointer-events:none;}
+.pp-hero-wm{position:absolute;right:-20px;bottom:-20px;font-size:200px;opacity:.1;line-height:1;pointer-events:none;}
+.pp-back{position:absolute;top:calc(var(--sat)+14px);left:20px;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:100px;padding:8px 14px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;z-index:10;-webkit-user-select:none;}
+.pp-hero-in{position:relative;z-index:1;padding-bottom:28px;}
+.pp-av{width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,.2);backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:14px;}
+.pp-name{font-size:36px;font-weight:900;letter-spacing:-1.5px;color:#fff;line-height:1;margin-bottom:8px;text-shadow:0 2px 12px rgba(0,0,0,.15);}
+.pp-tagline{font-size:15px;color:rgba(255,255,255,.7);line-height:1.6;max-width:400px;}
+
+/* Page Body */
+.pp-body{padding:0 20px 130px;display:flex;flex-direction:column;gap:14px;margin-top:-1px;background:#F8F7F4;}
+
+/* Pot + meta strip */
+.pp-strip{background:#fff;border-radius:18px;padding:16px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid rgba(0,0,0,.07);box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.pp-strip-pot{display:inline-flex;align-items:center;gap:5px;border-radius:9px;padding:6px 14px;font-size:13px;font-weight:800;border:1px solid transparent;}
+.pp-strip-div{width:1px;height:24px;background:rgba(0,0,0,.08);}
+.pp-strip-meta{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#888;}
+
+/* Section card */
+.pp-card{background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:20px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.pp-card-head{padding:16px 18px 0;}
+.pp-card-lbl{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#bbb;margin-bottom:10px;}
+.pp-card-title{font-size:20px;font-weight:900;letter-spacing:-.4px;color:#0D0D0D;line-height:1.2;margin-bottom:10px;}
+.pp-card-body{padding:0 18px 18px;}
+.pp-card-text{font-size:14px;color:#666;line-height:1.75;}
+
+/* Who they need */
+.need-card{background:#fff;border:1px solid rgba(0,0,0,.07);box-shadow:0 2px 12px rgba(0,0,0,.06);border-radius:20px;padding:22px;box-shadow:var(--sh-lg);}
+.need-lbl{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,43,43,.7);margin-bottom:12px;}
+.need-row{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;}
+.need-row:last-child{margin-bottom:0;}
+.need-ico{width:40px;height:40px;border-radius:12px;background:rgba(255,43,43,.12);border:1px solid rgba(255,43,43,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.need-body{}
+.need-t{font-size:15px;font-weight:700;color:#0D0D0D;margin-bottom:3px;letter-spacing:-.2px;}
+.need-s{font-size:13px;color:#888;line-height:1.55;}
+
+/* Founder */
+.founder-card{background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:20px;overflow:hidden;}
+.founder-top{display:flex;align-items:center;gap:12px;padding:18px;}
+.founder-av{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;flex-shrink:0;}
+.founder-name{font-size:16px;font-weight:800;color:#0D0D0D;}
+.founder-sub{font-size:12px;color:#aaa;margin-top:2px;}
+.founder-msg{padding:0 18px 18px;font-size:14px;color:#666;line-height:1.75;font-style:italic;border-top:1px solid rgba(0,0,0,.07);padding-top:14px;}
+.founder-msg .red{color:var(--red);font-style:normal;font-weight:700;}
+
+/* Perks */
+.perks{display:flex;flex-direction:column;gap:0;}
+.perk{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-bottom:1px solid rgba(0,0,0,.07);}
+.perk:last-child{border-bottom:none;}
+.perk-ico{font-size:20px;flex-shrink:0;margin-top:1px;}
+.perk-t{font-size:14px;font-weight:700;color:#0D0D0D;margin-bottom:2px;}
+.perk-s{font-size:12px;color:#aaa;line-height:1.5;}
+
+/* Related */
+.related-scroll{display:flex;gap:12px;overflow-x:auto;padding:4px 20px 16px;-webkit-overflow-scrolling:touch;scrollbar-width:none;background:#F8F7F4;}
+.related-scroll::-webkit-scrollbar{display:none;}
+.rel-card{background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:18px;overflow:hidden;flex-shrink:0;width:200px;cursor:pointer;transition:transform .2s;}
+.rel-card:hover{transform:translateY(-3px);}
+.rel-cover{height:72px;position:relative;display:flex;align-items:flex-end;padding:10px 12px;}
+.rel-cbg{position:absolute;inset:0;}
+.rel-cwm{position:absolute;right:-4px;top:-4px;font-size:60px;opacity:.14;line-height:1;}
+.rel-av{width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:14px;position:relative;z-index:1;}
+.rel-name{font-size:14px;font-weight:900;color:#fff;margin-left:8px;position:relative;z-index:1;letter-spacing:-.3px;}
+.rel-body{padding:10px 12px;background:#fff;}
+.rel-pot{display:inline-flex;align-items:center;gap:3px;border-radius:7px;padding:3px 8px;font-size:10px;font-weight:800;margin-bottom:5px;border:1px solid transparent;}
+.rel-role{font-size:11px;font-weight:700;color:var(--red);border-left:2px solid var(--red);padding-left:7px;}
+
+/* Fixed apply bar */
+.apply-bar{position:fixed;bottom:0;left:0;right:0;z-index:150;background:rgba(248,247,244,.97);backdrop-filter:blur(24px);border-top:1px solid rgba(0,0,0,.07);padding:12px 20px;padding-bottom:max(12px,calc(var(--sab)+8px));}
+.apply-bar-in{max-width:680px;margin:0 auto;display:flex;align-items:center;gap:12px;}
+.apply-int{font-size:13px;color:#aaa;font-weight:600;}
+.apply-int strong{color:#0D0D0D;}
+.btn-apply{flex:1;background:var(--grad);color:#fff;font-family:'Inter',sans-serif;font-weight:900;font-size:16px;padding:15px;border-radius:14px;border:none;cursor:pointer;box-shadow:0 6px 22px rgba(255,43,43,.28);letter-spacing:-.2px;}
+
+/* ── BOTTOM NAV ── */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:120;background:rgba(248,247,244,.97);backdrop-filter:blur(24px);border-top:1px solid rgba(0,0,0,.07);display:flex;padding-bottom:max(8px,var(--sab));}
+@media(min-width:680px){.bnav{left:50%;transform:translateX(-50%);width:680px;}}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0;cursor:pointer;border:none;background:none;text-decoration:none;}
+.bnav-ico{font-size:20px;margin-bottom:2px;}
+.bnav-lbl{font-size:10px;font-weight:700;color:#bbb;}
+.bnav-btn.on .bnav-lbl{color:var(--red);}
+
+/* ── APPLY SHEET ── */
+.overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .3s;}
+.overlay.open{opacity:1;pointer-events:all;}
+.sheet{position:fixed;bottom:0;left:0;right:0;z-index:301;background:var(--card);border-radius:28px 28px 0 0;padding:20px 24px;padding-bottom:max(28px,calc(var(--sab)+24px));transform:translateY(100%);transition:transform .4s cubic-bezier(.4,0,.2,1);box-shadow:0 -12px 48px rgba(0,0,0,.15);max-width:680px;margin:0 auto;max-height:82vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+@media(min-width:680px){.sheet{left:50%;transform:translateX(-50%) translateY(100%);width:680px;}.sheet.open{transform:translateX(-50%) translateY(0)!important;}}
+.sheet.open{transform:translateY(0);}
+.sh-handle{width:36px;height:4px;background:var(--bg);border-radius:4px;margin:0 auto 18px;}
+.sh-proj{display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:14px;padding:11px 14px;margin-bottom:16px;}
+.sh-av{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.sh-name{font-size:14px;font-weight:800;color:var(--tx);}
+.sh-role{font-size:11px;color:var(--tx3);margin-top:2px;}
+
+.sh-lbl{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px;padding-left:2px;margin-top:14px;}
+.sh-roles{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;}
+.sh-role-chip{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;border-radius:100px;border:2px solid var(--br);background:var(--card);font-size:12px;font-weight:700;color:var(--tx2);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.sh-role-chip:active{transform:scale(.95);}
+.sh-role-chip.on{background:var(--red);border-color:var(--red);color:#fff;}
+.sh-q{font-size:20px;font-weight:900;letter-spacing:-.5px;color:var(--tx);margin-bottom:5px;}
+.sh-sub{font-size:13px;color:var(--tx2);line-height:1.55;margin-bottom:14px;}
+.inp{width:100%;background:var(--bg);border:2px solid transparent;border-radius:14px;padding:13px 15px;font-family:'Inter',sans-serif;font-size:15px;color:var(--tx);outline:none;margin-bottom:10px;transition:all .2s;}
+.inp:focus{border-color:var(--red);background:var(--card);box-shadow:0 0 0 3px rgba(255,43,43,.08);}
+.inp::placeholder{color:var(--tx3);}
+.ta{resize:none;line-height:1.65;min-height:95px;}
+.at-wrap{position:relative;margin-bottom:10px;}
+.at-sym{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px;font-weight:700;color:var(--tx3);pointer-events:none;}
+.at-inp{padding-left:29px!important;margin-bottom:0!important;}
+.field-hint{font-size:11px;color:var(--tx3);margin-bottom:10px;padding-left:2px;}
+.btn-send{width:100%;background:var(--grad);color:#fff;font-family:'Inter',sans-serif;font-weight:900;font-size:16px;padding:15px;border-radius:14px;border:none;cursor:pointer;box-shadow:0 6px 20px rgba(255,43,43,.26);}
+
+/* ── SUCCESS ── */
+.suc-ov{position:fixed;inset:0;z-index:400;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;transform:translateY(100%);transition:transform .45s cubic-bezier(.4,0,.2,1);}
+.suc-ov.open{transform:translateY(0);}
+.suc-ico{font-size:52px;margin-bottom:16px;}
+.suc-t{font-size:26px;font-weight:900;letter-spacing:-.7px;color:var(--tx);margin-bottom:8px;}
+.suc-s{font-size:15px;color:var(--tx2);line-height:1.7;max-width:300px;margin-bottom:24px;}
+.suc-card{background:var(--card);border:1px solid var(--br);border-radius:20px;padding:16px 18px;width:100%;max-width:360px;text-align:left;margin-bottom:14px;box-shadow:var(--sh);}
+.suc-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--br);font-size:13px;color:var(--tx);line-height:1.4;}
+.suc-row:last-child{border-bottom:none;}
+.info-note{background:var(--bg);border:1px solid var(--br);border-radius:13px;padding:13px 15px;font-size:13px;color:var(--tx2);line-height:1.65;margin-bottom:16px;text-align:left;width:100%;max-width:360px;}
+.info-note strong{color:var(--tx);}
+.btn-primary{width:100%;max-width:360px;background:var(--grad);color:#fff;font-family:'Inter',sans-serif;font-weight:900;font-size:15px;padding:15px;border-radius:14px;border:none;cursor:pointer;margin-bottom:10px;}
+.btn-ghost-sm{background:none;border:none;font-family:'Inter',sans-serif;font-size:13px;color:var(--tx3);cursor:pointer;text-decoration:underline;padding:4px;}
+
+/* ── POST & MEMBERSHIP (same as before, condensed) ── */
+.post-ov,.mem-ov{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .4s cubic-bezier(.4,0,.2,1);}
+.post-ov.open,.mem-ov.open{transform:translateY(0);}
+.post-ov{background:var(--bg);}
+.post-hdr{display:flex;justify-content:space-between;align-items:center;padding:calc(var(--sat)+12px) 24px 12px;border-bottom:1px solid var(--br);flex-shrink:0;background:rgba(255,246,244,.97);backdrop-filter:blur(16px);}
+.post-htitle{font-size:16px;font-weight:800;color:var(--tx);}
+.post-hstep{font-size:11px;color:var(--tx3);font-weight:600;margin-top:1px;}
+.close-x{width:30px;height:30px;border-radius:50%;background:var(--bg);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;color:var(--tx2);}
+.post-prog{height:3px;background:var(--bg);flex-shrink:0;}
+.post-fill{height:100%;background:var(--grad);transition:width .4s cubic-bezier(.4,0,.2,1);}
+.post-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:22px 22px 100px;}
+.ps{display:none;flex-direction:column;}.ps.active{display:flex;}
+.ps-ico{font-size:36px;margin-bottom:12px;}
+.ps-q{font-size:21px;font-weight:900;letter-spacing:-.5px;color:var(--tx);margin-bottom:5px;}
+.ps-sub{font-size:13px;color:var(--tx2);line-height:1.6;margin-bottom:18px;}
+.ps-inp{width:100%;background:var(--card);border:2px solid var(--br);border-radius:13px;padding:13px 15px;font-family:'Inter',sans-serif;font-size:15px;color:var(--tx);outline:none;margin-bottom:10px;transition:all .2s;box-shadow:var(--sh);}
+.ps-inp:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(255,43,43,.08);}
+.ps-inp::placeholder{color:var(--tx3);}
+.ps-ta{resize:none;line-height:1.65;min-height:100px;}
+.scol{display:flex;flex-direction:column;gap:8px;}
+.sopt{padding:14px 15px;border-radius:16px;border:2px solid var(--br);background:var(--card);cursor:pointer;display:flex;align-items:center;gap:11px;position:relative;overflow:hidden;box-shadow:var(--sh);transition:all .18s;}
+.sopt:active{transform:scale(.98);}
+.sopt::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;background:var(--oc,var(--bg));}
+.sopt.on::before{opacity:.1;}
+.sopt.on{border-color:var(--oc,var(--red));}
+.sopt-ico{font-size:21px;flex-shrink:0;position:relative;z-index:1;}
+.sopt-body{flex:1;min-width:0;position:relative;z-index:1;}
+.sopt-n{font-size:13px;font-weight:700;color:var(--tx);line-height:1.3;}
+.sopt.on .sopt-n{color:var(--oc,var(--red));}
+.sopt-s{font-size:11px;color:var(--tx3);margin-top:2px;}
+.sopt-chk{width:21px;height:21px;border-radius:50%;border:2px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:transparent;transition:all .2s;z-index:1;flex-shrink:0;}
+.sopt.on .sopt-chk{background:var(--oc,var(--red));border-color:var(--oc,var(--red));color:#fff;}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ccat{padding:12px;border-radius:14px;border:2px solid var(--br);background:var(--card);cursor:pointer;transition:all .15s;position:relative;overflow:hidden;box-shadow:var(--sh);}
+.ccat:active{transform:scale(.96);}
+.ccat::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;background:var(--c,var(--bg));}
+.ccat.on::before{opacity:.12;}
+.ccat.on{border-color:var(--c,var(--red));}
+.ccat.on .cc-n{color:var(--c,var(--red));}
+.cc-e{font-size:20px;margin-bottom:4px;position:relative;z-index:1;}
+.cc-n{font-size:11px;font-weight:700;color:var(--tx);line-height:1.2;position:relative;z-index:1;}
+.chips-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.cchip{padding:7px 13px;border-radius:100px;border:1.5px solid var(--br);background:var(--card);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;transition:all .15s;box-shadow:var(--sh);}
+.cchip.on{background:var(--red);border-color:var(--red);color:#fff;}
+.sdiv{border:none;border-top:1px solid var(--br);margin:18px 0;}
+.s-head{font-size:16px;font-weight:800;color:var(--tx);margin-bottom:4px;}
+.s-sub{font-size:13px;color:var(--tx2);line-height:1.55;margin-bottom:12px;}
+.pnote{background:var(--bg);border:1px solid var(--br);border-radius:12px;padding:11px 14px;font-size:12px;color:var(--tx2);display:flex;gap:8px;line-height:1.6;margin-top:6px;}
+.tier-preview{background:var(--card);border:1px solid var(--br);border-radius:13px;padding:12px 15px;margin-top:6px;display:flex;align-items:center;gap:12px;box-shadow:var(--sh);}
+.tier-lbl{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;}
+.tier-val{font-size:16px;font-weight:900;color:var(--tx);letter-spacing:-.3px;}
+.tier-sub-t{font-size:11px;color:var(--tx3);margin-top:2px;}
+.post-btm{position:sticky;bottom:0;background:rgba(255,246,244,.97);backdrop-filter:blur(16px);border-top:1px solid var(--br);padding:12px 22px;padding-bottom:max(12px,calc(var(--sab)+8px));flex-shrink:0;}
+.btn-next{width:100%;background:var(--grad);color:#fff;font-family:'Inter',sans-serif;font-weight:900;font-size:16px;padding:15px;border-radius:14px;border:none;cursor:pointer;box-shadow:0 6px 20px rgba(255,43,43,.22);}
+.btn-back{background:none;border:none;font-family:'Inter',sans-serif;font-size:13px;color:var(--tx3);cursor:pointer;margin-top:8px;width:100%;text-align:center;padding:3px;}
+
+/* MEMBERSHIP */
+.mem-ov{background:transparent;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.mem-dark{background:#0A0A0A;flex-shrink:0;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 28px 24px;text-align:center;}
+.mem-glow{position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:600px;height:500px;background:radial-gradient(ellipse,rgba(255,43,43,.2) 0%,transparent 62%);pointer-events:none;}
+.mem-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:55px 55px;-webkit-mask-image:radial-gradient(ellipse at 50% 50%,black 10%,transparent 70%);mask-image:radial-gradient(ellipse at 50% 50%,black 10%,transparent 70%);pointer-events:none;}
+.mem-close{position:absolute;top:calc(var(--sat)+14px);right:20px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;color:rgba(255,255,255,.5);}
+.mem-label{position:relative;z-index:1;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,43,43,.7);margin-bottom:12px;}
+.mem-price-n{font-size:64px;font-weight:900;letter-spacing:-4px;line-height:1;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;position:relative;z-index:1;}
+.mem-price-per{font-size:14px;font-weight:700;color:rgba(255,255,255,.28);margin-top:-4px;position:relative;z-index:1;margin-bottom:14px;}
+.mem-title{font-size:22px;font-weight:900;letter-spacing:-.5px;color:#fff;line-height:1.1;margin-bottom:6px;position:relative;z-index:1;}
+.mem-sub{font-size:13px;color:rgba(255,255,255,.35);line-height:1.55;max-width:280px;margin:0 auto;position:relative;z-index:1;}
+.mem-light{background:var(--bg);padding:20px 20px 36px;display:flex;flex-direction:column;gap:8px;}
+.mem-perks{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+.mem-perk{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--br);border-radius:13px;padding:11px 14px;box-shadow:var(--sh);}
+.mem-perk-ico{font-size:20px;flex-shrink:0;}
+.mem-perk-body{flex:1;}
+.mem-perk-t{font-size:14px;font-weight:700;color:var(--tx);}
+.mem-perk-s{font-size:11px;color:var(--tx3);margin-top:2px;}
+.mem-perk-badge{font-size:10px;font-weight:800;padding:3px 9px;border-radius:100px;flex-shrink:0;}
+.bdg-free{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2);}
+.bdg-unlim{background:rgba(255,43,43,.08);color:var(--red);border:1px solid rgba(255,43,43,.18);}
+.mem-btn{width:100%;background:var(--grad);color:#fff;font-family:'Inter',sans-serif;font-weight:900;font-size:17px;padding:17px;border-radius:14px;border:none;cursor:pointer;box-shadow:0 8px 28px rgba(255,43,43,.28);}
+.mem-micro{font-size:12px;color:var(--tx3);text-align:center;}
+
+/* POST SUCCESS */
+.suc-ov2{position:fixed;inset:0;z-index:600;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;transform:translateY(100%);transition:transform .45s cubic-bezier(.4,0,.2,1);}
+.suc-ov2.open{transform:translateY(0);}
+
+/* FOOTER */
+footer{background:#0D0D0D;border-top:1px solid rgba(255,255,255,.06);padding:40px 24px 30px;margin-top:0;}
+.ft-in{max-width:680px;margin:0 auto;}
+.ft-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:24px;flex-wrap:wrap;}
+.ft-logo{font-weight:900;font-size:19px;letter-spacing:-.5px;color:#fff;text-decoration:none;display:block;margin-bottom:7px;}
+.ft-logo em{color:var(--red);font-style:normal;}
+.ft-tagline{font-size:13px;color:rgba(255,255,255,.28);line-height:1.65;}
+.ft-links{display:flex;flex-direction:column;gap:8px;}
+.fl{font-size:13px;color:rgba(255,255,255,.35);text-decoration:none;font-weight:600;}
+.fl:hover{color:rgba(255,255,255,.7);}
+.ft-bot{display:flex;justify-content:space-between;align-items:center;padding-top:22px;border-top:1px solid rgba(255,255,255,.06);flex-wrap:wrap;gap:8px;}
+.ft-copy{font-size:12px;color:rgba(255,255,255,.18);}
+.ft-tick{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.2);}
+.ft-tdot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:lp 2s infinite;}
+
+.btn-share-proj{display:flex;align-items:center;gap:6px;background:var(--card);border:1.5px solid var(--br);border-radius:100px;padding:8px 16px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.btn-share-proj:active{transform:scale(.95);}
+.btn-save{background:none;border:1.5px solid var(--br);border-radius:100px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.btn-save:active{transform:scale(.92);}
+.btn-save.saved{background:var(--rl);border-color:rgba(255,43,43,.2);}
+.verified-badge{display:inline-flex;align-items:center;gap:3px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:100px;padding:2px 8px;font-size:10px;font-weight:800;color:#3B82F6;}
+.live-ticker{background:#0A0A0A;overflow:hidden;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.ticker-inner{display:flex;gap:0;animation:tick 28s linear infinite;width:max-content;}
+.ticker-inner:hover{animation-play-state:paused;}
+.tick-item{display:flex;align-items:center;gap:6px;padding:0 20px;font-size:12px;font-weight:600;color:rgba(255,255,255,.45);white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);}
+.tick-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:lp 2s infinite;flex-shrink:0;}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:.3}}
+.pc-save-row{position:absolute;top:10px;right:10px;z-index:2;}
+.btn-website{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1.5px solid var(--br);border-radius:12px;padding:12px 18px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;color:var(--tx);text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:all .2s;}
+.btn-website:active{transform:scale(.97);}
+.pc-deal{display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:100px;padding:3px 10px;font-size:11px;font-weight:700;color:#16a34a;margin-top:7px;}
+
+@media(prefers-color-scheme:dark){:root{color-scheme:light;}html,body{background:#F5EFE8!important;color:#17110A!important;}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="index.html" class="logo">you<em>b</em>et</a>
+  <div class="nav-r">
+    <a href="match-quiz.html" class="np g">Find Match</a>
+    <button class="np r" onclick="openPost()">+ Post a Project</button>
+  </div>
+</nav>
+<!-- LIVE TICKER -->
+<div class="live-ticker">
+  <div class="ticker-inner" id="tickerInner">
+    <div class="tick-item"><div class="tick-dot"></div>🗽 New York · Cypher AI just posted</div>
+    <div class="tick-item"><div class="tick-dot"></div>🍁 Toronto · new application · 2 min ago</div>
+    <div class="tick-item"><div class="tick-dot"></div>🌴 LA · OFFGRID got 3 new likes</div>
+    <div class="tick-item"><div class="tick-dot"></div>🎡 London · new project posted</div>
+    <div class="tick-item"><div class="tick-dot"></div>🌆 Dubai · Homethy · 8 interested</div>
+    <div class="tick-item"><div class="tick-dot"></div>🇸🇬 Singapore · FlexHub just posted</div>
+    <div class="tick-item"><div class="tick-dot"></div>🌍 Lagos · new founder joined</div>
+    <div class="tick-item"><div class="tick-dot"></div>🗽 New York · Cypher AI just posted</div>
+    <div class="tick-item"><div class="tick-dot"></div>🍁 Toronto · new application · 2 min ago</div>
+    <div class="tick-item"><div class="tick-dot"></div>🌴 LA · OFFGRID got 3 new likes</div>
+    <div class="tick-item"><div class="tick-dot"></div>🎡 London · new project posted</div>
+    <div class="tick-item"><div class="tick-dot"></div>🌆 Dubai · Homethy · 8 interested</div>
+    <div class="tick-item"><div class="tick-dot"></div>🇸🇬 Singapore · FlexHub just posted</div>
+    <div class="tick-item"><div class="tick-dot"></div>🌍 Lagos · new founder joined</div>
+  </div>
+</div>
+
+
+
+<!-- ═══ BOARD VIEW ═══ -->
+<div id="boardView">
+  <div class="bh">
+    <div class="bh-glow"></div>
+    <div class="bh-grid"></div>
+    <div class="bh-in">
+      <div class="bh-live"><div class="ldot"></div><span class="ltxt">New projects posted daily</span></div>
+      <h1>Find someone who<br>believes in it <span class="red">as much<br>as you do.</span></h1>
+      <p class="bh-sub">Browse real projects. Free to join.<br>Or post yours and find your person.</p>
+      <div class="bh-pills">
+        <div class="bhpill"><span class="bhpill-n">Free</span><span class="bhpill-dot"></span><span class="bhpill-l">to join</span></div>
+        <div class="bhpill" style="cursor:pointer;" onclick="openPost()"><span class="bhpill-n">👑</span><span class="bhpill-dot"></span><span class="bhpill-l">Members post projects</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="wave"></div>
+  <div class="fbar"><div class="fbar-in">
+    <div class="fc on" onclick="filterBy(this,'all')">All</div>
+    <div class="fc" onclick="filterBy(this,'design')">🎨 Design</div>
+    <div class="fc" onclick="filterBy(this,'tech')">💻 Tech</div>
+    <div class="fc" onclick="filterBy(this,'sales')">🤝 Sales</div>
+    <div class="fc" onclick="filterBy(this,'marketing')">📊 Marketing</div>
+    <div class="fc" onclick="filterBy(this,'content')">🎬 Content</div>
+    <div class="fc" onclick="filterBy(this,'ops')">⚙️ Strategy</div>
+  </div></div>
+  <div class="feed-bg"><div class="feed" id="feed"></div></div>
+  <div class="bnav">
+    <a href="match-quiz.html" class="bnav-btn"><span class="bnav-ico">🔍</span><span class="bnav-lbl">Find Match</span></a>
+    <a href="project-board.html" class="bnav-btn on"><span class="bnav-ico">📋</span><span class="bnav-lbl">Projects</span></a>
+    <a href="index.html" class="bnav-btn"><span class="bnav-ico">🏠</span><span class="bnav-lbl">Home</span></a>
+  </div>
+  <footer>
+    <div class="ft-in">
+      <div class="ft-top">
+        <div><a href="index.html" class="ft-logo">you<em>b</em>et</a><div class="ft-tagline">Stop waiting to meet the right people.<br>Build your empire with them.</div></div>
+        <div class="ft-links"><a href="match-quiz.html" class="fl">Find My Match</a><a href="project-board.html" class="fl">Project Board</a><a href="mailto:hello@youbet.network" class="fl">hello@youbet.network</a></div>
+      </div>
+      <div class="ft-bot"><div class="ft-copy">© 2025 youbet.network</div><div class="ft-tick"><div class="ft-tdot"></div><span id="tickTxt">Someone in Toronto just applied</span></div></div>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══ PROJECT PAGE ═══ -->
+<div id="projectView">
+  <div class="pp-hero" id="ppHero">
+    <div class="pp-hero-bg" id="ppHeroBg"></div>
+    <div class="pp-hero-glow"></div>
+    <div class="pp-hero-wm" id="ppHeroWm"></div>
+    <div class="pp-back" onclick="goBack()">← Back</div>
+    <div class="pp-hero-in">
+      <div class="pp-av" id="ppAv"></div>
+      <div class="pp-name" id="ppName"></div>
+      <div class="pp-tagline" id="ppTagline"></div>
+    </div>
+  </div>
+  <div class="pp-body" id="ppBody"></div>
+  <div class="apply-bar">
+    <div class="apply-bar-in">
+      <div class="apply-int">❤️ <strong id="ppInt">0</strong> interested</div>
+      <button class="btn-apply" id="ppApplyBtn" onclick="openApplyFromPage()">I want in →</button>
+    </div>
+  </div>
+</div>
+
+<!-- APPLY SHEET -->
+<div class="overlay" id="overlay" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <div class="sh-handle"></div>
+  <div class="sh-proj" id="sheetProj"></div>
+
+  <!-- Role selector -->
+  <div class="sh-lbl">Which role are you applying for?</div>
+  <div class="sh-roles" id="sheetRoles"></div>
+
+  <!-- 3 focused questions -->
+  <div class="sh-lbl">Your strongest skill</div>
+  <input class="inp" type="text" id="sheetSkill" placeholder="e.g. Full-stack dev, 4 years shipping products" autocomplete="off">
+
+  <div class="sh-lbl">What have you actually built or sold?</div>
+  <input class="inp" type="text" id="sheetBuilt" placeholder="e.g. Grew a brand to 80k, launched 2 SaaS apps" autocomplete="off">
+
+  <div class="sh-lbl">Why this project specifically?</div>
+  <textarea class="inp ta" id="sheetMsg" rows="3" placeholder="Be real. Generic pitches get ignored." style="min-height:80px;"></textarea>
+
+  <!-- Contact -->
+  <div class="sh-lbl">Your Instagram</div>
+  <div class="at-wrap"><span class="at-sym">@</span><input class="inp at-inp" type="text" id="sheetIG" placeholder="your_instagram" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+
+  <div class="sh-lbl">Your name &amp; country</div>
+  <div style="display:flex;gap:8px;">
+    <input class="inp" type="text" id="sheetName" placeholder="First name" style="flex:1;margin-bottom:0;">
+    <input class="inp" type="text" id="sheetCountry" placeholder="Country" style="flex:1;margin-bottom:0;">
+  </div>
+  <div style="height:10px;"></div>
+
+  <input class="inp" type="email" id="sheetEmail" placeholder="your@email.com" inputmode="email" autocomplete="email">
+
+  <button class="btn-send" onclick="submitJoin()">Send Application →</button>
+</div>
+
+<!-- JOIN SUCCESS -->
+<div class="suc-ov" id="joinSuc">
+  <div class="suc-ico">🎯</div>
+  <div class="suc-t">You're in the mix.</div>
+  <div class="suc-s">The owner gets notified. If they want to connect, they unlock your profile directly.</div>
+  <div class="suc-card">
+    <div class="suc-row"><span>📋</span><span id="sucProj">—</span></div>
+    <div class="suc-row"><span>📸</span><span id="sucIG">—</span></div>
+    <div class="suc-row"><span>💬</span><span id="sucMsg">—</span></div>
+    <div class="suc-row"><span>📬</span><span id="sucEmail">—</span></div>
+  </div>
+  <div class="info-note"><strong>Your side is always free.</strong> The owner is a $29 member — they can unlock you directly. You never pay anything.</div>
+  <button class="btn-primary" onclick="closeJoinSuc()">Back to projects</button>
+  <button class="btn-ghost-sm" onclick="window.location='match-quiz.html'">Also get matched →</button>
+</div>
+
+<!-- POST OVERLAY -->
+<div class="post-ov" id="postOv">
+  <div class="post-hdr"><div><div class="post-htitle">Post a project</div><div class="post-hstep" id="postStxt">Step 1 of 6</div></div><div class="close-x" onclick="closePost()">✕</div></div>
+  <div class="post-prog"><div class="post-fill" id="postFill" style="width:16%"></div></div>
+  <div class="post-body">
+    <div class="ps active" id="ps1"><span class="ps-ico">🚀</span><div class="ps-q">What are you building?</div><div class="ps-sub">Give it a name and describe it. This is what people read first.</div><input class="ps-inp" type="text" id="postName" placeholder="Project or company name" autocomplete="off"><textarea class="ps-inp ps-ta" id="postDesc" placeholder="Describe your vision. What makes it different..." rows="4"></textarea></div>
+    <div class="ps" id="ps2"><span class="ps-ico">🏗️</span><div class="ps-q">What world does it live in?</div><div class="ps-sub">Pick your industry — this is how the right people find you.</div><div class="cat-grid" id="postCatGrid"></div></div>
+    <div class="ps" id="ps3">
+      <span class="ps-ico">📈</span><div class="ps-q">What traction do you have?</div><div class="ps-sub">Be honest. This is how we assign your potential tier.</div>
+      <div class="scol" id="tractionList">
+        <div class="sopt" style="--oc:#22c55e" onclick="togTraction(this,'none','🌱','$100K+','Solid concept')"><div class="sopt-ico">💡</div><div class="sopt-body"><div class="sopt-n">Just an idea right now</div><div class="sopt-s">Concept is solid, no customers yet.</div></div><div class="sopt-chk">✓</div></div>
+        <div class="sopt" style="--oc:#3B82F6" onclick="togTraction(this,'waitlist','🚀','$1M+','Waitlist confirmed')"><div class="sopt-ico">📋</div><div class="sopt-body"><div class="sopt-n">I have a waitlist or early sign-ups</div><div class="sopt-s">People have already shown real interest.</div></div><div class="sopt-chk">✓</div></div>
+        <div class="sopt" style="--oc:#3B82F6" onclick="togTraction(this,'built','🚀','$1M+','MVP built')"><div class="sopt-ico">🔨</div><div class="sopt-body"><div class="sopt-n">I've built a prototype or MVP</div><div class="sopt-s">Something exists people can see or use.</div></div><div class="sopt-chk">✓</div></div>
+        <div class="sopt" style="--oc:#f97316" onclick="togTraction(this,'users','💰','$10M+','Real users')"><div class="sopt-ico">👥</div><div class="sopt-body"><div class="sopt-n">I have real users or a community</div><div class="sopt-s">People are using what I've built.</div></div><div class="sopt-chk">✓</div></div>
+        <div class="sopt" style="--oc:#f97316" onclick="togTraction(this,'revenue','💰','$10M+','Revenue confirmed')"><div class="sopt-ico">💵</div><div class="sopt-body"><div class="sopt-n">I'm already making money</div><div class="sopt-s">Proof the market wants this.</div></div><div class="sopt-chk">✓</div></div>
+        <div class="sopt" style="--oc:#FF2B2B" onclick="togTraction(this,'scaling','🦄','$100M+','Strong growth')"><div class="sopt-ico">📊</div><div class="sopt-body"><div class="sopt-n">Growing fast with strong numbers</div><div class="sopt-s">Revenue, users, or both — moving up.</div></div><div class="sopt-chk">✓</div></div>
+      </div>
+      <textarea class="ps-inp ps-ta" id="tractionProof" placeholder="Optional: add proof — numbers, links, revenue..." rows="3" style="margin-top:10px;min-height:75px;font-size:13px;"></textarea>
+      <div style="margin-bottom:5px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);">Your assigned tier</div>
+      <div class="tier-preview" id="tierPreview"><div style="font-size:24px" id="tierIco">🌱</div><div><div class="tier-lbl">Potential</div><div class="tier-val" id="tierVal">$100K+</div><div class="tier-sub-t" id="tierSubT">Add traction above to level up</div></div></div>
+    </div>
+    <div class="ps" id="ps4"><span class="ps-ico">🎯</span><div class="ps-q">What roles do you need?</div><div class="ps-sub">Pick everything you need — you can look for more than one person.</div>
+      <div class="scol">
+        <div class="sopt" style="--oc:#FF2B2B" onclick="togRole(this,'🎨','Makes things look so good people stop scrolling','design')"><div class="sopt-ico">🎨</div><div class="sopt-body"><div class="sopt-n">Makes things look so good people stop scrolling</div><div class="sopt-s">Designer, branding, creative direction</div></div><div class="sopt-chk">✓</div></div>
+        <div class="sopt" style="--oc:#3B82F6" onclick="togRole(this,'💻','Builds fast and ships before anyone else','tech')"><div class="sopt-ico">💻</div><div class="sopt-body"><div class="sopt-n">Builds fast and ships before anyone else</div><div class="sopt-s">Developer, coder, AI, product</div></div><div class="sopt-chk">✓</div></div>
+        <div class="sopt" style="--oc:#22c55e" onclick="togRole(this,'🤝','Turns conversations into revenue','sales')"><div class="sopt-ico">🤝</div><div class="sopt-body"><div class="sopt-n">Turns conversations into revenue</div><div class="sopt-s">Sales, closing deals, business dev</div></div><div class="sopt-chk">✓</div></div>
+        <div class="sopt" style="--oc:#f97316" onclick="togRole(this,'📊','Makes people find you and want what you have','marketing')"><div class="sopt-ico">📊</div><div class="sopt-body"><div class="sopt-n">Makes people find you and want what you have</div><div class="sopt-s">Marketing, growth, social media</div></div><div class="sopt-chk">✓</div></div>
+        <div class="sopt" style="--oc:#8B5CF6" onclick="togRole(this,'⚙️','Keeps everything running so nothing falls apart','ops')"><div class="sopt-ico">⚙️</div><div class="sopt-body"><div class="sopt-n">Keeps everything running so nothing falls apart</div><div class="sopt-s">Strategy, finance, management</div></div><div class="sopt-chk">✓</div></div>
+        <div class="sopt" style="--oc:#EC4899" onclick="togRole(this,'📸','Creates content people actually watch and share','content')"><div class="sopt-ico">📸</div><div class="sopt-body"><div class="sopt-n">Creates content people actually watch and share</div><div class="sopt-s">Video, photo, social media</div></div><div class="sopt-chk">✓</div></div>
+        <div class="sopt" style="--oc:#f59e0b" onclick="togRole(this,'👑','Takes the lead on vision and execution','ceo')"><div class="sopt-ico">👑</div><div class="sopt-body"><div class="sopt-n">CEO — leads vision and execution</div><div class="sopt-s">Overall leadership, strategy, decisions</div></div><div class="sopt-chk">✓</div></div>
+      </div>
+    </div>
+    <div class="ps" id="ps5"><span class="ps-ico">🔥</span><div class="ps-q">What commitment level?</div><div class="ps-sub">Be honest. The right person needs to know what they're signing up for.</div>
+      <div class="scol" style="margin-bottom:20px;">
+        <div class="sopt" style="--oc:#FF2B2B" onclick="selCommit(this,'🔥','Full-time — all in')"><div class="sopt-ico">🔥</div><div class="sopt-body"><div class="sopt-n">Full-time — all in</div><div class="sopt-s">This is the main focus for both of us.</div></div><div class="sopt-chk">✓</div></div>
+        <div class="sopt" style="--oc:#f97316" onclick="selCommit(this,'💼','Side project to start')"><div class="sopt-ico">💼</div><div class="sopt-body"><div class="sopt-n">Side project to start — potential to grow</div><div class="sopt-s">Flexible hours. See where it goes.</div></div><div class="sopt-chk">✓</div></div>
+        <div class="sopt" style="--oc:#3B82F6" onclick="selCommit(this,'🌱','Open — let\'s talk')"><div class="sopt-ico">🌱</div><div class="sopt-body"><div class="sopt-n">Open — flexible for the right person</div><div class="sopt-s">Let's figure it out together.</div></div><div class="sopt-chk">✓</div></div>
+      </div>
+      <hr class="sdiv">
+      <div class="s-head">Where are you based?</div>
+      <div class="s-sub">Helps people know if location matters.</div>
+      <input class="ps-inp" type="text" id="postCity" placeholder="Your city..." autocomplete="off">
+      <div class="chips-row">
+        <div class="cchip" onclick="setCity(this,'New York')">🗽 NYC</div>
+        <div class="cchip" onclick="setCity(this,'Los Angeles')">🌴 LA</div>
+        <div class="cchip" onclick="setCity(this,'Toronto')">🍁 Toronto</div>
+        <div class="cchip" onclick="setCity(this,'London')">🎡 London</div>
+        <div class="cchip" onclick="setCity(this,'Vancouver')">🍁 Vancouver</div>
+        <div class="cchip" onclick="setCity(this,'Remote')">🌍 Remote</div>
+      </div>
+    </div>
+    <div class="ps" id="ps6"><span class="ps-ico">📬</span><div class="ps-q">Last step.</div><div class="ps-sub">When someone applies we notify you. As a member you unlock everyone — no extra fees ever.</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input class="ps-inp" type="text" id="postOwner" placeholder="Your first name" autocomplete="given-name" style="flex:1;margin-bottom:0;">
+        <input class="ps-inp" type="text" id="postCountry" placeholder="Country" autocomplete="country-name" style="flex:1;margin-bottom:0;">
+      </div>
+      <input class="ps-inp" type="email" id="postOwnerEmail" placeholder="your@email.com" autocomplete="email" inputmode="email">
+      <div class="at-wrap" style="margin-bottom:6px;"><span class="at-sym">@</span><input class="ps-inp at-inp" type="text" id="postOwnerIG" placeholder="your_instagram" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" style="margin-bottom:0;"></div>
+      <div class="field-hint">We'll DM you when someone applies.</div>
+      <input class="ps-inp" type="url" id="postWebsite" placeholder="yourwebsite.com (optional)" autocomplete="url" inputmode="url" style="margin-top:6px;">
+      <div class="pnote"><span>🔒</span><span>Your contact is private. Only shared after you unlock someone.</span></div>
+    </div>
+  </div>
+  <div class="post-btm">
+    <button class="btn-next" id="postNxt" onclick="postNext()">Continue →</button>
+    <button class="btn-back" id="postBk" style="display:none" onclick="postPrev()">← Back</button>
+  </div>
+</div>
+
+<!-- MEMBERSHIP -->
+<div class="mem-ov" id="memOv">
+  <div class="mem-dark">
+    <div class="mem-glow"></div><div class="mem-grid"></div>
+    <div class="mem-close" onclick="closeMem()">✕</div>
+    <div class="mem-label">Owner Membership</div>
+    <div class="mem-price-n">$29</div>
+    <div class="mem-price-per">one time · yours forever</div>
+    <div class="mem-title">One payment.<br>Everything unlocked.</div>
+    <div class="mem-sub">Unlimited match unlocks, post your project, unlock every applicant — forever.</div>
+  </div>
+  <div class="mem-light">
+    <div class="mem-perks">
+      <div class="mem-perk"><div class="mem-perk-ico">🔓</div><div class="mem-perk-body"><div class="mem-perk-t">Unlimited match unlocks</div><div class="mem-perk-s">Every match, all 3 unlocks per match — included. Never pay $10 again.</div></div><div class="mem-perk-badge bdg-unlim">Unlimited</div></div>
+      <div class="mem-perk"><div class="mem-perk-ico">📋</div><div class="mem-perk-body"><div class="mem-perk-t">Post your project</div><div class="mem-perk-s">Listed immediately. Real people browse it today.</div></div><div class="mem-perk-badge bdg-free">Included</div></div>
+      <div class="mem-perk"><div class="mem-perk-ico">👥</div><div class="mem-perk-body"><div class="mem-perk-t">Unlock every applicant</div><div class="mem-perk-s">See every pitch, contact, Instagram. No per-person fee.</div></div><div class="mem-perk-badge bdg-unlim">Unlimited</div></div>
+      <div class="mem-perk"><div class="mem-perk-ico">🔄</div><div class="mem-perk-body"><div class="mem-perk-t">Edit or repost anytime</div><div class="mem-perk-s">Update your project as things evolve. No charge.</div></div><div class="mem-perk-badge bdg-free">Included</div></div>
+    </div>
+    <button class="mem-btn" onclick="buyMembership()">Become a member — $29 →</button>
+    <div class="mem-micro">Secure via Stripe · One-time · No subscription ever</div>
+  </div>
+</div>
+
+<!-- POST SUCCESS -->
+<div class="suc-ov2" id="postSuc">
+  <div class="suc-ico">✅</div>
+  <div class="suc-t">Project submitted.</div>
+  <div class="suc-s">We're reviewing it now. Usually approved within 2 hours — we'll email you the moment it's live.</div>
+  <div class="suc-card" id="postSucDetail"></div>
+  <div class="info-note">⏱ <strong>Under review.</strong> Once approved it goes live and people can start applying.</div>
+  <button class="btn-primary" onclick="closePostSuc()">View the board 📋</button>
+</div>
+
+<script>
+const roleColors={design:'#FF2B2B',tech:'#3B82F6',sales:'#22c55e',marketing:'#f97316',ops:'#8B5CF6',content:'#EC4899'};
+const roleNames={design:'Designer',tech:'Developer / CTO',sales:'Sales closer',marketing:'Marketer',ops:'COO / Operations',content:'Content creator',ceo:'CEO'};
+const qM={
+  design:{
+    skill:"e.g. Brand designer, 5 years — built 3 visual identities from scratch",
+    built:"e.g. Rebranded a streetwear label, grew their IG 0 to 40k with content",
+    why:"e.g. The visual gap is obvious — I know exactly how to fill it"
+  },
+  tech:{
+    skill:"e.g. Full-stack dev, React + Node — shipped 4 production apps",
+    built:"e.g. Built an AI tool that got 2k users in a week, 2 SaaS launches",
+    why:"e.g. I can ship your MVP in 3 weeks — I have done it before and want to do it here"
+  },
+  sales:{
+    skill:"e.g. B2B sales, closed $200k in contracts last year",
+    built:"e.g. Took a startup from 0 to 15 paying clients in 6 months",
+    why:"e.g. I can open rooms you cannot get into — this is exactly the deal I close"
+  },
+  marketing:{
+    skill:"e.g. Growth marketer — SEO, paid ads, organic — scaled 3 brands",
+    built:"e.g. Took a brand from 5k to 200k followers in 8 months",
+    why:"e.g. Your audience exists — you just have not found them yet. I know where they are"
+  },
+  ops:{
+    skill:"e.g. COO-level ops — systems, hiring, finance, process design",
+    built:"e.g. Scaled a team from 3 to 20, built the ops from scratch",
+    why:"e.g. You are the visionary — I am the one who makes it run without you touching it"
+  },
+  content:{
+    skill:"e.g. Short-form video, scripting, editing — 3 viral videos in past year",
+    built:"e.g. Grew 2 brand accounts past 100k, one video hit 4M views",
+    why:"e.g. I have studied your space — I know exactly what content will blow up"
+  },
+  ceo:{
+    skill:"e.g. Operator and leader — run teams, raised money, built systems",
+    built:"e.g. Co-founded a company, hit $500k ARR before exit",
+    why:"e.g. I can take the full operational load off you and grow this fast"
+  }
+};
+const tierMap={
+
+  none:{ico:'🌱',val:'$100K+',sub:'Solid concept'},
+  waitlist:{ico:'🚀',val:'$1M+',sub:'Early interest confirmed'},
+  built:{ico:'🚀',val:'$1M+',sub:'MVP built'},
+  users:{ico:'💰',val:'$10M+',sub:'Real users'},
+  revenue:{ico:'💰',val:'$10M+',sub:'Revenue confirmed'},
+  scaling:{ico:'🦄',val:'$100M+',sub:'Strong growth signals'},
+};
+const cats=[
+  {e:'👕',n:'Clothing & Fashion',c:'#FF2B2B'},{e:'💻',n:'Tech & AI',c:'#3B82F6'},{e:'🎵',n:'Music & Arts',c:'#8B5CF6'},
+  {e:'🏀',n:'Sports & Fitness',c:'#22c55e'},{e:'🎬',n:'Content & Media',c:'#EC4899'},{e:'🍔',n:'Food & Hospitality',c:'#f97316'},
+  {e:'🎨',n:'Design & Creative',c:'#FF2B2B'},{e:'📈',n:'Business & Finance',c:'#14B8A6'},{e:'🏠',n:'Real Estate',c:'#EAB308'},
+  {e:'💊',n:'Health & Wellness',c:'#22c55e'},{e:'💄',n:'Beauty & Skincare',c:'#EC4899'},{e:'🎮',n:'Gaming & Esports',c:'#8B5CF6'},
+  {e:'📸',n:'Photography & Film',c:'#f97316'},{e:'🎓',n:'Education & Coaching',c:'#3B82F6'},{e:'✈️',n:'Travel & Lifestyle',c:'#14B8A6'},
+  {e:'🌱',n:'Sustainability',c:'#22c55e'},{e:'🎪',n:'Events',c:'#EC4899'},{e:'🔗',n:'Crypto & Web3',c:'#8B5CF6'},
+  {e:'🛒',n:'E-Commerce',c:'#3B82F6'},{e:'❤️',n:'Non-Profit',c:'#FF2B2B'},{e:'💪',n:'Fitness',c:'#22c55e'},
+  {e:'📊',n:'Trading',c:'#EAB308'},{e:'⚖️',n:'Law & Consulting',c:'#6B7280'},{e:'🚗',n:'Automotive',c:'#EAB308'},{e:'🏗️',n:'Architecture',c:'#f97316'},
+];
+
+const projects=[
+  {id:1,name:'youbet',tagline:'The platform matching ambitious people with their perfect business partner.',story:"I've been building youbet for 6 months. The idea came from watching brilliant people fail because they were doing it alone. The product works — I need someone to tell the world about it.",cat:'Tech & AI',catIco:'💻',grad:'linear-gradient(135deg,#3B82F6,#818cf8)',role:'content',roleIco:'📸',roleFull:'Creates content people actually watch and share',commit:'Side project to start',city:'Remote 🌍',interest:12,posted:'2 days ago',hot:true,isNew:false,pot:{cls:'pot2',ico:'🚀',label:'$1M+',sub:'Scalable platform'},founder:{name:'Yuen',city:'Vancouver 🍁',av:'Y',grad:'linear-gradient(135deg,#3B82F6,#818cf8)'},perks:['Equity from day one','Fully remote','Build something real together']},
+  {id:2,name:'OFFGRID',tagline:'Premium streetwear for people who move differently. Design locked. Need someone to sell it.',story:"The brand is ready. The product is ready. The designs speak for themselves — I just need someone who can open doors, close rooms, and turn conversations into revenue. If that's you, let's talk.",cat:'Clothing',catIco:'👕',grad:'linear-gradient(135deg,#FF2B2B,#ff6b3d)',role:'sales',roleIco:'🤝',roleFull:'Turns conversations into revenue',commit:'Full-time — all in',city:'New York 🗽',interest:8,posted:'1 day ago',hot:true,isNew:false,pot:{cls:'pot2',ico:'🚀',label:'$1M+',sub:'Brand ready to scale'},founder:{name:'Marcus',city:'New York 🗽',av:'M',grad:'linear-gradient(135deg,#FF2B2B,#ff6b3d)'},perks:['Revenue share from month 1','NYC based or remote','Fast moving — no bureaucracy']},
+  {id:3,name:'Cypher AI',tagline:'AI automation agency for small businesses. 3 paying clients already — need a builder to ship fast.',story:"We have the clients and the contracts. What we don't have is someone who can turn the ideas into real products fast. I sell, I vision — I need someone who ships. 3 clients in 3 weeks proves the demand is real.",cat:'Tech & AI',catIco:'🤖',grad:'linear-gradient(135deg,#6366f1,#8b5cf6)',role:'tech',roleIco:'💻',roleFull:'Builds fast and ships before anyone else',commit:'Full-time — all in',city:'Los Angeles 🌴',interest:19,posted:'3 days ago',hot:true,isNew:false,pot:{cls:'pot3',ico:'💰',label:'$10M+',sub:'AI with paying clients'},founder:{name:'Diego',city:'Los Angeles 🌴',av:'D',grad:'linear-gradient(135deg,#6366f1,#8b5cf6)'},perks:['Revenue from day one','Co-founder equity','LA-based preferred']},
+  {id:4,name:'NextLevel',tagline:'Youth basketball academy. 200+ players. I coach — need someone to run the entire business side.',story:"I've been coaching for 7 years. 200+ kids. Parents are paying, kids are improving — but I'm drowning in admin, scheduling, billing, and growth strategy. I need a business partner, not an employee.",cat:'Sports',catIco:'🏀',grad:'linear-gradient(135deg,#22c55e,#4ade80)',role:'ops',roleIco:'⚙️',roleFull:'Keeps everything running so nothing falls apart',commit:'Full-time — all in',city:'Atlanta 🍑',interest:6,posted:'5 days ago',hot:false,isNew:false,pot:{cls:'pot1',ico:'🌱',label:'$100K+',sub:'Solid recurring revenue'},founder:{name:'James',city:'Atlanta 🍑',av:'J',grad:'linear-gradient(135deg,#22c55e,#4ade80)'},perks:['Profit share from month 1','Built-in customer base','Atlanta based']},
+  {id:5,name:'Homethy',tagline:'PropTech helping people find homes that fit their lifestyle. 500 on the waitlist.',story:"People don't just want a home — they want a lifestyle. Homethy matches people with neighbourhoods based on who they actually are. 500 on the waitlist and I haven't even launched. Need a marketer who gets it.",cat:'Real Estate',catIco:'🏠',grad:'linear-gradient(135deg,#EAB308,#fbbf24)',role:'marketing',roleIco:'📊',roleFull:'Makes people find you and want what you have',commit:'Side project to start',city:'Toronto 🍁',interest:11,posted:'1 day ago',hot:false,isNew:true,pot:{cls:'pot3',ico:'💰',label:'$10M+',sub:'PropTech massive market'},founder:{name:'Priya',city:'Toronto 🍁',av:'P',grad:'linear-gradient(135deg,#EAB308,#fbbf24)'},perks:['Equity + salary when funded','Hybrid Toronto','500 users already waiting']},
+  {id:6,name:'BlockLearn',tagline:'Making crypto actually understandable for regular people. 500 subscribers in 2 weeks.',story:"Crypto is confusing because nobody explains it properly. I found a way. 500 subscribers in 2 weeks with zero ads. I need a content creator who can help me scale this while keeping the quality that made it work.",cat:'Web3',catIco:'🔗',grad:'linear-gradient(135deg,#8B5CF6,#ec4899)',role:'content',roleIco:'📸',roleFull:'Creates content people actually watch and share',commit:'Side project to start',city:'Dubai 🌆',interest:16,posted:'3 days ago',hot:true,isNew:false,pot:{cls:'pot1',ico:'🌱',label:'Early potential',sub:'Crypto education'},founder:{name:'Iman',city:'Dubai 🌆',av:'I',grad:'linear-gradient(135deg,#8B5CF6,#ec4899)'},perks:['Revenue share','Fully remote','Massive and growing market']},
+  {id:7,name:'TERRA',tagline:'Sustainable streetwear. Eco materials, clean aesthetic, Gen Z market. Identity is the missing piece.',story:"The fabrics are sourced. The ethics are real. The audience is ready — Gen Z wants sustainable but they also want heat. I need a designer who can make TERRA look as good as it stands for.",cat:'Fashion',catIco:'🌿',grad:'linear-gradient(135deg,#22c55e,#86efac)',role:'design',roleIco:'🎨',roleFull:'Makes things look so good people stop scrolling',commit:'Side project to start',city:'London 🎡',interest:9,posted:'2 days ago',hot:false,isNew:true,pot:{cls:'pot2',ico:'🚀',label:'$1M+',sub:'Sustainable fashion rising'},founder:{name:'Zara',city:'London 🎡',av:'Z',grad:'linear-gradient(135deg,#22c55e,#86efac)'},perks:['Equity from day one','London or remote','Category that only grows']},
+  {id:8,name:'FlexHub',tagline:'Online fitness for people who hate traditional gyms. 200 beta users. Need someone to close them.',story:"200 people signed up for the beta because they hate the gym experience. They want personalised, flexible, no-commitment fitness. I have the product. I need someone to convert the curious into paying members.",cat:'Fitness',catIco:'💪',grad:'linear-gradient(135deg,#f97316,#fb923c)',role:'sales',roleIco:'🤝',roleFull:'Turns conversations into revenue',commit:'Full-time — all in',city:'Miami 🌊',interest:7,posted:'6 days ago',hot:false,isNew:false,pot:{cls:'pot2',ico:'🚀',label:'$1M+',sub:'Fitness SaaS potential'},founder:{name:'Carlos',city:'Miami 🌊',av:'C',grad:'linear-gradient(135deg,#f97316,#fb923c)'},perks:['Commission + equity','200 warm leads waiting','Miami or remote']},
+];
+
+let activeFilter='all';
+let currentProject=null;
+let selectedRole='';
+
+// ── BUILD FEED ──
+function buildFeed(filter){
+  const feed=document.getElementById('feed');
+  const list=filter==='all'?projects:projects.filter(p=>p.role===filter);
+  if(!list.length){feed.innerHTML='<div style="text-align:center;padding:60px 24px;color:var(--tx3);font-size:14px;line-height:1.7;background:var(--card);border-radius:22px;box-shadow:var(--sh);">No projects here yet. Be the first to post one.</div>';return;}
+  const hot=list.filter(p=>p.hot),rest=list.filter(p=>!p.hot);
+  let h='';
+  if(hot.length&&filter==='all') h+='<div class="feed-lbl">🔥 Trending now</div>';
+  [...hot,...rest].forEach((p,i)=>{
+    const rc=roleColors[p.role]||'#FF2B2B';
+    h+=`<div class="pcard" style="animation-delay:${i*.05}s" onclick="openProject(${p.id})">
+      <div class="pc-cover">
+        <div class="pc-cbg" style="background:${p.grad}"></div>
+        <div class="pc-cwm">${p.catIco}</div>
+        <div class="pc-av">${p.catIco}</div>
+        <div class="pc-ci">
+          <div class="pc-name">${p.name}</div>
+          <div class="pc-badges">${p.hot?'<span class="badge b-hot">🔥 HOT</span>':''}${p.isNew?'<span class="badge b-new">NEW</span>':''}</div>
+        </div>
+        <div class="pc-cat">${p.catIco} ${p.cat}</div>
+      </div>
+      <div class="pc-body">
+        <div class="pot ${p.pot.cls}">${p.pot.ico} ${p.pot.label} <span style="opacity:.55;font-weight:600;">· ${p.pot.sub}</span></div>
+        <div class="pc-desc">${p.tagline}</div>
+        ${(p.roles&&p.roles.length>1)?`<div class="pc-roles">${p.roles.map(r=>`<span class="pc-role-tag">${r.ico} ${roleNames[r.key]||r.key}</span>`).join("")}</div>`:`<div class="pc-role" style="--rc:${rc}"><div class="pc-rlbl">Looking for someone who</div><div class="pc-rval">${p.roleFull||p.roleLabel||""}</div></div>${p.deal?`<div class="pc-deal"><span>${p.dealIco||''}</span><span>${p.deal}</span></div>`:''}`}
+        <div class="pc-meta"><span class="cm">📍 ${p.city}</span><span class="cm">🔥 ${p.commit}</span><span class="cm">⏱ ${p.posted}</span></div>
+        <div class="pc-foot">
+          <div class="pc-int">
+            <button class="btn-like" id="like-${p.id}" onclick="event.stopPropagation();togLike(${p.id})">❤️ <span id="likeN-${p.id}">${p.interest}</span></button>
+          </div>
+          <button class="btn-join" onclick="event.stopPropagation();openApply(${p.id})">I want in →</button>
+        </div>
+      </div>
+    </div>`;
+  });
+  feed.innerHTML=h;
+  // Restore liked state
+  projects.forEach(p=>{
+    if(localStorage.getItem('yb_like_'+p.id)){
+      const btn=document.getElementById('like-'+p.id);
+      if(btn)btn.classList.add('liked');
+    }
+  });
+}
+
+function togSave(id){
+  const saved=localStorage.getItem('yb_save_'+id);
+  if(saved){
+    localStorage.removeItem('yb_save_'+id);
+  } else {
+    localStorage.setItem('yb_save_'+id,'1');
+  }
+  // Re-render to update all save buttons
+  renderCards();
+  // If on project page update that button too
+  const shareRow=document.getElementById('ppShareRow');
+  if(shareRow&&currentProject&&currentProject.id===id){
+    const btn=shareRow.querySelector('.btn-save');
+    if(btn){btn.textContent=saved?'🤍':'❤️';btn.classList.toggle('saved',!saved);}
+  }
+}
+
+function shareProject(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  const url=window.location.origin+window.location.pathname+'?project='+id;
+  const text='Check out '+p.name+' on youbet — '+p.tagline;
+  if(navigator.share){
+    navigator.share({title:p.name,text,url}).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(url).then(()=>{
+      const btn=document.querySelector('.btn-share-proj');
+      if(btn){const orig=btn.innerHTML;btn.innerHTML='✓ Copied!';setTimeout(()=>btn.innerHTML=orig,2000);}
+    });
+  }
+}
+
+function togLike(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  const liked=localStorage.getItem('yb_like_'+id);
+  const btn=document.getElementById('like-'+id);
+  const num=document.getElementById('likeN-'+id);
+  if(liked){
+    localStorage.removeItem('yb_like_'+id);
+    p.interest=Math.max(0,(p.interest||0)-1);
+    if(btn)btn.classList.remove('liked');
+  } else {
+    localStorage.setItem('yb_like_'+id,'1');
+    p.interest=(p.interest||0)+1;
+    if(btn)btn.classList.add('liked');
+  }
+  if(num)num.textContent=p.interest;
+}
+
+function filterBy(chip,f){
+  document.querySelectorAll('.fc').forEach(c=>c.classList.remove('on'));
+  chip.classList.add('on');activeFilter=f;buildFeed(f);
+}
+
+// ── PROJECT PAGE ──
+function openProject(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  currentProject=p;
+  const rc=roleColors[p.role]||'#FF2B2B';
+
+  // Hero
+  document.getElementById('ppHeroBg').style.background=p.grad;
+  document.getElementById('ppHeroWm').textContent=p.catIco;
+  document.getElementById('ppAv').textContent=p.catIco;
+  document.getElementById('ppName').textContent=p.name;
+  document.getElementById('ppTagline').textContent=p.tagline;
+  document.getElementById('ppInt').textContent=p.interest;
+
+  // Body
+  const related=projects.filter(x=>x.id!==p.id&&x.role===p.role).slice(0,4);
+  document.getElementById('ppBody').innerHTML=`
+    <!-- Strip -->
+    <div class="pp-strip">
+      <div class="pp-strip-pot pot ${p.pot.cls}">${p.pot.ico} ${p.pot.label}</div>
+      <div class="pp-strip-div"></div>
+      <div class="pp-strip-meta">📍 ${p.city}</div>
+      <div class="pp-strip-div"></div>
+      <div class="pp-strip-meta">🔥 ${p.commit}</div>
+      <div class="pp-strip-div"></div>
+      <div class="pp-strip-meta">⏱ ${p.posted}</div>
+    </div>
+
+    <!-- Who they need -->
+    <div class="need-card">
+      <div class="need-lbl">Who they need</div>
+      ${(p.roles&&p.roles.length>0?p.roles:[{key:p.role,ico:p.roleIco,label:p.roleFull}]).map(r=>`
+      <div class="need-row">
+        <div class="need-ico">${r.ico}</div>
+        <div class="need-body">
+          <div class="need-t">${r.label||r.key}</div>
+          <div class="need-s">${roleNames[r.key]||r.key} · Open role</div>
+        </div>
+      </div>`).join('')}
+    </div>
+
+    <!-- Founder's story -->
+    <div class="founder-card">
+      <div class="founder-top">
+        <div class="founder-av" style="background:${p.founder.grad}">${p.founder.av}</div>
+        <div>
+          <div class="founder-name">${p.founder.name}</div>
+          <div class="founder-sub">Founder · ${p.founder.city}</div>
+        </div>
+      </div>
+      <div class="founder-msg">"${p.story}"</div>
+    </div>
+
+    <!-- What you get -->
+    <div class="pp-card">
+      <div class="pp-card-head"><div class="pp-card-lbl">What you get</div></div>
+      <div class="perks">${p.perks.map(perk=>`<div class="perk"><div class="perk-ico">✓</div><div><div class="perk-t">${perk}</div></div></div>`).join('')}</div>
+    </div>
+
+    <!-- Website button -->
+    ${p.website?`<a href="https://${p.website}" target="_blank" class="btn-website">🌐 Visit ${p.website} →</a>`:''}
+
+    <!-- Related -->
+    ${related.length?`
+    <div>
+      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.35);margin-bottom:12px;padding:0 2px;">More projects needing a ${roleNames[p.role]||p.role}</div>
+    </div>`:''}
+  `;
+
+  // Related scroll (outside ppBody, appended after)
+  if(related.length){
+    const relWrap=document.createElement('div');
+    relWrap.className='related-scroll';
+    relWrap.innerHTML=related.map(r=>`
+      <div class="rel-card" onclick="openProject(${r.id})">
+        <div class="rel-cover">
+          <div class="rel-cbg" style="background:${r.grad}"></div>
+          <div class="rel-cwm">${r.catIco}</div>
+          <div class="rel-av">${r.catIco}</div>
+          <div class="rel-name">${r.name}</div>
+        </div>
+        <div class="rel-body">
+          <div class="rel-pot pot ${r.pot.cls}">${r.pot.ico} ${r.pot.label}</div>
+          <div class="rel-role">${roleNames[r.role]||r.role} needed</div>
+        </div>
+      </div>`).join('');
+    document.getElementById('ppBody').appendChild(relWrap);
+  }
+
+  // Show project view
+  document.getElementById('boardView').style.display='none';
+  document.getElementById('projectView').style.display='block';
+  document.getElementById('nav').classList.remove('lit');
+  window.scrollTo(0,0);
+}
+
+function goBack(){
+  document.getElementById('projectView').style.display='none';
+  document.getElementById('boardView').style.display='block';
+  window.scrollTo(0,0);
+}
+
+function openApplyFromPage(){openApply(currentProject.id);}
+
+// ── APPLY SHEET ──
+function openApply(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  currentProject=p;
+  document.getElementById('sheetProj').innerHTML=`<div class="sh-av" style="background:${p.grad}">${p.catIco}</div><div><div class="sh-name">${p.name}</div><div class="sh-role">${p.roleIco} ${roleNames[p.role]||p.role} · ${p.city}</div></div>`;
+  // Build role chips — ONLY show roles the owner posted for
+  const projectRoles=p.roles&&p.roles.length>0
+    ?p.roles
+    :[{key:p.role,ico:p.roleIco,label:p.roleLabel||p.roleFull||roleNames[p.role]||p.role}];
+  const rDiv=document.getElementById('sheetRoles');
+  rDiv.innerHTML='';
+  selectedRole='';
+  // Auto-select first role
+  if(projectRoles.length===1){
+    selectedRole=projectRoles[0].label||projectRoles[0].key;
+  }
+  projectRoles.forEach((r,i)=>{
+    const key=r.key||r.k;
+    const ico=r.ico||'👤';
+    const name=r.label||r.n||roleNames[key]||key;
+    const chip=document.createElement('div');
+    chip.className='sh-role-chip'+(i===0?' on':'');
+    if(i===0)selectedRole=name;
+    chip.innerHTML=ico+' '+name;
+    chip.onclick=()=>{
+      rDiv.querySelectorAll('.sh-role-chip').forEach(x=>x.classList.remove('on'));
+      chip.classList.add('on');
+      selectedRole=name;
+      // Update placeholders for selected role
+      const q2=qM[key]||qM.tech;
+      const skillEl=document.getElementById('sheetSkill');
+      const builtEl=document.getElementById('sheetBuilt');
+      const msgEl=document.getElementById('sheetMsg');
+      if(skillEl)skillEl.placeholder=q2.skill;
+      if(builtEl)builtEl.placeholder=q2.built;
+      if(msgEl)msgEl.placeholder=q2.why;
+    };
+    rDiv.appendChild(chip);
+  });
+  // Set dynamic placeholders based on project role
+  const q=qM[p.role]||qM.tech;
+  const skillEl=document.getElementById('sheetSkill');
+  const builtEl=document.getElementById('sheetBuilt');
+  const msgEl=document.getElementById('sheetMsg');
+  if(skillEl)skillEl.placeholder=q.skill;
+  if(builtEl)builtEl.placeholder=q.built;
+  if(msgEl)msgEl.placeholder=q.why;
+  // Clear values
+  ['sheetMsg','sheetIG','sheetEmail','sheetSkill','sheetBuilt','sheetName','sheetCountry'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('sheet').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeSheet(){
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('sheet').classList.remove('open');
+  document.body.style.overflow='';
+}
+function submitJoin(){
+  const p=currentProject;if(!p)return;
+  const skill=document.getElementById('sheetSkill').value.trim();
+  const built=document.getElementById('sheetBuilt').value.trim();
+  const msg=document.getElementById('sheetMsg').value.trim();
+  const ig='@'+(document.getElementById('sheetIG').value.trim().replace('@',''));
+  const name=document.getElementById('sheetName').value.trim();
+  const country=document.getElementById('sheetCountry').value.trim();
+  const email=document.getElementById('sheetEmail').value.trim();
+  const role=selectedRole||'Not specified';
+  if(!name){document.getElementById('sheetName').classList.add('err');document.getElementById('sheetName').focus();return;}
+  if(!msg){document.getElementById('sheetMsg').classList.add('err');document.getElementById('sheetMsg').focus();return;}
+  if(!email||!email.includes('@')){document.getElementById('sheetEmail').classList.add('err');document.getElementById('sheetEmail').focus();return;}
+  // Build mailto
+  const ownerEmail=p.ownerEmail||'hello@youbet.network';
+  const subject=encodeURIComponent('Application — '+p.name+' ('+role+')');
+  const body=encodeURIComponent(
+    'Hi '+p.founder.name+',\n\n'+
+    'I want to apply for the '+role+' role on '+p.name+'.\n\n'+
+    '--- Strongest skill ---\n'+skill+'\n\n'+
+    '--- Built or sold ---\n'+built+'\n\n'+
+    '--- Why this project ---\n'+msg+'\n\n'+
+    '--- About me ---\n'+
+    'Name: '+name+'\n'+
+    'Country: '+country+'\n'+
+    'Instagram: '+ig+'\n'+
+    'Email: '+email+'\n\n'+
+    'Found you on youbet.network'
+  );
+  // Bump interest count visually
+  p.interest=(p.interest||0)+1;
+  document.querySelectorAll('.interest-count-'+p.id).forEach(el=>el.textContent=p.interest);
+  // Open mail app
+  window.location.href='mailto:'+ownerEmail+'?subject='+subject+'&body='+body;
+  // Show success
+  setTimeout(()=>{
+    closeSheet();
+    document.getElementById('sucProj').textContent=p.name;
+    document.getElementById('sucIG').textContent=ig;
+    document.getElementById('sucMsg').textContent=msg.substring(0,60)+(msg.length>60?'…':'');
+    document.getElementById('sucEmail').textContent=email;
+    document.getElementById('joinSuc').classList.add('open');
+    document.body.style.overflow='hidden';
+  },400);
+}
+
+function closeJoinSuc(){document.getElementById('joinSuc').classList.remove('open');}
+
+// ── POST FLOW ──
+let postStep=1;
+const post={name:'',desc:'',cat:'',catIco:'',catColor:'',roleIco:'',roleLabel:'',roleKey:'',commitIco:'',commit:'',city:'',owner:'',email:'',ig:'',traction:'',potKey:'none',potIco:'🌱',potLabel:'$100K+',potCls:'pot1'};
+
+function openPost(){
+  if(sessionStorage.getItem('yb_member')==='1'){openPostFlow();return;}
+  document.getElementById('memOv').classList.add('open');document.body.style.overflow='hidden';
+}
+function closeMem(){document.getElementById('memOv').classList.remove('open');document.body.style.overflow='';}
+function buyMembership(){
+  const returnUrl = window.location.origin + window.location.pathname + '?member=1&post=1';
+  window.location.href = 'https://buy.stripe.com/8x228r5Yeelrgx39rA5kk01?success_url=' + encodeURIComponent(returnUrl);
+}
+function openPostFlow(){
+  document.getElementById('postCatGrid').innerHTML=cats.map(c=>`<div class="ccat" style="--c:${c.c}" onclick="selCat(this,'${c.e}','${c.n.replace(/'/g,"\\'")}','${c.c}')"><div class="cc-e">${c.e}</div><div class="cc-n">${c.n}</div></div>`).join('');
+  document.getElementById('postOv').classList.add('open');document.body.style.overflow='hidden';
+  postStep=1;postUi();
+}
+function closePost(){document.getElementById('postOv').classList.remove('open');document.body.style.overflow='';}
+function postUi(){
+  document.getElementById('postFill').style.width=(postStep/7*100)+'%';
+  document.getElementById('postStxt').textContent='Step '+postStep+' of 7';
+  document.getElementById('postBk').style.display=postStep>1?'block':'none';
+  document.getElementById('postNxt').textContent=postStep===7?'Post My Project 🚀':'Continue →';
+  document.querySelectorAll('.ps').forEach(s=>s.classList.remove('active'));
+  document.getElementById('ps'+postStep).classList.add('active');
+}
+function postNext(){
+  if(postStep===1){post.name=document.getElementById('postName').value.trim();if(!post.name){document.getElementById('postName').style.borderColor='var(--red)';document.getElementById('postName').focus();setTimeout(()=>document.getElementById('postName').style.borderColor='var(--br)',1500);return;}post.desc=document.getElementById('postDesc').value.trim();}
+  if(postStep===2&&!post.cat)return;
+  if(postStep===3){post.traction=document.getElementById('tractionProof').value.trim();}
+  if(postStep===4&&(!post.roles||post.roles.length===0))return;
+  if(postStep===5){post.city=document.getElementById('postCity').value||post.city||'Remote';}
+  if(postStep===6){
+    post.owner=document.getElementById('postOwner').value.trim();
+    post.country=document.getElementById('postCountry').value.trim();
+    post.email=document.getElementById('postOwnerEmail').value.trim();
+    post.ig=document.getElementById('postOwnerIG').value.trim().replace('@','');
+    const wu=document.getElementById('postWebsite');
+    if(wu)post.website=wu.value.trim().replace(/^https?:\/\//,'');
+    if(!post.owner){document.getElementById('postOwner').focus();return;}
+    if(!post.email||!post.email.includes('@')){document.getElementById('postOwnerEmail').focus();return;}
+    submitPost();return;
+  }
+  postStep++;postUi();
+}
+function postPrev(){if(postStep>1){postStep--;postUi();}}
+function selCat(el,e,n,c){document.querySelectorAll('.ccat').forEach(i=>i.classList.remove('on'));el.classList.add('on');post.cat=n;post.catIco=e;post.catColor=c;}
+function togRole(el,ico,label,key){
+  const on=el.classList.toggle('on');
+  el.querySelector('.sopt-chk').style.color=on?'#fff':'transparent';
+  if(!post.roles)post.roles=[];
+  if(on){
+    if(!post.roles.find(r=>r.key===key))post.roles.push({key,ico,label});
+  } else {
+    post.roles=post.roles.filter(r=>r.key!==key);
+  }
+  // keep legacy single role as first selected (for backwards compat)
+  if(post.roles.length>0){
+    post.roleKey=post.roles[0].key;
+    post.roleIco=post.roles[0].ico;
+    post.roleLabel=post.roles[0].label;
+    post.roleFull=post.roles[0].label;
+  }
+}
+function selCommit(el,ico,label){document.querySelectorAll('#ps5 .scol .sopt').forEach(c=>{c.classList.remove('on');c.querySelector('.sopt-chk').style.color='transparent';});el.classList.add('on');el.querySelector('.sopt-chk').style.color='#fff';post.commitIco=ico;post.commit=label;}
+function setCity(chip,city){document.querySelectorAll('.cchip').forEach(c=>c.classList.remove('on'));chip.classList.add('on');document.getElementById('postCity').value=city;post.city=city;}
+function togTraction(el,key,ico,label,desc){
+  document.querySelectorAll('#tractionList .sopt').forEach(c=>{c.classList.remove('on');c.querySelector('.sopt-chk').style.color='transparent';});
+  el.classList.add('on');el.querySelector('.sopt-chk').style.color='#fff';
+  const t=tierMap[key]||tierMap.none;
+  post.potKey=key;post.potIco=t.ico;post.potLabel=t.val;post.potCls=t.cls;
+  document.getElementById('tierIco').textContent=t.ico;
+  document.getElementById('tierVal').textContent=t.val;
+  document.getElementById('tierSubT').textContent=t.sub;
+}
+function submitPost(){
+  closePost();
+  document.getElementById('postSucDetail').innerHTML=`
+    <div class="suc-row"><span>${post.catIco||'🚀'}</span><span>${post.name} — ${post.cat||'Your project'}</span></div>
+    <div class="suc-row"><span>${post.potIco}</span><span>${post.potLabel} potential</span></div>
+    <div class="suc-row"><span>${post.roleIco||'👤'}</span><span>${post.roleLabel||'Looking for a partner'}</span></div>
+    <div class="suc-row"><span>${post.dealIco||'🤝'}</span><span>${post.dealLabel||'Deal TBD'}</span></div>
+    <div class="suc-row"><span>📍</span><span>${post.city||'Remote'}</span></div>`;
+  document.getElementById('liveN').textContent=parseInt(document.getElementById('liveN').textContent)+1;
+  setTimeout(()=>document.getElementById('postSuc').classList.add('open'),200);
+}
+function closePostSuc(){document.getElementById('postSuc').classList.remove('open');}
+
+// ── NAV SCROLL ──
+window.addEventListener('scroll',()=>{
+  if(document.getElementById('projectView').style.display==='block') return;
+  document.getElementById('nav').classList.toggle('lit',scrollY>80);
+});
+
+// ── NO FAKE COUNTER ──
+// ── FOOTER TICKER ──
+const ticks=['Someone in Toronto just applied','Someone in New York just posted a project','Someone in Dubai just said "I want in"','A new project in Tech & AI just went live','Someone in London is browsing right now','Someone in Lagos just joined the queue'];
+let ti=0;
+setInterval(()=>{ti=(ti+1)%ticks.length;const el=document.getElementById('tickTxt');if(el){el.style.opacity='0';setTimeout(()=>{el.textContent=ticks[ti];el.style.opacity='1';el.style.transition='opacity .5s';},300);}},4500);
+
+// Check if returning from Stripe payment
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('member')==='1'){
+    sessionStorage.setItem('yb_member','1');
+    // Clean URL
+    window.history.replaceState({},'',window.location.pathname);
+    // If post=1, open post flow after short delay
+    if(params.get('post')==='1'){
+      setTimeout(()=>{
+        closeMem();
+        openPostFlow();
+      }, 600);
+    }
+  }
+})();
+
+buildFeed('all');
+</script>
+</body>
+</html>
