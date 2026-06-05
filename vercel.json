@@ -1,9 +1,0 @@
-{
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "rewrites": [
-    { "source": "/quiz", "destination": "/match-quiz.html" },
-    { "source": "/projects", "destination": "/project-board.html" },
-    { "source": "/board", "destination": "/project-board.html" }
-  ]
-}
