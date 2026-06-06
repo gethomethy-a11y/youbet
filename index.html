@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>youbet — your business partner is one match away</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=Inter+Tight:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#FF2B2B;--rdh:#E03A22;--rd2:#C41616;--rl:#FFF1EF;--rg:rgba(255,43,43,.15);
+  --orange:#FF4D4D;--amber:#FF6B6B;--blue:#3B82F6;--green:#34A853;--purple:#8B5CF6;--yellow:#EAB308;
+  --grad:linear-gradient(120deg,#FF2B2B 0%,#FF4D4D 55%,#FF6B6B 100%);
+  --bg:#FFFDFC;--bg2:#F7F7F8;--bg3:#F0F0F2;
+  --tx:#0B0B0F;--tx2:#6B6B72;--tx3:#9a9aa4;
+  --br:#E9E9EC;
+  --sh:0 1px 3px rgba(11,11,15,.05),0 4px 14px rgba(11,11,15,.05);
+  --sh-lg:0 8px 32px rgba(11,11,15,.1),0 2px 8px rgba(11,11,15,.05);
+  --head:"Inter Tight",sans-serif;--body:"Inter",sans-serif;
+  --sab:env(safe-area-inset-bottom,0px);
+}
+[data-theme=dark]{--bg:#0A0A0A;--bg2:#141414;--bg3:#1E1E1E;--tx:#fff;--tx2:#aaa;--tx3:#555;--br:#222;--rl:rgba(255,43,43,.12);}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{background:var(--bg);color:var(--tx);font-family:var(--body);overflow-x:hidden;transition:background .3s,color .3s;font-weight:400;letter-spacing:-.006em;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--head);letter-spacing:-.035em;line-height:1.06}
+.flame{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:var(--red)}
+
+.logo{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.logo svg{width:26px;height:26px;border-radius:7px;box-shadow:0 3px 9px rgba(255,43,43,.26)}
+.logo .wm{font-family:var(--head);font-weight:800;font-size:1.2rem;letter-spacing:-.05em;color:var(--tx)}
+.logo .wm em{color:var(--red);font-style:normal}
+
+.act-bar{background:var(--bg2);border-bottom:1px solid var(--br);padding:10px 0;overflow:hidden;white-space:nowrap}
+.act-track{display:inline-flex;animation:atick 32s linear infinite}
+.act-item{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:var(--tx2);padding:0 40px}
+.act-item b{color:var(--tx);font-weight:700}
+.act-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:lp 2s infinite;flex-shrink:0}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes atick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+nav{position:sticky;top:0;z-index:200;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 40px;background:rgba(255,253,252,.85);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--br);transition:all .3s}
+[data-theme=dark] nav{background:rgba(10,10,10,.9)}
+.nav-r{display:flex;align-items:center;gap:4px}
+.nav-a{font-size:13px;font-weight:500;color:var(--tx2);text-decoration:none;padding:8px 13px;border-radius:9px;transition:all .15s}
+.nav-a:hover{color:var(--tx);background:var(--bg2)}
+.ttog{width:34px;height:34px;border-radius:50%;background:var(--bg2);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .2s;margin-left:2px}
+.ttog:hover{border-color:var(--red)}
+.nav-login{font-size:13px;font-weight:600;color:var(--tx2);padding:9px 14px;border-radius:10px;text-decoration:none;transition:color .15s}
+.nav-login:hover{color:var(--tx)}
+.nav-btn{background:var(--red);color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border-radius:11px;text-decoration:none;margin-left:6px;transition:all .2s;box-shadow:0 4px 14px rgba(255,43,43,.28)}
+.nav-btn:hover{background:var(--rdh);transform:translateY(-1px)}
+
+/* HERO */
+.hero{padding:90px 24px 72px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,43,43,.07) 0%,transparent 70%);pointer-events:none}
+.hero-bg-word{position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);font-family:var(--head);font-size:clamp(180px,28vw,380px);font-weight:800;letter-spacing:-14px;color:transparent;-webkit-text-stroke:1.5px rgba(11,11,15,.04);pointer-events:none;user-select:none;white-space:nowrap;line-height:1}
+[data-theme=dark] .hero-bg-word{-webkit-text-stroke:1.5px rgba(255,255,255,.04)}
+.hero-inner{position:relative;z-index:2;max-width:720px;margin:0 auto}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--br);padding:7px 16px 7px 10px;border-radius:100px;font-size:12px;font-weight:600;color:var(--tx);margin-bottom:26px;box-shadow:var(--sh);opacity:0;animation:fadeUp .5s .1s both}
+.badge-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:lp 2s infinite;flex-shrink:0}
+.hero h1{font-size:clamp(40px,6.5vw,74px);font-weight:800;line-height:1.02;letter-spacing:-.045em;color:var(--tx);opacity:0;animation:fadeUp .6s .2s both}
+.hero-sub{font-size:18px;color:var(--tx2);line-height:1.6;max-width:520px;margin:20px auto 0;opacity:0;animation:fadeUp .6s .3s both;font-weight:450}
+.hero-note{font-size:13px;color:var(--tx3);margin-top:12px;opacity:0;animation:fadeUp .6s .45s both;font-weight:450}
+.hero-btns{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:30px;flex-wrap:wrap;opacity:0;animation:fadeUp .6s .4s both}
+.btn-main{background:var(--red);color:#fff;font-family:var(--body);font-size:15px;font-weight:600;padding:15px 32px;border-radius:13px;text-decoration:none;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 18px rgba(255,43,43,.28),inset 0 1px 0 rgba(255,255,255,.18)}
+.btn-main:hover{background:var(--rdh);transform:translateY(-2px);box-shadow:0 10px 30px rgba(255,43,43,.4)}
+.btn-sec{background:var(--bg);color:var(--tx);font-size:14px;font-weight:600;padding:15px 22px;border-radius:13px;text-decoration:none;border:1px solid var(--br);transition:all .15s;box-shadow:var(--sh)}
+.btn-sec:hover{background:var(--bg2);transform:translateY(-1px)}
+.hero-social{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:22px;opacity:0;animation:fadeUp .6s .5s both}
+.avs{display:flex}
+.av{width:30px;height:30px;border-radius:50%;border:2.5px solid var(--bg);font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;margin-left:-9px;font-family:var(--head)}
+.av:first-child{margin-left:0}
+.social-t{font-size:13px;color:var(--tx2);font-weight:450}
+.social-t strong{color:var(--tx);font-weight:700}
+
+.match-preview{max-width:600px;margin:46px auto 0;opacity:0;animation:fadeUp .7s .7s both}
+.mbox{background:var(--bg);border:1px solid var(--br);border-radius:20px;overflow:hidden;box-shadow:0 16px 44px var(--rg)}
+.mhead{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--br);background:var(--bg2)}
+.mlabel{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:6px}
+.mlabel::before{content:'✦';font-size:9px}
+.mcompat{background:#ECFDF3;color:#1c8a48;font-size:12px;font-weight:700;padding:5px 12px;border-radius:100px}
+[data-theme=dark] .mcompat{background:rgba(52,168,83,.14)}
+.mbody{display:grid;grid-template-columns:1fr 48px 1fr;align-items:center;padding:24px;gap:12px;transition:opacity .4s}
+.mbody.fade{opacity:0}
+.mp{text-align:center}
+.mpav{width:56px;height:56px;border-radius:15px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:25px;margin:0 auto 10px}
+.mpn{font-family:var(--head);font-weight:700;font-size:15px;color:var(--tx);margin-bottom:3px}
+.mps{font-size:11px;color:var(--tx3);margin-bottom:12px;font-weight:450}
+.mptags{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.mptag{font-size:11px;font-weight:500;padding:4px 10px;border-radius:100px;background:var(--bg2);color:var(--tx3);border:1px solid var(--br)}
+.mptag.hot{background:var(--rl);color:var(--rd2);border-color:rgba(255,43,43,.15);font-weight:600}
+.mlink{width:44px;height:44px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 16px rgba(255,43,43,.34);margin:0 auto;animation:ip 2.5s infinite}
+@keyframes ip{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.mfoot{border-top:1px solid var(--br);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mfootl{font-size:13px;color:var(--tx3);font-weight:450}
+.mfootl strong{color:var(--tx);font-weight:600}
+.mulockbtn{background:var(--red);color:#fff;font-family:var(--body);font-size:12px;font-weight:600;padding:9px 16px;border-radius:9px;border:none;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.mulockbtn:hover{background:var(--rdh)}
+.mdots{display:flex;gap:6px;justify-content:center;margin-top:14px}
+.mdot{width:6px;height:6px;border-radius:50%;background:var(--br);transition:background .3s}
+.mdot.on{background:var(--red)}
+
+.ticker{border-top:1px solid var(--br);border-bottom:1px solid var(--br);padding:12px 0;overflow:hidden;white-space:nowrap;background:var(--bg)}
+.ttrack{display:inline-flex;animation:tick 30s linear infinite}
+.titem{font-size:13px;font-weight:600;color:var(--tx3);padding:0 28px;display:flex;align-items:center;gap:10px}
+.tdot{width:4px;height:4px;background:var(--red);border-radius:50%;flex-shrink:0}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--red);margin-bottom:16px}
+.sec-t{font-family:var(--head);font-size:clamp(26px,5vw,38px);font-weight:800;letter-spacing:-.04em;line-height:1.06;margin-bottom:8px;color:var(--tx)}
+
+/* PATHS (5 cards) */
+.paths-sec{background:var(--bg2);padding:84px 24px}
+.paths-in{max-width:680px;margin:0 auto}
+.paths-head{text-align:center;margin-bottom:34px}
+.paths-meta{display:inline-flex;align-items:center;gap:9px;background:var(--bg);border:1px solid var(--br);border-radius:100px;padding:7px 15px;font-size:12px;font-weight:600;color:var(--tx3);margin-top:14px}
+.pmdot{width:3px;height:3px;background:var(--br);border-radius:50%}
+.paths-grid{display:flex;flex-direction:column;gap:11px}
+.path-card{display:flex;align-items:center;gap:15px;background:var(--bg);border:1.5px solid var(--br);border-left:4px solid var(--pc,var(--red));border-radius:16px;padding:18px 20px;cursor:pointer;text-decoration:none;transition:all .22s cubic-bezier(.22,1,.36,1)}
+.path-card:hover{transform:translateX(6px);box-shadow:var(--sh-lg);border-color:var(--pc,var(--red));border-left-color:var(--pc,var(--red))}
+.path-ico{width:48px;height:48px;border-radius:13px;background:var(--pcbg,rgba(255,43,43,.1));display:flex;align-items:center;justify-content:center;font-size:23px;flex-shrink:0}
+.path-b{flex:1}
+.path-n{font-family:var(--head);font-size:16px;font-weight:800;color:var(--tx);letter-spacing:-.02em;transition:color .2s}
+.path-card:hover .path-n{color:var(--pc,var(--red))}
+.path-s{font-size:13px;color:var(--tx3);margin-top:3px;font-weight:450;line-height:1.45}
+.path-arr{font-size:17px;color:var(--tx3);transition:all .2s;flex-shrink:0}
+.path-card:hover .path-arr{color:var(--pc,var(--red));transform:translateX(4px)}
+
+/* VS (alone vs youbet) */
+.vs-sec{background:var(--bg);padding:84px 24px}
+.vs-in{max-width:760px;margin:0 auto;text-align:center}
+.vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:36px;text-align:left}
+@media(max-width:600px){.vs-grid{grid-template-columns:1fr}}
+.vs-col{border-radius:22px;padding:28px 24px;border:1px solid var(--br)}
+.vs-col.alone{background:var(--bg2)}
+.vs-col.youbet{background:#0A0A0A;border-color:rgba(255,43,43,.25);position:relative;overflow:hidden}
+.vs-col.youbet::before{content:'';position:absolute;top:-80px;right:-60px;width:300px;height:300px;background:radial-gradient(ellipse,rgba(255,43,43,.22),transparent 65%);pointer-events:none}
+.vs-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:100px;margin-bottom:18px;position:relative;z-index:1}
+.vs-tag.a{background:rgba(0,0,0,.05);color:var(--tx3)}
+.vs-tag.y{background:rgba(255,43,43,.16);color:#FF6B6B}
+.vs-li{display:flex;align-items:flex-start;gap:11px;padding:9px 0;font-size:14px;line-height:1.5;position:relative;z-index:1}
+.vs-col.alone .vs-li{color:var(--tx2)}
+.vs-col.youbet .vs-li{color:rgba(255,255,255,.82)}
+.vs-x{flex-shrink:0;color:var(--tx3);font-weight:700;margin-top:1px}
+.vs-c{flex-shrink:0;color:var(--green);font-weight:800;margin-top:1px}
+
+/* STEPS (3 visual) */
+.steps-sec{background:#0A0A0A;padding:84px 24px}
+.steps-in{max-width:900px;margin:0 auto}
+.steps-head{text-align:center;margin-bottom:44px}
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:720px){.steps-grid{grid-template-columns:1fr;gap:12px}}
+.step-card{background:#121212;border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:28px 24px;position:relative;overflow:hidden;transition:transform .25s,border-color .25s}
+.step-card:hover{transform:translateY(-4px);border-color:rgba(255,43,43,.3)}
+.step-num{font-family:var(--head);font-size:13px;font-weight:800;color:#fff;width:34px;height:34px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;margin-bottom:18px;box-shadow:0 4px 14px rgba(255,43,43,.3)}
+.step-ico{font-size:30px;margin-bottom:14px}
+.step-t{font-family:var(--head);font-size:18px;font-weight:800;color:#fff;letter-spacing:-.02em;margin-bottom:8px}
+.step-s{font-size:13px;color:rgba(255,255,255,.4);line-height:1.65;font-weight:450}
+
+/* PROJECT PREVIEWS */
+.proj-sec{background:var(--bg2);padding:84px 24px}
+.proj-in{max-width:920px;margin:0 auto}
+.proj-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+.proj-head-l{flex:1;min-width:240px}
+.proj-see{font-size:13px;font-weight:700;color:var(--red);text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;transition:gap .2s}
+.proj-see:hover{gap:9px}
+.proj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:760px){.proj-grid{grid-template-columns:1fr}}
+.pcard{background:var(--bg);border:1px solid var(--br);border-radius:18px;overflow:hidden;text-decoration:none;display:block;box-shadow:var(--sh);transition:transform .22s,box-shadow .22s}
+.pcard:hover{transform:translateY(-5px);box-shadow:var(--sh-lg)}
+.pc-cov{height:88px;position:relative;display:flex;align-items:flex-end;padding:12px 14px;overflow:hidden}
+.pc-cwm{position:absolute;right:-4px;top:-8px;font-size:72px;opacity:.16;line-height:1}
+.pc-cav{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.22);backdrop-filter:blur(6px);border:1.5px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:18px;position:relative;z-index:1}
+.pc-cnm{margin-left:9px;font-family:var(--head);font-size:18px;font-weight:800;color:#fff;letter-spacing:-.03em;position:relative;z-index:1;text-shadow:0 1px 6px rgba(0,0,0,.2)}
+.pc-bd{padding:13px 15px 15px}
+.pc-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+.sbadge{display:inline-flex;align-items:center;gap:4px;border-radius:8px;padding:3px 9px;font-size:10px;font-weight:800;border:1px solid transparent}
+.sb-users{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.2);color:#7c3aed}
+.sb-building{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.2);color:#2563eb}
+.sb-revenue{background:rgba(52,168,83,.1);border-color:rgba(52,168,83,.2);color:#1c8a48}
+.sb-launched{background:rgba(249,115,22,.1);border-color:rgba(249,115,22,.2);color:#ea6c0a}
+.dbadge{display:inline-flex;align-items:center;gap:4px;border-radius:8px;padding:3px 9px;font-size:10px;font-weight:800;background:rgba(255,43,43,.08);border:1px solid rgba(255,43,43,.18);color:var(--red)}
+.pc-lf-lbl{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tx3);margin-bottom:3px}
+.pc-lf-v{font-size:13px;font-weight:700;color:var(--tx);line-height:1.35}
+.pc-meta{font-size:11px;color:var(--tx3);margin-top:10px;font-weight:500}
+
+/* FEATURES */
+.feat-sec{background:var(--bg);padding:84px 24px}
+.feat-in{max-width:680px;margin:0 auto}
+.feat-h{font-family:var(--head);font-size:clamp(24px,5vw,34px);font-weight:800;letter-spacing:-.04em;line-height:1.1;color:var(--tx);margin-bottom:12px}
+.feat-sub{font-size:15px;line-height:1.65;color:var(--tx2);margin-bottom:30px;max-width:480px}
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.feat-grid{grid-template-columns:1fr}}
+.feat-card{background:var(--bg);border:1px solid var(--br);border-radius:18px;padding:22px;box-shadow:var(--sh);transition:transform .2s}
+.feat-card:hover{transform:translateY(-3px)}
+.feat-ico{font-size:26px;margin-bottom:11px}
+.feat-t{font-family:var(--head);font-size:17px;font-weight:800;letter-spacing:-.02em;color:var(--tx);margin-bottom:6px}
+.feat-s{font-size:13px;line-height:1.6;color:var(--tx2);font-weight:450}
+
+/* TESTIMONIALS */
+.testi-sec{background:var(--rl);padding:84px 24px;border-top:1px solid rgba(255,43,43,.1);border-bottom:1px solid rgba(255,43,43,.1)}
+.testi-in{max-width:880px;margin:0 auto}
+.testi-head{text-align:center;margin-bottom:36px}
+.testi-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:30px}
+@media(max-width:640px){.testi-grid{grid-template-columns:1fr}}
+.testi-card{background:var(--bg);border:1px solid var(--br);border-radius:18px;padding:24px;box-shadow:var(--sh)}
+.testi-q{font-size:15px;line-height:1.6;color:var(--tx);font-weight:500;margin-bottom:16px}
+.testi-q .red{color:var(--red);font-weight:700}
+.testi-who{display:flex;align-items:center;gap:11px}
+.testi-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;font-family:var(--head);flex-shrink:0}
+.testi-nm{font-size:13px;font-weight:700;color:var(--tx)}
+.testi-rl{font-size:12px;color:var(--tx3);margin-top:1px}
+.founder-q{background:var(--bg);border:1px solid var(--br);border-radius:22px;padding:34px 28px;text-align:center;box-shadow:var(--sh)}
+.fq-big{font-family:var(--head);font-size:clamp(19px,3.2vw,25px);font-weight:700;color:var(--tx);line-height:1.34;letter-spacing:-.03em;margin-bottom:22px}
+.fq-big .red{color:var(--red)}
+.fq-who{display:flex;align-items:center;justify-content:center;gap:12px}
+.fq-avs{display:flex}
+.fq-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;border:2.5px solid var(--rl);font-family:var(--head)}
+
+/* PRICING */
+.price-sec{background:var(--bg2);padding:84px 24px}
+.price-in{max-width:680px;margin:0 auto}
+.price-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:30px}
+@media(max-width:600px){.price-cards{grid-template-columns:1fr}}
+.pc2{background:var(--bg);border:1px solid var(--br);border-radius:20px;padding:30px;position:relative;overflow:hidden}
+.pc2.hot{border-color:rgba(255,43,43,.2);box-shadow:0 0 0 1px rgba(255,43,43,.07)}
+.pc2::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad)}
+.pc-tag{display:inline-flex;align-items:center;gap:4px;background:var(--rl);color:var(--red);font-size:10px;font-weight:700;padding:4px 10px;border-radius:100px;margin-bottom:16px}
+.pc-amt{font-family:var(--head);font-size:54px;font-weight:800;color:var(--tx);line-height:1;letter-spacing:-.04em}
+.pc-amt sup{font-size:24px;color:var(--red);vertical-align:super;font-weight:800;letter-spacing:0}
+.pc-per{font-size:12px;color:var(--tx2);margin-top:6px;font-weight:450}
+.pc-div{border:none;border-top:1px solid var(--br);margin:20px 0}
+.pc-feats{list-style:none;display:flex;flex-direction:column;gap:10px}
+.pc-feats li{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--tx);font-weight:450}
+.pc-feats li::before{content:'✓';width:18px;height:18px;border-radius:6px;background:var(--rl);color:var(--red);font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pc-btn{width:100%;background:var(--red);color:#fff;font-family:var(--body);font-size:14px;font-weight:600;padding:14px;border-radius:12px;border:none;cursor:pointer;margin-top:22px;box-shadow:0 4px 16px var(--rg);transition:all .2s}
+.pc-btn:hover{background:var(--rdh);transform:translateY(-1px)}
+.pc-btn.alt{background:var(--tx);color:var(--bg)}
+.pc-note{text-align:center;font-size:11px;color:var(--tx3);margin-top:9px;font-weight:450}
+
+/* FAQ */
+.faq-sec{background:#0A0A0A;padding:84px 24px}
+.faq-in{max-width:680px;margin:0 auto}
+.faq-list{margin-top:26px;display:flex;flex-direction:column}
+.fitem{border-bottom:1px solid rgba(255,255,255,.07)}
+.fq-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:19px 0;cursor:pointer;user-select:none}
+.fqt{font-family:var(--head);font-size:15px;font-weight:700;color:#fff;line-height:1.3}
+.fico{font-size:17px;color:rgba(255,255,255,.22);transition:transform .3s;flex-shrink:0}
+.fitem.open .fico{transform:rotate(45deg);color:var(--red)}
+.fa{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.fitem.open .fa{max-height:320px}
+.fat{font-size:14px;color:rgba(255,255,255,.4);line-height:1.7;padding-bottom:18px;font-weight:450}
+
+/* FINAL */
+.final-sec{background:#0A0A0A;padding:84px 24px 96px}
+.final-in{max-width:680px;margin:0 auto}
+.final-card{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:26px;padding:52px 32px;text-align:center;position:relative;overflow:hidden}
+.fc-glow{position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:500px;height:380px;background:radial-gradient(ellipse,rgba(255,43,43,.18) 0%,transparent 65%);pointer-events:none}
+.fc-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:52px 52px;-webkit-mask-image:radial-gradient(ellipse at 50% 50%,black 5%,transparent 70%);mask-image:radial-gradient(ellipse at 50% 50%,black 5%,transparent 70%);pointer-events:none}
+.fc-t{position:relative;z-index:1;font-family:var(--head);font-size:clamp(32px,7vw,50px);font-weight:800;letter-spacing:-.045em;color:#fff;line-height:1.0;margin-bottom:14px}
+.fc-t .red{color:var(--red)}
+.fc-t .dim{color:rgba(255,255,255,.2)}
+.fc-s{position:relative;z-index:1;font-size:14px;color:rgba(255,255,255,.34);line-height:1.6;margin-bottom:28px;max-width:340px;margin-left:auto;margin-right:auto;font-weight:450}
+.btn-final{position:relative;z-index:1;display:block;background:var(--grad);color:#fff;font-family:var(--body);font-weight:700;font-size:16px;padding:18px;border-radius:14px;text-decoration:none;box-shadow:0 8px 30px rgba(255,43,43,.3);margin-bottom:10px;transition:all .2s}
+.btn-final:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(255,43,43,.42)}
+.final-note{position:relative;z-index:1;font-size:11px;color:rgba(255,255,255,.22);font-weight:450}
+
+footer{background:#0A0A0A;border-top:1px solid rgba(255,255,255,.07);padding:36px 40px}
+.ft-in{max-width:1000px;margin:0 auto}
+.ft-top{display:flex;justify-content:space-between;align-items:flex-start;gap:32px;flex-wrap:wrap;margin-bottom:28px}
+.ft-logo .wm{color:#fff}
+.ft-tag{font-size:12px;color:rgba(255,255,255,.28);margin-top:10px;line-height:1.6;max-width:240px;font-weight:450}
+.ft-links{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.fl{font-size:13px;color:rgba(255,255,255,.38);text-decoration:none;transition:color .15s;font-weight:450}
+.fl:hover{color:rgba(255,255,255,.72)}
+.ft-bot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.06);padding-top:20px;flex-wrap:wrap;gap:12px}
+.ft-copy{font-size:12px;color:rgba(255,255,255,.2)}
+.ft-tick{display:flex;align-items:center;gap:7px;font-size:12px;color:rgba(255,255,255,.28)}
+.ft-tdot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:lp 2s infinite;flex-shrink:0}
+
+.mob-sticky{display:none;position:fixed;bottom:0;left:0;right:0;z-index:400;background:var(--bg);border-top:1px solid var(--br);padding:12px 20px;padding-bottom:max(12px,var(--sab));box-shadow:0 -4px 24px rgba(0,0,0,.06)}
+.mob-sticky a{display:block;width:100%;background:var(--red);color:#fff;font-family:var(--body);font-weight:600;font-size:14px;padding:14px;border-radius:12px;text-align:center;text-decoration:none;box-shadow:0 4px 16px rgba(255,43,43,.3)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.rev{opacity:0;transform:translateY(24px);transition:opacity .6s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.22,1,.36,1)}
+.rev.vis{opacity:1;transform:translateY(0)}
+.d1{transition-delay:.07s}.d2{transition-delay:.14s}.d3{transition-delay:.21s}.d4{transition-delay:.28s}.d5{transition-delay:.35s}
+
+@media(max-width:768px){
+  nav{padding:0 18px}
+  .nav-a{display:none}
+  .ft-links{align-items:flex-start}
+  footer{padding:32px 22px}
+  .mob-sticky{display:block}
+  body{padding-bottom:74px}
+}
+</style>
+</head>
+<body>
+
+<div class="act-bar">
+  <div class="act-track" id="actTrack">
+    <span class="act-item"><span class="act-dot"></span><b>Marcus</b> in NYC just matched with a developer</span>
+    <span class="act-item"><span class="act-dot"></span><b>Priya</b> posted Homethy · needs a marketer</span>
+    <span class="act-item"><span class="act-dot"></span><b>Diego</b> found a co-founder for Cypher AI</span>
+    <span class="act-item"><span class="act-dot"></span><b>3 matches</b> made in the last hour</span>
+    <span class="act-item"><span class="act-dot"></span><b>Zara</b> in London is looking for a designer</span>
+    <span class="act-item"><span class="act-dot"></span><b>Marcus</b> in NYC just matched with a developer</span>
+    <span class="act-item"><span class="act-dot"></span><b>Priya</b> posted Homethy · needs a marketer</span>
+    <span class="act-item"><span class="act-dot"></span><b>Diego</b> found a co-founder for Cypher AI</span>
+    <span class="act-item"><span class="act-dot"></span><b>3 matches</b> made in the last hour</span>
+    <span class="act-item"><span class="act-dot"></span><b>Zara</b> in London is looking for a designer</span>
+  </div>
+</div>
+
+<nav>
+  <a href="#" class="logo" aria-label="youbet home">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#FF2B2B"/><circle cx="62" cy="34" r="13" fill="#fff" opacity=".55"/><path d="M40 74c0-12 10-20 22-20s22 8 22 20z" fill="#fff" opacity=".55"/><circle cx="40" cy="40" r="15" fill="#fff"/><path d="M14 82c0-14 12-23 26-23s26 9 26 23z" fill="#fff"/></svg>
+    <span class="wm">you<em>b</em>et</span>
+  </a>
+  <div class="nav-r">
+    <a href="#paths" class="nav-a">Start</a>
+    <a href="/project-board.html" class="nav-a">Projects</a>
+    <a href="#pricing" class="nav-a">Pricing</a>
+    <a href="#faq" class="nav-a">FAQ</a>
+    <button class="ttog" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <a href="/match-quiz.html" class="nav-login">Log in</a>
+    <a href="/match-quiz.html" class="nav-btn">Find My Match</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg-word">BET</div>
+  <div class="hero-inner">
+    <div class="hero-badge"><span class="badge-dot"></span>Networking, without the networking events.</div>
+    <h1>Your business partner<br>is <span class="flame">one match away.</span></h1>
+    <p class="hero-sub">Meet founders, creators, builders, and ambitious people who match your goals, skills, projects, and energy.</p>
+    <div class="hero-btns">
+      <a href="/match-quiz.html" class="btn-main">Find My Match — Free →</a>
+      <a href="/project-board.html" class="btn-sec">Browse Projects 📋</a>
+    </div>
+    <p class="hero-note">Free to start · $10 unlocks 3 matches · no subscription ever</p>
+    <div class="hero-social">
+      <div class="avs">
+        <div class="av" style="background:#FF2B2B">J</div>
+        <div class="av" style="background:#6B8CFF">M</div>
+        <div class="av" style="background:#FFB347">K</div>
+        <div class="av" style="background:#34A853">R</div>
+        <div class="av" style="background:#C084FC">S</div>
+      </div>
+      <span class="social-t"><strong>7,603+</strong> founders already searching</span>
+    </div>
+    <div class="match-preview">
+      <div class="mbox">
+        <div class="mhead">
+          <span class="mlabel">Match Found</span>
+          <span class="mcompat" id="mcompat">94% compatibility</span>
+        </div>
+        <div class="mbody" id="mbody">
+          <div class="mp" id="mp1"></div>
+          <div class="mlink">🔗</div>
+          <div class="mp" id="mp2"></div>
+        </div>
+        <div class="mfoot">
+          <span class="mfootl" id="mloc">Both in <strong>New York</strong> · Vision aligned</span>
+          <button class="mulockbtn" onclick="location.href='/match-quiz.html'">Unlock 3 matches — $10 🔓</button>
+        </div>
+      </div>
+      <div class="mdots" id="mdots"></div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker">
+  <div class="ttrack">
+    <span class="titem"><span class="tdot"></span>AI Agency</span><span class="titem"><span class="tdot"></span>Clothing Brand</span><span class="titem"><span class="tdot"></span>Basketball Coaching</span><span class="titem"><span class="tdot"></span>Music Label</span><span class="titem"><span class="tdot"></span>Tech Startup</span><span class="titem"><span class="tdot"></span>Creative Agency</span><span class="titem"><span class="tdot"></span>Food Brand</span><span class="titem"><span class="tdot"></span>E-Commerce</span><span class="titem"><span class="tdot"></span>Content Studio</span><span class="titem"><span class="tdot"></span>Real Estate</span><span class="titem"><span class="tdot"></span>Sports Academy</span><span class="titem"><span class="tdot"></span>SaaS Product</span>
+    <span class="titem"><span class="tdot"></span>AI Agency</span><span class="titem"><span class="tdot"></span>Clothing Brand</span><span class="titem"><span class="tdot"></span>Basketball Coaching</span><span class="titem"><span class="tdot"></span>Music Label</span><span class="titem"><span class="tdot"></span>Tech Startup</span><span class="titem"><span class="tdot"></span>Creative Agency</span><span class="titem"><span class="tdot"></span>Food Brand</span><span class="titem"><span class="tdot"></span>E-Commerce</span><span class="titem"><span class="tdot"></span>Content Studio</span><span class="titem"><span class="tdot"></span>Real Estate</span><span class="titem"><span class="tdot"></span>Sports Academy</span><span class="titem"><span class="tdot"></span>SaaS Product</span>
+  </div>
+</div>
+
+
+<!-- PATHS -->
+<section class="paths-sec" id="paths">
+  <div class="paths-in">
+    <div class="paths-head">
+      <div class="eyebrow rev" style="text-align:center">Start here</div>
+      <div class="sec-t rev d1">What are you looking for?</div>
+      <div class="paths-meta rev d2"><span>3 minutes</span><div class="pmdot"></div><span>13 questions</span><div class="pmdot"></div><span>Always free</span></div>
+    </div>
+    <div class="paths-grid">
+      <a href="/match-quiz.html" class="path-card rev d1" style="--pc:#FF2B2B;--pcbg:rgba(255,43,43,.1)">
+        <div class="path-ico">🤝</div>
+        <div class="path-b"><div class="path-n">A co-founder to build with</div><div class="path-s">Someone to start with from day one — equal footing.</div></div>
+        <span class="path-arr">→</span>
+      </a>
+      <a href="/match-quiz.html" class="path-card rev d2" style="--pc:#3B82F6;--pcbg:rgba(59,130,246,.1)">
+        <div class="path-ico">🧩</div>
+        <div class="path-b"><div class="path-n">A skill I don't have</div><div class="path-s">Tech, design, sales — the piece you're missing.</div></div>
+        <span class="path-arr">→</span>
+      </a>
+      <a href="/match-quiz.html" class="path-card rev d3" style="--pc:#8B5CF6;--pcbg:rgba(139,92,246,.1)">
+        <div class="path-ico">⚙️</div>
+        <div class="path-b"><div class="path-n">An operator to run it</div><div class="path-s">Someone to run things while you focus on the vision.</div></div>
+        <span class="path-arr">→</span>
+      </a>
+      <a href="/match-quiz.html" class="path-card rev d4" style="--pc:#34A853;--pcbg:rgba(52,168,83,.1)">
+        <div class="path-ico">⚡</div>
+        <div class="path-b"><div class="path-n">Something to join</div><div class="path-s">You've got the skills. Find the right vision to back.</div></div>
+        <span class="path-arr">→</span>
+      </a>
+      <a href="/match-quiz.html" class="path-card rev d5" style="--pc:#EAB308;--pcbg:rgba(234,179,8,.12)">
+        <div class="path-ico">🔥</div>
+        <div class="path-b"><div class="path-n">My kind of people</div><div class="path-s">Ambitious peers with the same energy and drive.</div></div>
+        <span class="path-arr">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- VS -->
+<section class="vs-sec">
+  <div class="vs-in">
+    <div class="eyebrow rev">The real reason people quit</div>
+    <div class="sec-t rev d1">The idea isn't the problem.<br>Building alone is.</div>
+    <div class="vs-grid">
+      <div class="vs-col alone rev d1">
+        <div class="vs-tag a">Going solo</div>
+        <div class="vs-li"><span class="vs-x">✕</span>You overthink every decision because there's nobody to challenge you.</div>
+        <div class="vs-li"><span class="vs-x">✕</span>The skill you're missing becomes the reason the project stops.</div>
+        <div class="vs-li"><span class="vs-x">✕</span>You lose momentum because nobody is building beside you.</div>
+        <div class="vs-li"><span class="vs-x">✕</span>You keep explaining the vision to people who don't get it.</div>
+          <div class="vs-li"><span class="vs-x">✕</span>Eventually, the idea doesn't die — you just stop pushing it.</div>
+      </div>
+      <div class="vs-col youbet rev d2">
+        <div class="vs-tag y">With the right person</div>
+        <div class="vs-li"><span class="vs-c">✓</span>Someone fills the gap you can't fill alone.</div>
+        <div class="vs-li"><span class="vs-c">✓</span>Decisions get clearer because another serious person is thinking with you.</div>
+        <div class="vs-li"><span class="vs-c">✓</span>The project moves faster because the pressure is shared.</div>
+        <div class="vs-li"><span class="vs-c">✓</span>You stop selling the dream to random people — and start building with someone who gets it.</div>
+          <div class="vs-li"><span class="vs-c">✓</span>The idea has a better chance because it's no longer only on you.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STEPS -->
+<section class="steps-sec">
+  <div class="steps-in">
+    <div class="steps-head">
+      <div class="eyebrow rev">How it works</div>
+      <div class="sec-t rev d1" style="color:#fff">Three steps to your person.</div>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card rev d1">
+        <div class="step-num">1</div>
+        <div class="step-ico">📝</div>
+        <div class="step-t">Take the quiz</div>
+        <div class="step-s">Tell us what you're building and the gap that's slowing you down. 13 quick questions, 3 minutes, always free.</div>
+      </div>
+      <div class="step-card rev d2">
+        <div class="step-num">2</div>
+        <div class="step-ico">🎯</div>
+        <div class="step-t">We find your match</div>
+        <div class="step-s">We pair you with someone whose strengths are your gaps — matched on skills, ambition, commitment, and location.</div>
+      </div>
+      <div class="step-card rev d3">
+        <div class="step-num">3</div>
+        <div class="step-ico">🚀</div>
+        <div class="step-t">Connect and build</div>
+        <div class="step-s">Unlock their profile for $10, reach out directly, and start building. Not the right fit? We keep searching — free.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECT PREVIEWS -->
+<section class="proj-sec">
+  <div class="proj-in">
+    <div class="proj-head">
+      <div class="proj-head-l">
+        <div class="eyebrow rev">Live on the board</div>
+        <div class="sec-t rev d1">Real projects, real people.</div>
+      </div>
+      <a href="/project-board.html" class="proj-see rev d2">See all projects →</a>
+    </div>
+    <div class="proj-grid">
+      <a href="/project-board.html" class="pcard rev d1">
+        <div class="pc-cov" style="background:linear-gradient(135deg,#3B82F6,#818cf8)"><div class="pc-cwm">💻</div><div class="pc-cav">💻</div><div class="pc-cnm">youbet</div></div>
+        <div class="pc-bd">
+          <div class="pc-row"><span class="sbadge sb-users">👥 Has users</span><span class="dbadge">🤝 Equity</span></div>
+          <div class="pc-lf-lbl">Looking for</div>
+          <div class="pc-lf-v">Content creator who can grow TikTok from 0</div>
+          <div class="pc-meta">📍 Remote · ⚡ Replies fast</div>
+        </div>
+      </a>
+      <a href="/project-board.html" class="pcard rev d2">
+        <div class="pc-cov" style="background:linear-gradient(135deg,#C41616,#FF2B2B)"><div class="pc-cwm">👕</div><div class="pc-cav">👕</div><div class="pc-cnm">OFFGRID</div></div>
+        <div class="pc-bd">
+          <div class="pc-row"><span class="sbadge sb-building">🛠️ Building</span><span class="dbadge">📊 Rev share</span></div>
+          <div class="pc-lf-lbl">Looking for</div>
+          <div class="pc-lf-v">Sales person who can open retail accounts</div>
+          <div class="pc-meta">📍 New York · ⚡ Replies fast</div>
+        </div>
+      </a>
+      <a href="/project-board.html" class="pcard rev d3">
+        <div class="pc-cov" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)"><div class="pc-cwm">🤖</div><div class="pc-cav">🤖</div><div class="pc-cnm">Cypher AI</div></div>
+        <div class="pc-bd">
+          <div class="pc-row"><span class="sbadge sb-revenue">💰 Making money</span><span class="dbadge">🚀 Co-founder</span></div>
+          <div class="pc-lf-lbl">Looking for</div>
+          <div class="pc-lf-v">Builder who can ship AI automations fast</div>
+          <div class="pc-meta">📍 Los Angeles · ⚡ Replies fast</div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="feat-sec">
+  <div class="feat-in">
+    <div class="eyebrow rev" style="color:var(--rd2)">Why it works</div>
+    <h2 class="feat-h rev d1">A real partner — not a job board.</h2>
+    <p class="feat-sub rev d1">Most people fail building alone. youbet finds the person who fills your gaps, shares your drive, and actually wants to build with you.</p>
+    <div class="feat-grid rev d2">
+      <div class="feat-card"><div class="feat-ico">🎯</div><div class="feat-t">Matched on your gaps</div><div class="feat-s">We pair builders with doers — your missing skill is their strength, and the other way around.</div></div>
+      <div class="feat-card"><div class="feat-ico">🔒</div><div class="feat-t">Free until it's real</div><div class="feat-s">Browsing and matching cost nothing. You only pay $10 to unlock contact once you see someone worth reaching out to.</div></div>
+      <div class="feat-card"><div class="feat-ico">📋</div><div class="feat-t">A live project board</div><div class="feat-s">Post what you're building, or browse real projects looking for your exact skill. Apply in one tap.</div></div>
+      <div class="feat-card"><div class="feat-ico">🤝</div><div class="feat-t">Built for partners</div><div class="feat-s">Not freelancers or hires — equals. People matched on energy, commitment level, and where they want to go.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testi-sec">
+  <div class="testi-in">
+    <div class="testi-head">
+      <div class="eyebrow rev" style="color:var(--rd2)">What people say</div>
+      <div class="sec-t rev d1">Built with someone they met here.</div>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card rev d1">
+        <div class="testi-q">"I had the product but couldn't sell to save my life. Matched with a closer in my city — we did <span class="red">$14k in our first month</span> together."</div>
+        <div class="testi-who"><div class="testi-av" style="background:linear-gradient(135deg,#FF4D4D,#FF2B2B)">M</div><div><div class="testi-nm">Marcus T.</div><div class="testi-rl">Streetwear founder · New York</div></div></div>
+      </div>
+      <div class="testi-card rev d2">
+        <div class="testi-q">"Everyone around me thought I was crazy for building. youbet found someone who <span class="red">matched my energy exactly</span> — now we talk every single day."</div>
+        <div class="testi-who"><div class="testi-av" style="background:linear-gradient(135deg,#3B82F6,#818cf8)">D</div><div><div class="testi-nm">Diego R.</div><div class="testi-rl">AI agency · Los Angeles</div></div></div>
+      </div>
+    </div>
+    <div class="founder-q rev d3">
+      <div class="fq-big">"Met this guy through Discord, same interests — now we're doing business together. <span class="red">That's what youbet is built for.</span>"</div>
+      <div class="fq-who">
+        <div class="fq-avs">
+          <div class="fq-av" style="background:linear-gradient(135deg,#FF5A5A,#FF2B2B)">Y</div>
+          <div class="fq-av" style="background:linear-gradient(135deg,#6B8CFF,#4F6EF5);margin-left:-10px">L</div>
+        </div>
+        <div style="text-align:left"><div class="testi-nm">Yuen &amp; Lucia</div><div class="testi-rl">Founders of youbet</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="price-sec" id="pricing">
+  <div class="price-in">
+    <div class="eyebrow rev" style="color:var(--rd2)">Pricing</div>
+    <div class="sec-t rev d1">No match, no charge.</div>
+    <p class="rev d2" style="font-size:15px;color:var(--tx2);margin-top:8px;line-height:1.7;font-weight:450">Free until we find them. $10 unlocks 3 matches. Or go unlimited for $17.99/month.</p>
+    <div class="price-cards rev d3">
+      <div class="pc2 hot">
+        <div class="pc-tag">🔥 Most popular</div>
+        <div class="pc-amt"><sup>$</sup>10</div>
+        <div class="pc-per">3 match unlocks · use one at a time</div>
+        <hr class="pc-div">
+        <ul class="pc-feats">
+          <li>Matched by vision + skill gaps</li>
+          <li>Your city or remote — you choose</li>
+          <li>3 credits · a credit unlocks the person you pick</li>
+          <li>Free, unlimited rematches until one clicks</li>
+          <li>No subscription ever</li>
+        </ul>
+        <button class="pc-btn" onclick="location.href='https://buy.stripe.com/bJefZhgCSdhnbcJ6fo5kk05'">Get Started — $10 →</button>
+        <p class="pc-note">Free until we find your match.</p>
+      </div>
+      <div class="pc2">
+        <div class="pc-tag">⚡ Go unlimited</div>
+        <div class="pc-amt"><sup>$</sup>17<span style="font-size:26px;font-weight:800;letter-spacing:-.02em">.99</span></div>
+        <div class="pc-per">per month · cancel anytime</div>
+        <hr class="pc-div">
+        <ul class="pc-feats">
+          <li>Unlimited match unlocks</li>
+          <li><strong>Founder Access</strong> — connect with any founder who posts</li>
+          <li>Post projects on the board</li>
+          <li>Priority matching queue</li>
+          <li>Access to every applicant</li>
+          <li>Cancel anytime</li>
+        </ul>
+        <button class="pc-btn alt" onclick="location.href='https://buy.stripe.com/5kQaEX72ielr6Wt9rA5kk06'">Get Monthly Access →</button>
+        <p class="pc-note">No commitment. Cancel anytime.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-sec" id="faq">
+  <div class="faq-in">
+    <div class="eyebrow rev" style="color:var(--red)">Got questions</div>
+    <div class="sec-t rev d1" style="color:#fff">Honest answers.</div>
+    <div class="faq-list">
+      <div class="fitem rev" onclick="togFaq(this)"><div class="fq-row"><span class="fqt">How is this different from LinkedIn?</span><span class="fico">+</span></div><div class="fa"><p class="fat">LinkedIn is for careers. youbet is for finding the one person you build something with. We match on gaps, ambition and commitment — not job titles.</p></div></div>
+      <div class="fitem rev d1" onclick="togFaq(this)"><div class="fq-row"><span class="fqt">How long does it take to find a match?</span><span class="fico">+</span></div><div class="fa"><p class="fat">Usually 2–7 days. We don't rush it — a bad match is worse than no match. When we find someone who genuinely fits, we email and DM you immediately.</p></div></div>
+      <div class="fitem rev d2" onclick="togFaq(this)"><div class="fq-row"><span class="fqt">What makes the matching actually work?</span><span class="fico">+</span></div><div class="fa"><p class="fat">We ask what slows you down — your honest gap. That gap is exactly what your match is great at. Skills + gaps + commitment + location. Better signal than skills alone.</p></div></div>
+      <div class="fitem rev d3" onclick="togFaq(this)"><div class="fq-row"><span class="fqt">Why $10 to unlock?</span><span class="fico">+</span></div><div class="fa"><p class="fat">It filters for serious people — someone who won't pay $10 isn't serious about building. Matching and rematching are always free; a credit is only spent when you unlock someone you actually want to contact. Not a fit? We keep searching — free.</p></div></div>
+      <div class="fitem rev d4" onclick="togFaq(this)"><div class="fq-row"><span class="fqt">Is my information private?</span><span class="fico">+</span></div><div class="fa"><p class="fat">Your contact is only shared after both sides unlock. We never sell data. Never share without permission.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL -->
+<section class="final-sec" id="join">
+  <div class="final-in">
+    <div class="final-card rev">
+      <div class="fc-glow"></div>
+      <div class="fc-grid"></div>
+      <div class="fc-t">Your business partner<br>is <span class="red">one match</span><br><span class="dim">away.</span></div>
+      <div class="fc-s">Free to start. $10 only when we find them. Not right? We keep searching — free.</div>
+      <a href="/match-quiz.html" class="btn-final">Find My Match — Free →</a>
+      <div class="final-note">3 minutes · No credit card · Rematch guarantee</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="ft-in">
+    <div class="ft-top">
+      <div>
+        <a href="#" class="logo ft-logo" aria-label="youbet home">
+          <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#FF2B2B"/><circle cx="62" cy="34" r="13" fill="#fff" opacity=".55"/><path d="M40 74c0-12 10-20 22-20s22 8 22 20z" fill="#fff" opacity=".55"/><circle cx="40" cy="40" r="15" fill="#fff"/><path d="M14 82c0-14 12-23 26-23s26 9 26 23z" fill="#fff"/></svg>
+          <span class="wm">you<em>b</em>et</span>
+        </a>
+        <div class="ft-tag">Stop waiting to meet the right people.<br>Build your empire with them.</div>
+      </div>
+      <div class="ft-links">
+        <a href="/match-quiz.html" class="fl">Find My Match</a>
+        <a href="/project-board.html" class="fl">Project Board</a>
+        <a href="mailto:hello@youbet.network" class="fl">hello@youbet.network</a>
+      </div>
+    </div>
+    <div class="ft-bot">
+      <div class="ft-copy">© 2026 youbet.network</div>
+      <div class="ft-tick"><div class="ft-tdot"></div><span id="tickTxt">Someone just joined</span></div>
+    </div>
+  </div>
+</footer>
+
+<div class="mob-sticky"><a href="/match-quiz.html">Find My Match — Free →</a></div>
+
+<script>
+var dark=false;
+function toggleTheme(){dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');document.getElementById('themeBtn').textContent=dark?'☀️':'🌙';}
+
+var matches=[
+  {p1:{av:'🎨',n:'Alex K., 23',s:'Clothing · NYC',tags:['Design ✓','Creative','Brand']},p2:{av:'🤝',n:'Marcus T., 24',s:'Clothing · NYC',tags:['Sales ✓','Growth','Ops']},compat:'94% compatibility',loc:'Both in <strong>New York</strong> · Vision aligned'},
+  {p1:{av:'💻',n:'Dev R., 25',s:'AI Agency · LA',tags:['Code ✓','Backend','AI']},p2:{av:'🎯',n:'Jordan S., 23',s:'AI Agency · LA',tags:['Sales ✓','Clients','Closer']},compat:'91% compatibility',loc:'Both in <strong>Los Angeles</strong> · Vision aligned'},
+  {p1:{av:'🎬',n:'Maya C., 22',s:'Content · Toronto',tags:['Video ✓','Brand','Create']},p2:{av:'📊',n:'Ryan M., 24',s:'Content · Toronto',tags:['Growth ✓','Strategy','Ads']},compat:'96% compatibility',loc:'Both in <strong>Toronto</strong> · Vision aligned'},
+  {p1:{av:'🏀',n:'Ty W., 26',s:'Academy · ATL',tags:['Coach ✓','Training','Youth']},p2:{av:'💼',n:'Sam K., 25',s:'Academy · ATL',tags:['Ops ✓','Business','Finance']},compat:'89% compatibility',loc:'Both in <strong>Atlanta</strong> · Vision aligned'}
+];
+var cur=0;
+var dotsEl=document.getElementById('mdots');
+matches.forEach(function(_,i){var d=document.createElement('div');d.className='mdot'+(i===0?' on':'');dotsEl.appendChild(d);});
+function renderP(el,p){el.innerHTML='<div class="mpav">'+p.av+'</div><div class="mpn">'+p.n+'</div><div class="mps">'+p.s+'</div><div class="mptags">'+p.tags.map(function(t,i){return '<span class="mptag'+(i===0?' hot':'')+'">'+t+'</span>';}).join('')+'</div>';}
+function showMatch(i){var m=matches[i];var body=document.getElementById('mbody');body.classList.add('fade');setTimeout(function(){renderP(document.getElementById('mp1'),m.p1);renderP(document.getElementById('mp2'),m.p2);document.getElementById('mcompat').textContent=m.compat;document.getElementById('mloc').innerHTML=m.loc;document.querySelectorAll('.mdot').forEach(function(d,j){d.classList.toggle('on',j===i);});body.classList.remove('fade');},350);}
+showMatch(0);
+setInterval(function(){cur=(cur+1)%matches.length;showMatch(cur);},3800);
+
+var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)e.target.classList.add('vis');});},{threshold:.08});
+document.querySelectorAll('.rev').forEach(function(el){obs.observe(el);});
+
+
+var ticks=['Someone in Toronto just joined','A match was made in NYC · 2 min ago','New founder from London just signed up','Someone in Dubai just unlocked their match'];
+var ti=0;
+setInterval(function(){ti=(ti+1)%ticks.length;var el=document.getElementById('tickTxt');if(el)el.textContent=ticks[ti];},4000);
+
+function togFaq(item){var was=item.classList.contains('open');document.querySelectorAll('.fitem').forEach(function(i){i.classList.remove('open');});if(!was)item.classList.add('open');}
+</script>
+</body>
+</html>
