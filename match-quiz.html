@@ -312,60 +312,47 @@ body{background:transparent;}
 
 @media(prefers-reduced-motion:reduce){*{animation-duration:.001s!important;animation-iteration-count:1!important}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-// ── Supabase integration ─────────────────────────────────────────────────────
-let _sb;
-try {
-  _sb = window.supabase.createClient(
-    'https://kqbylqtsyplhdfdhplal.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxYnlscXRzeXBsaGRmZGhwbGFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODYyNjcsImV4cCI6MjA5NTc2MjI2N30.MNC5ZZAbsjeXyEpKJAtZ-RAxesBciG2uMgAsFQ7JCDk'
-  );
-} catch(e) { console.warn('[youbet] Supabase init skipped:', e); }
-
+<script>
+// ── Supabase integration via REST fetch (no CDN needed) ──────────────────────
 async function saveToSupabase() {
-  if(!_sb){console.warn('[youbet] Supabase not ready, skipping save');return;}
   try {
     const profile = {
-      name:               d.name || null,
-      email:              d.email || null,
-      instagram:          d.ig   || null,
-      look_type:          d.lookType || null,
-      look_label:         d.lookL    || null,
-      skill:              d.s2val    || d.ans['skill']    || null,
-      skill_label:        d.s2L      || d.ansL['skill']   || null,
-      skill_desc:         (d.s2multi||[]).join(', ')       || null,
-      industry:           d.ans['industry']       || d.s3val || null,
-      industry_label:     d.ansL['industry']      || d.s3L   || null,
-      industry_drill:     d.ans['industry_drill'] || d.s4val || null,
-      industry_drill_label: d.ansL['industry_drill'] || d.s4L || null,
-      project_name:       d.projName || null,
-      project_desc:       d.projDesc || null,
-      commitment:         d.commit   || d.ans['commit']   || null,
-      commitment_label:   d.ansL['commit']  || null,
-      weakness:           d.weakness || d.ans['weakness'] || null,
-      weakness_label:     d.weaknessL|| d.ansL['weakness']|| null,
-      deal:               d.relation || d.ans['deal']     || null,
-      deal_label:         d.relationL|| d.ansL['deal']    || null,
-      location_pref:      d.loc  || null,
-      city:               d.city || null,
-      age_range:          d.age  || null,
-      tribe_type:         d.ans['tribe_type']      || null,
-      tribe_strength:     d.ans['tribe_strength']  || null,
-      business_stage:     d.ans['stage'] || d.ans['business_stage'] || null,
-      partner_needed:     d.ans['partner_needed']  || null,
-      referred_by:        d.refCode || null,
-      ref_code:           (d.ig || (d.name||'').toLowerCase().replace(/\s+/g,'_')) || null,
-      status:             'searching',
+      name:       d.name        || '',
+      email:      d.email       || '',
+      instagram:  d.ig          || '',
+      look_type:  d.lookType    || '',
+      look_label: d.lookL       || '',
+      industry:   d.ansL['industry']   || d.ansL['sector']   || '',
+      project:    d.ansL['project']    || d.ansL['idea']     || '',
+      skill:      d.ansL['skill']      || d.ansL['strength'] || '',
+      weakness:   d.ansL['weakness']   || d.ansL['gap']      || '',
+      commitment: d.ansL['commitment'] || '',
+      location:   d.locL  || '',
+      city:       d.city  || '',
+      age:        d.age   || '',
+      referral:   d.refCode || '',
+      updated_at: new Date().toISOString()
     };
-    const { error } = await _sb.from('profiles').upsert([profile], { onConflict: 'email' });
-    if (error) console.warn('[youbet] Profile save error:', error.message);
-    else       console.log('[youbet] Profile saved ✓');
+    const res = await fetch('https://kqbylqtsyplhdfdhplal.supabase.co/rest/v1/profiles', {
+      method: 'POST',
+      headers: {
+        'apikey':        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxYnlscXRzeXBsaGRmZGhwbGFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODYyNjcsImV4cCI6MjA5NTc2MjI2N30.MNC5ZZAbsjeXyEpKJAtZ-RAxesBciG2uMgAsFQ7JCDk',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxYnlscXRzeXBsaGRmZGhwbGFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODYyNjcsImV4cCI6MjA5NTc2MjI2N30.MNC5ZZAbsjeXyEpKJAtZ-RAxesBciG2uMgAsFQ7JCDk',
+        'Content-Type':  'application/json',
+        'Prefer':        'resolution=merge-duplicates,return=minimal'
+      },
+      body: JSON.stringify(profile)
+    });
+    if (res.ok) {
+      console.log('[youbet] Profile saved to Supabase');
+    } else {
+      const t = await res.text();
+      console.warn('[youbet] Supabase error:', t);
+    }
   } catch(e) {
-    console.warn('[youbet] Supabase error:', e);
+    console.warn('[youbet] Save skipped:', e.message);
   }
 }
-// ─────────────────────────────────────────────────────────────────────────────
-
 </script>
 </head>
 <body>
