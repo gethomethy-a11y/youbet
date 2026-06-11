@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#FFFDFC">
+<title>youbet — Find Your Business Partner</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--red:#FF2B2B;--rl:#FFF1EF;--bg:#FFFDFC;--card:#fff;--bg2:#FFF1EF;--bg3:#FFE3DE;--tx:#0D0D0D;--tx2:#555;--tx3:#999;--br:rgba(0,0,0,.07);--green:#34A853;--grad:linear-gradient(135deg,#FF2B2B,#FF4D4D);--sh:0 2px 20px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.04);--sh-lg:0 8px 40px rgba(0,0,0,.11),0 2px 8px rgba(0,0,0,.05);--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--head:"Inter Tight",sans-serif;--body:"Inter",sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}
+html{height:100%;}
+body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--tx);overflow-x:hidden;min-height:100%;}
+.hdr{position:sticky;top:0;z-index:100;background:rgba(255,253,252,.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--br);padding:calc(var(--sat) + 12px) 20px 12px;}
+.hdr-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.logo{display:inline-flex;align-items:center;gap:7px;text-decoration:none;}
+.logo svg{width:24px;height:24px;border-radius:7px;box-shadow:0 3px 9px rgba(255,43,43,.26);}
+.logo .wm{font-family:var(--head);font-weight:800;font-size:20px;letter-spacing:-.04em;color:var(--tx);}
+.logo .wm em{color:var(--red);font-style:normal;}
+.step-badge{background:var(--rl);color:var(--red);font-size:11px;font-weight:800;padding:5px 12px;border-radius:100px;}
+.prog{height:4px;background:var(--bg3);border-radius:4px;overflow:hidden;}
+.prog-bar{height:100%;background:var(--grad);border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;}
+.prog-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shim 2s infinite;}
+@keyframes shim{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.pill{margin:10px 20px 0;background:var(--card);border:1px solid var(--br);border-radius:12px;padding:9px 13px;display:flex;align-items:center;gap:8px;min-height:40px;overflow:hidden;box-shadow:var(--sh);}
+.pill-lbl{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--tx3);flex-shrink:0;}
+.pill-tags{display:flex;flex-wrap:nowrap;gap:5px;flex:1;overflow:hidden;}
+.ptag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:100px;color:#fff;white-space:nowrap;flex-shrink:0;animation:pop .22s cubic-bezier(.4,0,.2,1);}
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+.pill-empty{font-size:11px;color:var(--tx3);font-style:italic;}
+.step-wrap{position:relative;}
+.step{display:none;padding:22px 20px 130px;flex-direction:column;min-height:calc(100vh - 120px);}
+.step.active{display:flex;}
+.s-ico{font-size:40px;margin-bottom:12px;display:inline-block;animation:bounce .45s cubic-bezier(.4,0,.2,1);}
+@keyframes bounce{0%{transform:scale(0) rotate(-10deg)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+.s-lbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:6px;opacity:.8;}
+.s-q{font-family:var(--head);font-size:26px;font-weight:800;letter-spacing:-.04em;line-height:1.12;color:var(--tx);margin-bottom:6px;}
+.s-sub{font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:20px;}
+.s-ctx{display:flex;align-items:center;gap:9px;background:var(--rl);border:1px solid rgba(255,43,43,.1);border-radius:12px;padding:10px 14px;margin-bottom:16px;font-size:13px;font-weight:600;color:var(--red);}
+.opts{display:flex;flex-direction:column;gap:10px;}
+.opt{padding:16px;border-radius:18px;border:2px solid var(--br);background:var(--card);cursor:pointer;display:flex;align-items:center;gap:13px;position:relative;overflow:hidden;-webkit-user-select:none;box-shadow:var(--sh);transition:border-color .18s,transform .15s;}
+.opt:active{transform:scale(.985);}
+.opt.on{border-color:var(--oc,var(--red));}
+.opt-bg{position:absolute;inset:0;background:var(--oc,var(--rl));opacity:0;transition:opacity .2s;}
+.opt.on .opt-bg{opacity:.09;}
+.opt-ico{font-size:24px;flex-shrink:0;position:relative;z-index:1;}
+.opt-body{flex:1;min-width:0;position:relative;z-index:1;}
+.opt-n{font-size:13px;font-weight:700;color:var(--tx);line-height:1.3;}
+.opt.on .opt-n{color:var(--oc,var(--red));}
+.opt-s{font-size:11px;color:var(--tx3);margin-top:2px;line-height:1.4;}
+.opt-chk{width:22px;height:22px;border-radius:50%;border:2px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:transparent;transition:all .2s;flex-shrink:0;position:relative;z-index:1;}
+.opt.on .opt-chk{background:var(--oc,var(--red));border-color:var(--oc,var(--red));color:#fff;}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px;}
+.cat{padding:13px 11px;border-radius:16px;border:2px solid var(--br);background:var(--card);cursor:pointer;display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden;-webkit-user-select:none;box-shadow:var(--sh);transition:border-color .15s,transform .12s;}
+.cat:active{transform:scale(.96);}
+.cat.on{border-color:var(--cc,var(--red));}
+.cat-bg{position:absolute;inset:0;background:var(--cc,var(--rl));opacity:0;transition:opacity .2s;}
+.cat.on .cat-bg{opacity:.12;}
+.cat.on .cat-n{color:var(--cc,var(--red));}
+.cat-top{display:flex;justify-content:space-between;position:relative;z-index:1;}
+.cat-e{font-size:22px;}
+.cat-chk{width:18px;height:18px;border-radius:50%;background:var(--cc,var(--red));color:#fff;font-size:9px;font-weight:800;display:none;align-items:center;justify-content:center;}
+.cat.on .cat-chk{display:flex;}
+.cat-n{font-size:12px;font-weight:700;color:var(--tx);line-height:1.2;position:relative;z-index:1;}
+.cat-s{font-size:10px;color:var(--tx3);line-height:1.2;position:relative;z-index:1;}
+.no-res{text-align:center;padding:24px 0;font-size:13px;color:var(--tx3);grid-column:1/-1;}
+.search-wrap{position:relative;margin-bottom:10px;}
+.search-wrap span{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;}
+.search-inp{width:100%;background:var(--card);border:2px solid var(--br);border-radius:12px;padding:11px 14px 11px 38px;font-family:'Inter',sans-serif;font-size:14px;color:var(--tx);outline:none;-webkit-appearance:none;box-shadow:var(--sh);transition:border-color .2s;}
+.search-inp:focus{border-color:var(--red);}
+.search-inp::placeholder{color:var(--tx3);}
+.pop-lbl{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:7px;}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:7px 12px;border-radius:100px;border:1.5px solid var(--br);background:var(--card);font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;transition:all .15s;white-space:nowrap;box-shadow:var(--sh);}
+.chip:active{transform:scale(.95);}
+.chip.on{background:var(--red);border-color:var(--red);color:#fff;}
+.sec-lbl{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:8px;}
+.sel-ct{font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px;display:none;}
+.multi-hint{font-size:11px;color:var(--tx3);font-weight:600;margin-bottom:8px;}
+.other-inp{width:100%;background:var(--card);border:2px solid var(--br);border-radius:12px;padding:12px 14px;font-family:'Inter',sans-serif;font-size:14px;color:var(--tx);outline:none;-webkit-appearance:none;box-shadow:var(--sh);transition:border-color .2s;}
+.other-inp:focus{border-color:var(--red);}
+.other-inp::placeholder{color:var(--tx3);}
+.or-div{text-align:center;font-size:11px;font-weight:700;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;margin:10px 0;position:relative;}
+.or-div::before,.or-div::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--br);}
+.or-div::before{left:0;}.or-div::after{right:0;}
+.inp{width:100%;background:var(--card);border:2px solid var(--br);border-radius:14px;padding:14px 16px;font-family:'Inter',sans-serif;font-size:15px;color:var(--tx);outline:none;-webkit-appearance:none;margin-bottom:10px;transition:border-color .2s,box-shadow .2s;box-shadow:var(--sh);}
+.inp:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(255,43,43,.08);}
+.inp::placeholder{color:var(--tx3);}
+.inp.err{border-color:var(--red);animation:shake .3s;}
+.ta{resize:none;line-height:1.65;min-height:110px;}
+.char-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.char-hint{font-size:11px;color:var(--tx3);font-style:italic;}
+.char-ct{font-size:11px;font-weight:700;color:var(--tx3);}
+.divider{border:none;border-top:1px solid var(--br);margin:22px 0;}
+.sub-sub{font-size:13px;color:var(--tx2);line-height:1.55;margin-bottom:12px;}
+.note{background:var(--rl);border:1px solid rgba(255,43,43,.1);border-radius:13px;padding:12px 14px;font-size:12px;color:var(--tx2);display:flex;gap:8px;line-height:1.6;margin-top:6px;}
+.city-row{position:relative;margin-bottom:8px;}
+.city-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;}
+.city-inp{width:100%;background:var(--card);border:2px solid var(--br);border-radius:14px;padding:12px 40px;font-family:'Inter',sans-serif;font-size:15px;color:var(--tx);outline:none;-webkit-appearance:none;box-shadow:var(--sh);transition:border-color .2s;}
+.city-inp:focus{border-color:var(--red);}
+.city-inp::placeholder{color:var(--tx3);}
+.city-clear{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--bg3);border:none;border-radius:50%;width:22px;height:22px;font-size:10px;cursor:pointer;color:var(--tx3);display:none;}
+.city-sugs{background:var(--card);border:1.5px solid var(--br);border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:var(--sh-lg);}
+.city-sug{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:14px;font-weight:500;color:var(--tx);cursor:pointer;border-bottom:1px solid var(--br);}
+.city-sug:last-child{border-bottom:none;}
+.city-sug:active{background:var(--rl);}
+.city-sug-use{background:var(--rl);border:1.5px solid rgba(255,43,43,.15);}
+.city-sug-use:active{background:rgba(255,43,43,.12);}
+.sug-use{margin-left:auto;font-size:11px;font-weight:800;color:var(--red);background:rgba(255,43,43,.08);border-radius:100px;padding:3px 9px;}
+.city-chosen{display:flex;align-items:center;gap:10px;background:var(--rl);border:1.5px solid rgba(255,43,43,.15);border-radius:14px;padding:12px 14px;margin-bottom:10px;}
+.city-chosen-name{font-size:14px;font-weight:700;color:var(--tx);flex:1;}
+.city-change{background:none;border:1px solid rgba(255,43,43,.25);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--red);cursor:pointer;}
+.age-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px;}
+.age-card{padding:14px 8px;border-radius:16px;border:2px solid var(--br);background:var(--card);cursor:pointer;text-align:center;position:relative;overflow:hidden;box-shadow:var(--sh);transition:all .15s;-webkit-user-select:none;}
+.age-card:active{transform:scale(.96);}
+.age-card.on{border-color:var(--red);background:var(--rl);}
+.age-card-e{font-size:22px;margin-bottom:4px;display:block;}
+.age-card-n{font-size:13px;font-weight:800;color:var(--tx);}
+.age-card.on .age-card-n{color:var(--red);}
+.age-card-s{font-size:10px;color:var(--tx3);margin-top:2px;}
+.age-card-chk{position:absolute;top:8px;right:8px;width:16px;height:16px;border-radius:50%;background:var(--red);color:#fff;font-size:8px;font-weight:800;display:none;align-items:center;justify-content:center;}
+.age-card.on .age-card-chk{display:flex;}
+.at-wrap{position:relative;margin-bottom:10px;}
+.at-sym{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:15px;font-weight:700;color:var(--tx3);pointer-events:none;z-index:1;}
+.at-inp{padding-left:30px!important;}
+.field-hint{font-size:11px;color:var(--tx3);margin-top:-6px;margin-bottom:10px;padding-left:2px;}
+.field-label{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px;padding-left:2px;}
+.teaser-section{margin-top:24px;}
+.teaser-lbl{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--red);margin-bottom:12px;opacity:.8;}
+.t-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:lp 2s infinite;flex-shrink:0;}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:.3}}
+.teaser-cards{display:flex;flex-direction:column;gap:9px;}
+.tcard{background:var(--card);border:1.5px solid var(--br);border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;box-shadow:var(--sh);}
+.tcard-av{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.tcard-info{flex:1;}
+.tcard-name{font-size:14px;font-weight:800;color:var(--tx);filter:blur(5px);user-select:none;}
+.tcard-sub{font-size:11px;color:var(--tx3);filter:blur(4px);user-select:none;margin-top:2px;}
+.tcard-pct{font-size:14px;font-weight:900;color:var(--red);flex-shrink:0;}
+.tcard-lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,253,252,.7);backdrop-filter:blur(1px);}
+.tcard-lock span{font-size:12px;font-weight:800;color:var(--tx3);}
+.teaser-note{font-size:12px;color:var(--tx3);text-align:center;margin-top:10px;line-height:1.5;}
+.s10-hero{background:linear-gradient(135deg,#0A0A0A,#1a0505);border-radius:20px;padding:20px;margin-bottom:20px;position:relative;overflow:hidden;}
+.s10-glow{position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(ellipse,rgba(255,43,43,.25) 0%,transparent 65%);pointer-events:none;}
+.s10-preview{display:flex;gap:8px;margin-bottom:14px;position:relative;z-index:1;}
+.s10-card{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px;text-align:center;position:relative;overflow:hidden;}
+.s10-card-blur{font-size:12px;font-weight:800;color:rgba(255,255,255,.3);filter:blur(4px);margin-bottom:3px;}
+.s10-card-pct{font-size:15px;font-weight:900;color:var(--red);}
+.s10-card-lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.s10-cta{position:relative;z-index:1;font-size:13px;font-weight:700;color:rgba(255,255,255,.5);text-align:center;}
+.s10-cta span{color:#fff;}
+.btm{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,253,252,.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--br);padding:12px 20px;padding-bottom:max(12px,calc(var(--sab)+8px));}
+@media(min-width:480px){.btm{left:50%;transform:translateX(-50%);width:480px;}}
+.btn-go{width:100%;background:var(--grad);color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:16px;padding:16px;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 22px rgba(255,43,43,.28);-webkit-appearance:none;transition:transform .15s,box-shadow .15s;letter-spacing:-.2px;position:relative;overflow:hidden;}
+.btn-go:active{transform:scale(.98);}
+.btn-go::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:translateX(-100%);}
+.btn-go.pulse::after{animation:btnShim .5s ease forwards;}
+@keyframes btnShim{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.btn-back{background:none;border:none;font-family:'Inter',sans-serif;font-size:13px;color:var(--tx3);cursor:pointer;margin-top:8px;width:100%;text-align:center;padding:4px;}
+.scan-ov{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;transform:translateY(100%);transition:transform .4s cubic-bezier(.4,0,.2,1);}
+.scan-ov.open{transform:translateY(0);}
+.scan-ring{position:relative;width:110px;height:110px;margin-bottom:24px;}
+.scan-mid{position:absolute;inset:16px;border-radius:50%;background:var(--rl);display:flex;align-items:center;justify-content:center;font-size:36px;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.scan-r1{position:absolute;inset:7px;border-radius:50%;border:2px solid rgba(255,43,43,.2);animation:ring 2s ease-in-out infinite;}
+.scan-r2{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,43,43,.1);animation:ring 2s ease-in-out infinite .35s;}
+@keyframes ring{0%{transform:scale(.8);opacity:1}100%{transform:scale(1.25);opacity:0}}
+.scan-title{font-family:var(--head);font-size:22px;font-weight:800;letter-spacing:-.03em;color:var(--tx);margin-bottom:6px;}
+.scan-sub{font-size:13px;color:var(--tx2);margin-bottom:24px;line-height:1.5;}
+.flash-card{width:100%;max-width:280px;height:50px;position:relative;margin-bottom:24px;}
+.fc{position:absolute;inset:0;background:var(--card);border:1px solid var(--br);border-radius:13px;padding:10px 14px;display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .25s;box-shadow:var(--sh);}
+.fc.show{opacity:1;}
+.fc-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.fc-name{font-size:13px;font-weight:700;color:var(--tx);}
+.fc-loc{font-size:10px;color:var(--tx3);}
+.fc-pct{font-size:13px;font-weight:800;color:var(--red);margin-left:auto;}
+.scan-steps{display:flex;flex-direction:column;gap:10px;width:100%;max-width:260px;text-align:left;}
+.ss{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:600;color:var(--tx3);transition:color .3s;}
+.ss.done{color:var(--tx);}
+.ss-dot{width:22px;height:22px;border-radius:50%;background:var(--bg2);border:1.5px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;transition:all .3s;}
+.ss.done .ss-dot{background:var(--green);border-color:var(--green);color:#fff;}
+.suc-ov{position:fixed;inset:0;z-index:300;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .45s cubic-bezier(.4,0,.2,1);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.suc-ov.open{transform:translateY(0);}
+.suc-hero{background:var(--grad);padding:calc(var(--sat)+48px) 24px 40px;text-align:center;position:relative;overflow:hidden;flex-shrink:0;}
+.suc-glow{position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:340px;height:220px;background:radial-gradient(ellipse,rgba(255,255,255,.18) 0%,transparent 70%);pointer-events:none;}
+.suc-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;}
+.suc-ring{width:88px;height:88px;position:relative;margin-bottom:16px;display:flex;align-items:center;justify-content:center;}
+.suc-ico{font-size:36px;position:relative;z-index:1;animation:pulse 3s ease-in-out infinite;}
+.suc-r1{position:absolute;inset:8px;border-radius:50%;border:2px solid rgba(255,255,255,.3);animation:ring 3s ease-in-out infinite;}
+.suc-r2{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,255,255,.15);animation:ring 3s ease-in-out infinite .4s;}
+.suc-title{font-family:var(--head);font-size:28px;font-weight:800;letter-spacing:-.04em;color:#fff;margin-bottom:8px;}
+.suc-desc{font-size:14px;color:rgba(255,255,255,.8);line-height:1.65;max-width:290px;margin-bottom:16px;}
+.suc-live{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);padding:7px 14px;border-radius:100px;font-size:12px;font-weight:700;color:#fff;}
+.suc-ldot{width:7px;height:7px;background:#fff;border-radius:50%;animation:lp 2s infinite;flex-shrink:0;}
+.suc-body{padding:20px 20px 50px;display:flex;flex-direction:column;gap:14px;}
+.nxt{background:var(--card);border:1px solid var(--br);border-radius:20px;padding:6px 16px;box-shadow:var(--sh-lg);}
+.nxt-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);padding:12px 0 6px;}
+.ns{display:flex;gap:12px;padding:13px 0;}
+.ns:not(:last-child){border-bottom:1px solid var(--br);}
+.ns-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
+.ns-dot.done{background:var(--green);border:2px solid var(--green);color:#fff;}
+.ns-dot.active{background:var(--grad);border:2px solid var(--red);color:#fff;animation:pulse 1.5s ease-in-out infinite;box-shadow:0 0 14px rgba(255,43,43,.3);}
+.ns-dot.idle{background:var(--bg3);border:2px solid var(--br);color:var(--tx3);}
+.ns-r{flex:1;padding-top:3px;}
+.ns-t{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:3px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.ns.act .ns-t{color:var(--red);}
+.ns-s{font-size:12px;color:var(--tx3);line-height:1.5;}
+.badge-g{font-size:10px;font-weight:800;background:rgba(52,168,83,.12);color:var(--green);padding:2px 8px;border-radius:100px;}
+.badge-r{font-size:10px;font-weight:800;background:var(--rl);color:var(--red);padding:2px 8px;border-radius:100px;}
+.prof{background:var(--card);border:1px solid var(--br);border-radius:20px;padding:16px;position:relative;overflow:hidden;box-shadow:var(--sh-lg);}
+.prof::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad);}
+.prof-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.prof-av{width:44px;height:44px;border-radius:12px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.prof-name{font-family:var(--head);font-size:15px;font-weight:800;color:var(--tx);}
+.prof-saved{font-size:11px;font-weight:700;color:var(--green);margin-top:2px;}
+.prof-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.prof-tag{font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;color:#fff;}
+.prof-rows{border-top:1px solid var(--br);padding-top:10px;}
+.prof-row{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--br);font-size:13px;color:var(--tx);line-height:1.4;}
+.prof-row:last-child{border-bottom:none;}
+.ref-compact{background:linear-gradient(135deg,#1a0404,#210808);border:1px solid rgba(255,43,43,.2);border-radius:18px;padding:18px 18px 16px;}
+.ref-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px;}
+.ref-top-left{flex:1;}
+.ref-compact-title{font-family:var(--head);font-size:17px;font-weight:800;letter-spacing:-.02em;color:#fff;margin-bottom:3px;}
+.ref-compact-sub{font-size:12px;color:rgba(255,255,255,.38);line-height:1.55;}
+.ref-dots-inline{display:flex;gap:5px;flex-shrink:0;padding-top:3px;}
+.ref-dots-inline .ref-prog-dot{width:22px;height:6px;border-radius:100px;background:rgba(255,255,255,.12);transition:background .5s;flex:none;}
+.ref-dots-inline .ref-prog-dot.done{background:var(--grad);box-shadow:0 1px 6px rgba(255,43,43,.4);}
+.ref-prog-status-inline{font-size:11px;color:rgba(255,255,255,.35);font-weight:600;margin-bottom:12px;}
+.ref-link-row{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:11px;padding:10px 12px;margin-bottom:10px;}
+.ref-link-val-sm{flex:1;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ref-copy-btn-sm{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 12px;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0;transition:all .2s;white-space:nowrap;}
+.ref-copy-btn-sm.copied{background:rgba(52,168,83,.2);border-color:rgba(52,168,83,.35);color:#34A853;}
+/* keep these used by updateRefProgress */
+.ref-prog-dot{flex:1;height:7px;border-radius:100px;background:rgba(255,255,255,.12);transition:background .5s;}
+.ref-prog-dot.done{background:var(--grad);box-shadow:0 2px 8px rgba(255,43,43,.4);}
+.btn-share{width:100%;background:var(--grad);color:#fff;font-family:'Inter',sans-serif;font-weight:900;font-size:16px;padding:16px;border-radius:14px;border:none;cursor:pointer;box-shadow:0 6px 24px rgba(255,43,43,.35);letter-spacing:-.2px;transition:all .2s;}
+.btn-share:active{transform:scale(.98);}
+.board-prev{background:var(--card);border:1px solid var(--br);border-radius:20px;padding:16px;box-shadow:var(--sh-lg);}
+.bp-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:12px;}
+.bp-card{background:var(--bg);border:1px solid var(--br);border-radius:14px;padding:12px 14px;cursor:pointer;transition:all .15s;margin-bottom:8px;}
+.bp-card:last-of-type{margin-bottom:12px;}
+.bp-card:active{transform:scale(.98);}
+.bp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.bp-name{font-size:14px;font-weight:800;color:var(--tx);}
+.bp-role{font-size:11px;font-weight:700;padding:3px 9px;border-radius:100px;color:#fff;}
+.bp-desc{font-size:12px;color:var(--tx2);line-height:1.5;}
+.btn-board{width:100%;background:#0D0D0D;color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:14px;padding:13px;border-radius:13px;border:none;cursor:pointer;}
+.social{text-align:center;padding-bottom:8px;}
+.social-lbl{font-size:12px;color:var(--tx3);font-weight:600;margin-bottom:10px;}
+.social-row{display:flex;gap:10px;justify-content:center;}
+.soc-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:var(--card);border:1.5px solid var(--br);border-radius:100px;font-size:13px;font-weight:700;color:var(--tx);text-decoration:none;box-shadow:var(--sh);}
+.soc-btn:active{transform:scale(.96);}
+.conf{position:fixed;width:8px;height:8px;border-radius:2px;pointer-events:none;z-index:9999;animation:cffly 1s ease-in forwards;}
+@keyframes cffly{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(420px) rotate(720deg)}}
+@keyframes shake{0%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}100%{transform:translateX(0)}}
+@media(min-width:480px){.step-wrap,.hdr,.pill{max-width:480px;margin-left:auto;margin-right:auto;}}
+
+/* ============ MAX VISUAL ENHANCEMENT LAYER (additive) ============ */
+body{background:transparent;}
+.q-aurora{position:fixed;inset:0;z-index:-1;background:radial-gradient(125% 85% at 50% -8%,#FFFFFF 0%,var(--bg) 46%);overflow:hidden;}
+.q-aurora::before{content:'';position:absolute;width:62vw;height:62vw;max-width:540px;max-height:540px;top:-12%;left:-18%;background:radial-gradient(circle,rgba(255,43,43,.16),transparent 62%);animation:qFloat1 19s ease-in-out infinite;}
+.q-aurora::after{content:'';position:absolute;width:56vw;height:56vw;max-width:500px;max-height:500px;bottom:-14%;right:-16%;background:radial-gradient(circle,rgba(255,107,107,.14),transparent 62%);animation:qFloat2 23s ease-in-out infinite;}
+@keyframes qFloat1{0%,100%{transform:translate(0,0)}50%{transform:translate(42px,32px)}}
+@keyframes qFloat2{0%,100%{transform:translate(0,0)}50%{transform:translate(-38px,-28px)}}
+
+/* cinematic per-step entrance */
+.step.active{animation:qStepIn .5s cubic-bezier(.22,1,.36,1);}
+@keyframes qStepIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* staggered option / card reveal */
+.step.active .opt,.step.active .cat,.step.active .age-card,.step.active .chip{animation:qOptIn .45s cubic-bezier(.22,1,.36,1) both;}
+@keyframes qOptIn{from{opacity:0;transform:translateY(13px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+.step.active .opt:nth-of-type(1){animation-delay:.05s}.step.active .opt:nth-of-type(2){animation-delay:.11s}.step.active .opt:nth-of-type(3){animation-delay:.17s}.step.active .opt:nth-of-type(4){animation-delay:.23s}.step.active .opt:nth-of-type(5){animation-delay:.29s}.step.active .opt:nth-of-type(6){animation-delay:.35s}.step.active .opt:nth-of-type(7){animation-delay:.41s}
+
+/* bolder intro headline + icon */
+.s-ico{font-size:46px;filter:drop-shadow(0 7px 18px rgba(255,43,43,.2));}
+.s-q{font-size:28px;}
+.s-lbl{opacity:1;}
+
+/* richer, more tactile cards */
+.opt{border-radius:20px;transition:border-color .18s,transform .16s,box-shadow .22s;}
+.opt:hover{transform:translateY(-2px);box-shadow:var(--sh-lg);}
+.opt.on{box-shadow:0 10px 30px rgba(255,43,43,.16),0 0 0 1px var(--oc,var(--red));}
+.opt-ico{transition:transform .2s;}
+.opt.on .opt-ico{transform:scale(1.14) rotate(-3deg);}
+.cat{transition:border-color .15s,transform .13s,box-shadow .2s;}
+.cat:hover{transform:translateY(-2px);box-shadow:var(--sh-lg);}
+.age-card:hover{transform:translateY(-2px);box-shadow:var(--sh-lg);}
+
+/* glowing progress */
+.prog{height:6px;box-shadow:inset 0 1px 2px rgba(0,0,0,.05);}
+.prog-bar{box-shadow:0 0 12px rgba(255,43,43,.5);}
+.step-badge{box-shadow:0 2px 10px rgba(255,43,43,.14);}
+.pill{border-radius:14px;}
+
+/* live, flowing primary CTA */
+.btn-go{background:linear-gradient(115deg,#FF2B2B,#FF4D4D,#FF6B6B,#FF4D4D,#FF2B2B);background-size:220% 100%;animation:qBtnFlow 7s ease infinite;font-size:16.5px;padding:17px;box-shadow:0 6px 26px rgba(255,43,43,.34),inset 0 1px 0 rgba(255,255,255,.25);}
+@keyframes qBtnFlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.btn-go:hover{box-shadow:0 11px 36px rgba(255,43,43,.46);transform:translateY(-1px);}
+
+/* cinematic scan overlay */
+.scan-ov{background:radial-gradient(125% 85% at 50% 18%,#fff,var(--bg) 56%);}
+.scan-mid{box-shadow:0 0 44px rgba(255,43,43,.34);}
+.scan-ring::before{content:'';position:absolute;inset:-9px;border-radius:50%;border:2px solid rgba(255,43,43,.06);animation:ring 2s ease-in-out infinite .7s;}
+
+/* success hero depth */
+.suc-ring{filter:drop-shadow(0 8px 24px rgba(0,0,0,.18));}
+.suc-ring::before{content:'';position:absolute;inset:-9px;border-radius:50%;border:2px solid rgba(255,255,255,.1);animation:ring 3s ease-in-out infinite .8s;}
+
+/* teaser + board card lift */
+.tcard,.bp-card{transition:transform .2s,box-shadow .2s;}
+.tcard:hover,.bp-card:hover{transform:translateY(-2px);box-shadow:var(--sh-lg);}
+
+@media(prefers-reduced-motion:reduce){*{animation-duration:.001s!important;animation-iteration-count:1!important}}
+</style>
+<script>
+// ── Supabase integration via REST fetch (no CDN needed) ──────────────────────
+
+// Strip any Instagram URL format → bare handle
+function cleanIG(raw) {
+  if (!raw) return '';
+  let h = raw.trim().replace('@','');
+  // e.g. https://www.instagram.com/handle/ or instagram.com/handle
+  const m = h.match(/(?:instagram\.com\/)([\w.]+)/i);
+  if (m) h = m[1];
+  // Remove trailing slash or query string
+  h = h.split('/')[0].split('?')[0].trim();
+  return h;
+}
+
+async function saveToSupabase() {
+  try {
+    const ig = cleanIG(d.ig);
+
+    // ref_code: use cleaned IG handle, fallback to name slug
+    const myRefCode = ig || (d.name||'').toLowerCase().replace(/\s+/g,'_');
+
+    // weakness: pickWeakness sets d.weakness directly — use it first, then ansL fallbacks
+    const weakness = d.weakness
+      || d.ansL['cfWeak'] || d.ansL['needHelp'] || d.ansL['biggestProblem']
+      || d.ansL['specificNeed'] || d.ansL['wantInReturn'] || d.ansL['whyMeet'] || '';
+    const weaknessLabel = d.weaknessL
+      || d.ansML['cfWeak'] || d.ansML['needHelp'] || weakness || '';
+
+    // commitment: pickCommit sets d.commit — use it first, then ansL fallbacks
+    const commitment = d.commit
+      || d.ansL['seriousness'] || d.ansL['stage'] || d.ansL['commitment'] || '';
+    const commitmentLabel = commitment; // same value for now
+
+    // skill
+    const skill = d.ansL['skillType'] || d.ansL['bring'] || d.ansL['youBring']
+      || d.ansL['founderType'] || d.ansL['operatorType'] || d.ansL['cfType']
+      || d.s2val || '';
+    const skillLabel = d.ansML['skillType'] || d.ansML['bring'] || d.ansML['youBring']
+      || skill || '';
+
+    // industry
+    const industry = d.ansL['industry'] || d.ansL['sector'] || d.ansL['subCategory']
+      || d.s3val || '';
+    const industryLabel = d.ansML['industry'] || d.ansML['sector'] || industry || '';
+
+    // industry drill-down
+    const industryDrill = d.ansL['industryDrill'] || d.ansL['drill'] || d.s4val || '';
+    const industryDrillLabel = d.ansML['industryDrill'] || d.ansML['drill'] || industryDrill || '';
+
+    // project
+    const projectName = d.ansTxt['describe_cfProjName'] || d.ansTxt['describe_projNameS']
+      || d.ansTxt['describe_joinDesc1'] || d.ansTxt['describe_mindDesc1']
+      || d.projName || d.ansL['projectType'] || d.ansL['opportunityType'] || '';
+    const projectDesc = d.projDesc || d.ansTxt['describe_projDesc'] || '';
+
+    // city: also try the text field in case user typed but didn't pick from list
+    const cityEl = document.getElementById('cityIn');
+    const city = d.city || (cityEl ? cityEl.value.trim() : '') || '';
+
+    // "What matters most" — the mindset/values step (multi-select)
+    // stored in d.ansML['matters'] as array of selected labels
+    const mattersArr = d.ansML['matters'] || d.mattersL || [];
+    const partnerNeeded = Array.isArray(mattersArr)
+      ? mattersArr.join(', ')
+      : (mattersArr || '');
+
+    // Relationship / deal type (what kind of partnership)
+    const deal = d.ansL['relationship'] || d.relation || d.ansL['deal'] || '';
+    const dealLabel = d.ansML['relationship'] || d.relationL || deal || '';
+
+    // Business stage (for operators / join paths)
+    const businessStage = d.ansL['stage'] || d.ansL['stageToJoin'] || d.s2val || '';
+
+    // Tribe type (for mindset path)
+    const tribeType = d.ansL['peopleType'] || d.ansL['vibe'] || '';
+
+    const profile = {
+      name:                 d.name        || '',
+      email:                d.email       || '',
+      instagram:            ig,
+      look_type:            d.lookType    || '',
+      look_label:           d.lookL       || '',
+      skill,
+      skill_label:          skillLabel,
+      industry,
+      industry_label:       industryLabel,
+      industry_drill:       industryDrill,
+      industry_drill_label: industryDrillLabel,
+      project_name:         projectName,
+      project_desc:         projectDesc,
+      weakness,
+      weakness_label:       weaknessLabel,
+      commitment,
+      commitment_label:     commitmentLabel,
+      location_pref:        d.locL        || '',
+      city,
+      age_range:            d.age         || '',
+      partner_needed:       partnerNeeded,
+      deal,
+      deal_label:           dealLabel,
+      business_stage:       businessStage,
+      tribe_type:           tribeType,
+      ref_code:             myRefCode,
+      referred_by:          d.refCode     || null,
+      status:               'searching'
+    };
+
+    const res = await fetch('https://kqbylqtsyplhdfdhplal.supabase.co/rest/v1/profiles', {
+      method: 'POST',
+      headers: {
+        'apikey':        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxYnlscXRzeXBsaGRmZGhwbGFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODYyNjcsImV4cCI6MjA5NTc2MjI2N30.MNC5ZZAbsjeXyEpKJAtZ-RAxesBciG2uMgAsFQ7JCDk',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxYnlscXRzeXBsaGRmZGhwbGFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODYyNjcsImV4cCI6MjA5NTc2MjI2N30.MNC5ZZAbsjeXyEpKJAtZ-RAxesBciG2uMgAsFQ7JCDk',
+        'Content-Type':  'application/json',
+        'Prefer':        'return=minimal'
+      },
+      body: JSON.stringify(profile)
+    });
+
+    if (res.ok) {
+      console.log('[youbet] Profile saved ✓', profile);
+    } else {
+      const t = await res.text();
+      console.warn('[youbet] Supabase error:', res.status, t);
+    }
+  } catch(e) {
+    console.warn('[youbet] Save skipped:', e.message);
+  }
+}
+</script>
+</head>
+<body>
+<div class="q-aurora" aria-hidden="true"></div>
+<div class="hdr">
+  <div class="hdr-row">
+    <a href="/index.html" class="logo"><svg viewBox="0 0 100 100"><rect width="100" height="100" rx="24" fill="#FF2B2B"/><circle cx="62" cy="34" r="13" fill="#fff" opacity=".55"/><path d="M40 74c0-12 10-20 22-20s22 8 22 20z" fill="#fff" opacity=".55"/><circle cx="40" cy="40" r="15" fill="#fff"/><path d="M14 82c0-14 12-23 26-23s26 9 26 23z" fill="#fff"/></svg><span class="wm">you<em>b</em>et</span></a>
+    <div class="step-badge" id="stepBadge">Step 1 of 11</div>
+  </div>
+  <div class="prog"><div class="prog-bar" id="progBar" style="width:9%"></div></div>
+</div>
+<div class="pill" id="pill">
+  <span class="pill-lbl">You</span>
+  <div class="pill-tags" id="pillTags"><span class="pill-empty">your profile builds here...</span></div>
+</div>
+<div class="step-wrap" id="stepWrap">
+  <div class="step active" id="s1">
+    <span class="s-ico">👋</span>
+    <div class="s-lbl">Step 1 of 11</div>
+    <div class="s-q">What are you looking for?</div>
+    <div class="s-sub">Be honest — this shapes every question that comes after.</div>
+    <div class="opts">
+      <div class="opt" style="--oc:#FF2B2B" onclick="pickLook(this,'cofounder','🤝','A co-founder')"><div class="opt-bg"></div><span class="opt-ico">🤝</span><div class="opt-body"><div class="opt-n">A co-founder</div><div class="opt-s">Someone to build with from day one. Equal footing.</div></div><div class="opt-chk">✓</div></div>
+      <div class="opt" style="--oc:#3B82F6" onclick="pickLook(this,'skill','🧩','A skill I don\'t have')"><div class="opt-bg"></div><span class="opt-ico">🧩</span><div class="opt-body"><div class="opt-n">A skill I don't have</div><div class="opt-s">Tech, design, sales — the piece you're missing.</div></div><div class="opt-chk">✓</div></div>
+      <div class="opt" style="--oc:#8B5CF6" onclick="pickLook(this,'operator','⚙️','An operator')"><div class="opt-bg"></div><span class="opt-ico">⚙️</span><div class="opt-body"><div class="opt-n">An operator</div><div class="opt-s">Someone to run it while you focus on the vision.</div></div><div class="opt-chk">✓</div></div>
+      <div class="opt" style="--oc:#34A853" onclick="pickLook(this,'join','⚡','Something to join')"><div class="opt-bg"></div><span class="opt-ico">⚡</span><div class="opt-body"><div class="opt-n">Something to join</div><div class="opt-s">You've got skills. You want into the right vision.</div></div><div class="opt-chk">✓</div></div>
+      <div class="opt" style="--oc:#EAB308" onclick="pickLook(this,'mindset','🔥','My kind of people')"><div class="opt-bg"></div><span class="opt-ico">🔥</span><div class="opt-body"><div class="opt-n">My kind of people</div><div class="opt-s">Ambitious peers. Same energy, same drive.</div></div><div class="opt-chk">✓</div></div>
+    </div>
+  </div>
+  <div class="step" id="pathView"></div>
+  <div class="step" id="s2"></div>
+  <div class="step" id="s3"></div>
+  <div class="step" id="s4"></div>
+  <div class="step" id="s5">
+    <span class="s-ico" id="s5ico">✍️</span>
+    <div class="s-lbl">Step 5 of 11</div>
+    <div class="s-q" id="s5q">Tell us about your idea.</div>
+    <div class="s-sub" id="s5sub">This is the first thing your match reads — make it real.</div>
+    <input class="inp" type="text" id="projName" placeholder="Project or company name (optional)" autocomplete="off">
+    <textarea class="inp ta" id="projDesc" placeholder="" rows="5" maxlength="200" oninput="countChars(this)"></textarea>
+    <div class="char-row"><span class="char-hint" id="s5hint">Be specific. The right person is out there reading this.</span><span class="char-ct" id="charCt">0 / 200</span></div>
+  </div>
+  <div class="step" id="s6">
+    <span class="s-ico">🔥</span>
+    <div class="s-lbl">Step 6 of 11</div>
+    <div class="s-q">How serious are you right now?</div>
+    <div class="s-sub">We match people at the same level. All-in with all-in. No wasted conversations.</div>
+    <div class="opts">
+      <div class="opt" style="--oc:#FF2B2B" onclick="pickCommit(this,'🔥','All in — this is my main focus')"><div class="opt-bg"></div><span class="opt-ico">🔥</span><div class="opt-body"><div class="opt-n">All in — this is my main focus</div><div class="opt-s">Full speed. Building my life around this right now.</div></div><div class="opt-chk">✓</div></div>
+      <div class="opt" style="--oc:#f97316" onclick="pickCommit(this,'💼','Serious — building on the side for now')"><div class="opt-bg"></div><span class="opt-ico">💼</span><div class="opt-body"><div class="opt-n">Serious — building on the side for now</div><div class="opt-s">Still have a job or school. Ready to go all in once it moves.</div></div><div class="opt-chk">✓</div></div>
+      <div class="opt" style="--oc:#3B82F6" onclick="pickCommit(this,'🌱','Exploring — still figuring things out')"><div class="opt-bg"></div><span class="opt-ico">🌱</span><div class="opt-body"><div class="opt-n">Exploring — still figuring things out</div><div class="opt-s">Not fully committed yet. Looking to connect and see what clicks.</div></div><div class="opt-chk">✓</div></div>
+    </div>
+    <div class="teaser-section" id="teasers" style="display:none">
+      <div class="teaser-lbl"><div class="t-dot"></div>Already finding people for you</div>
+      <div class="teaser-cards">
+        <div class="tcard"><div class="tcard-av" style="background:linear-gradient(135deg,#FF2B2B,#FF4D4D)">👕</div><div class="tcard-info"><div class="tcard-name">Alex K., 23 — New York</div><div class="tcard-sub">Clothing & Fashion · Streetwear</div></div><div class="tcard-pct">94%</div><div class="tcard-lock"><span>🔒 Finish to unlock</span></div></div>
+        <div class="tcard"><div class="tcard-av" style="background:linear-gradient(135deg,#8B5CF6,#a78bfa)">🎵</div><div class="tcard-info"><div class="tcard-name">Marcus T., 24 — Toronto</div><div class="tcard-sub">Music & Arts · Independent label</div></div><div class="tcard-pct">91%</div><div class="tcard-lock"><span>🔒 Finish to unlock</span></div></div>
+        <div class="tcard"><div class="tcard-av" style="background:linear-gradient(135deg,#3B82F6,#818cf8)">💻</div><div class="tcard-info"><div class="tcard-name">Sofia L., 22 — London</div><div class="tcard-sub">Tech & AI · SaaS product</div></div><div class="tcard-pct">88%</div><div class="tcard-lock"><span>🔒 Finish to unlock</span></div></div>
+      </div>
+      <div class="teaser-note">Complete your profile to see who they are.</div>
+    </div>
+  </div>
+  <div class="step" id="s7">
+    <span class="s-ico" id="s7ico">🪞</span>
+    <div class="s-lbl">Step 7 of 11</div>
+    <div class="s-q" id="s7q">What kind of co-founder do you need?</div>
+    <div class="s-sub" id="s7sub">This is the most important question. Be specific — the right type changes everything.</div>
+    <div class="opts" id="s7opts"></div>
+  </div>
+  <div class="step" id="s8">
+    <span class="s-ico">🤝</span>
+    <div class="s-lbl">Step 8 of 11</div>
+    <div class="s-q">What kind of relationship do you want?</div>
+    <div class="s-sub">This separates real co-founders from casual partners.</div>
+    <div class="opts" id="s8opts"></div>
+  </div>
+  <div class="step" id="s11"></div>
+  <div class="step" id="s9">
+    <span class="s-ico">📍</span>
+    <div class="s-lbl">Step 10 of 11</div>
+    <div class="s-q">Where in the world are you?</div>
+    <div class="s-sub">Some of the best partnerships are remote. Some want to meet in person. You decide.</div>
+    <div class="city-row"><span class="city-ico">🌍</span><input class="city-inp" type="text" id="cityIn" placeholder="Search your city..." oninput="onCityInput(this.value)" autocomplete="off"><button class="city-clear" id="cityClear" onclick="clearCity()">✕</button></div>
+    <div class="city-sugs" id="citySugs" style="display:none"></div>
+    <div class="city-chosen" id="cityChosen" style="display:none"><span style="font-size:18px;">📍</span><span class="city-chosen-name" id="cityChosenName"></span><button class="city-change" onclick="clearCity()">Change</button></div>
+    <div class="pop-lbl" style="margin-top:12px;">🔥 Popular cities</div>
+    <div class="chips">
+      <div class="chip" onclick="pickCity('New York')">🗽 New York</div>
+      <div class="chip" onclick="pickCity('London')">🎡 London</div>
+      <div class="chip" onclick="pickCity('Berlin')">🇩🇪 Berlin</div>
+      <div class="chip" onclick="pickCity('Munich')">🇩🇪 Munich</div>
+      <div class="chip" onclick="pickCity('Hamburg')">🇩🇪 Hamburg</div>
+      <div class="chip" onclick="pickCity('Cologne')">🇩🇪 Cologne</div>
+      <div class="chip" onclick="pickCity('Frankfurt')">🇩🇪 Frankfurt</div>
+      <div class="chip" onclick="pickCity('Vienna')">🇦🇹 Vienna</div>
+      <div class="chip" onclick="pickCity('Zurich')">🇨🇭 Zurich</div>
+      <div class="chip" onclick="pickCity('Amsterdam')">🇳🇱 Amsterdam</div>
+      <div class="chip" onclick="pickCity('Paris')">🇫🇷 Paris</div>
+      <div class="chip" onclick="pickCity('Toronto')">🍁 Toronto</div>
+      <div class="chip" onclick="pickCity('Vancouver')">🍁 Vancouver</div>
+      <div class="chip" onclick="pickCity('Los Angeles')">🌴 LA</div>
+      <div class="chip" onclick="pickCity('Dubai')">🌆 Dubai</div>
+      <div class="chip" onclick="pickCity('Singapore')">🇸🇬 Singapore</div>
+      <div class="chip" onclick="pickCity('São Paulo')">🇧🇷 São Paulo</div>
+      <div class="chip" onclick="pickCity('Lagos')">🌍 Lagos</div>
+      <div class="chip" onclick="pickCity('Remote')">🌍 Remote</div>
+    </div>
+    <div class="opts">
+      <div class="opt" style="--oc:#FF2B2B" onclick="pickLoc(this,'🏙️','Same city only')"><div class="opt-bg"></div><span class="opt-ico">🏙️</span><div class="opt-body"><div class="opt-n">Same city only</div><div class="opt-s">I want to meet in person. Face to face builds faster.</div></div><div class="opt-chk">✓</div></div>
+      <div class="opt" style="--oc:#f97316" onclick="pickLoc(this,'🗺️','Same country is fine')"><div class="opt-bg"></div><span class="opt-ico">🗺️</span><div class="opt-body"><div class="opt-n">Same country is fine</div><div class="opt-s">Close enough to meet when it matters.</div></div><div class="opt-chk">✓</div></div>
+      <div class="opt" style="--oc:#34A853" onclick="pickLoc(this,'🌍','Anywhere in the world')"><div class="opt-bg"></div><span class="opt-ico">🌍</span><div class="opt-body"><div class="opt-n">Anywhere in the world</div><div class="opt-s">The right person matters more than where they live.</div></div><div class="opt-chk">✓</div></div>
+    </div>
+  </div>
+  <div class="step" id="s10">
+    <span class="s-ico">🎯</span>
+    <div class="s-lbl">Step 11 of 11</div>
+    <div class="s-q">Last thing. Then we find your person.</div>
+    <div class="s-sub">We need two things — your name and Instagram. That's how we reach you the moment we find your match.</div>
+    <div class="s10-hero"><div class="s10-glow"></div><div class="s10-preview"><div class="s10-card"><div class="s10-card-blur">Alex K.</div><div class="s10-card-pct">94%</div><div class="s10-card-lock">🔒</div></div><div class="s10-card"><div class="s10-card-blur">Marcus T.</div><div class="s10-card-pct">91%</div><div class="s10-card-lock">🔒</div></div><div class="s10-card"><div class="s10-card-blur">Sofia L.</div><div class="s10-card-pct">88%</div><div class="s10-card-lock">🔒</div></div></div><div class="s10-cta">One more step and we <span>start searching.</span></div></div>
+    <div class="field-label">Your first name</div>
+    <input class="inp" type="text" id="nameIn" placeholder="First name" autocomplete="given-name">
+    <div class="field-label">Instagram handle</div>
+    <div class="at-wrap"><span class="at-sym">@</span><input class="inp at-inp" type="text" id="igIn" placeholder="your_instagram" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+    <div class="field-hint">We DM you the moment we find your match.</div>
+    <div class="field-label">Email address</div>
+    <input class="inp" type="email" id="emailIn" placeholder="your@email.com" autocomplete="email" inputmode="email" style="margin-bottom:6px;">
+    <div class="field-hint" style="margin-bottom:16px;">We only email you when we find someone.</div>
+    <div class="field-label">How old are you?</div>
+    <div class="sub-sub">Helps us match people at the same stage of life.</div>
+    <div class="age-grid">
+      <div class="age-card" onclick="pickAge(this,'Under 20')"><span class="age-card-e">🌱</span><div class="age-card-n">Under 20</div><div class="age-card-s">Just starting</div><div class="age-card-chk">✓</div></div>
+      <div class="age-card" onclick="pickAge(this,'20–24')"><span class="age-card-e">⚡</span><div class="age-card-n">20–24</div><div class="age-card-s">Building fast</div><div class="age-card-chk">✓</div></div>
+      <div class="age-card" onclick="pickAge(this,'25–29')"><span class="age-card-e">🚀</span><div class="age-card-n">25–29</div><div class="age-card-s">Prime time</div><div class="age-card-chk">✓</div></div>
+      <div class="age-card" onclick="pickAge(this,'30–35')"><span class="age-card-e">💼</span><div class="age-card-n">30–35</div><div class="age-card-s">Experienced</div><div class="age-card-chk">✓</div></div>
+      <div class="age-card" onclick="pickAge(this,'35+')"><span class="age-card-e">🏆</span><div class="age-card-n">35+</div><div class="age-card-s">Battle-tested</div><div class="age-card-chk">✓</div></div>
+    </div>
+    <div class="note" style="margin-top:12px;"><span>🔒</span><span>Your contact is only shared with your match. Never sold. Never public.</span></div>
+  </div>
+</div>
+<div class="btm" id="btmBar">
+  <button class="btn-go" id="goBtn" onclick="next()">Continue →</button>
+  <button class="btn-back" id="backBtn" style="display:none" onclick="prev()">← Back</button>
+</div>
+<div class="scan-ov" id="scanOv">
+  <div class="scan-ring"><div class="scan-mid">🔍</div><div class="scan-r1"></div><div class="scan-r2"></div></div>
+  <div class="scan-title">Finding your match...</div>
+  <div class="scan-sub">Scanning every profile for the right person.</div>
+  <div class="flash-card">
+    <div class="fc" id="fc0"><div class="fc-av" style="background:#FFF1EF">🎨</div><div><div class="fc-name">Alex K., 23</div><div class="fc-loc">New York · Designer</div></div><div class="fc-pct">94%</div></div>
+    <div class="fc" id="fc1"><div class="fc-av" style="background:#EFF6FF">💻</div><div><div class="fc-name">Dev R., 25</div><div class="fc-loc">LA · Developer</div></div><div class="fc-pct">88%</div></div>
+    <div class="fc" id="fc2"><div class="fc-av" style="background:#F0FFF4">🤝</div><div><div class="fc-name">Marcus T., 24</div><div class="fc-loc">NYC · Sales</div></div><div class="fc-pct">91%</div></div>
+    <div class="fc" id="fc3"><div class="fc-av" style="background:#FFF7ED">📊</div><div><div class="fc-name">Sofia L., 22</div><div class="fc-loc">Toronto · Marketing</div></div><div class="fc-pct">89%</div></div>
+    <div class="fc" id="fc4"><div class="fc-av" style="background:#FDF4FF">🌐</div><div><div class="fc-name">Iman B., 24</div><div class="fc-loc">London · Strategy</div></div><div class="fc-pct">96%</div></div>
+  </div>
+  <div class="scan-steps">
+    <div class="ss" id="ss1"><div class="ss-dot">1</div>Reading your intent</div>
+    <div class="ss" id="ss2"><div class="ss-dot">2</div>Scanning profiles near you</div>
+    <div class="ss" id="ss3"><div class="ss-dot">3</div>Checking skill alignment</div>
+    <div class="ss" id="ss4"><div class="ss-dot">4</div><span id="ss4txt">Matching commitment levels</span></div>
+  </div>
+</div>
+<div class="suc-ov" id="sucOv">
+  <div class="suc-hero"><div class="suc-glow"></div><div class="suc-inner"><div class="suc-ring"><div class="suc-ico">🔍</div><div class="suc-r1"></div><div class="suc-r2"></div></div><div class="suc-title">You're in the queue.</div><div class="suc-desc" id="sucDesc">Searching for your match now. Zero cost until we find them.</div><div class="suc-live"><div class="suc-ldot"></div><span id="sucCnt">7,603</span>&nbsp;people searching with you</div></div></div>
+  <div class="suc-body">
+    <div class="nxt"><div class="nxt-lbl">What happens next</div><div class="ns"><div class="ns-dot done">✓</div><div class="ns-r"><div class="ns-t">Profile created <span class="badge-g">Done</span></div><div class="ns-s">Your answers are saved and active.</div></div></div><div style="background:#FFF1EF;border:1px solid rgba(255,43,43,.14);border-radius:12px;padding:12px 14px;margin:4px 0 8px;display:flex;align-items:flex-start;gap:10px"><span style="font-size:18px;flex-shrink:0">📬</span><div><div style="font-size:13px;font-weight:700;color:#0B0B0F;margin-bottom:3px">Check your spam folder</div><div style="font-size:12px;color:#6B6B72;line-height:1.55">We just sent you a confirmation email. If it lands in spam, mark it as <b style="color:#0B0B0F">"Not spam"</b> — so you don't miss your match notification.</div></div></div><div class="ns act"><div class="ns-dot active">⟳</div><div class="ns-r"><div class="ns-t">We search for your match <span class="badge-g">2–7 days</span></div><div class="ns-s">We email + DM you the moment we find someone who fits.</div></div></div><div class="ns"><div class="ns-dot idle">3</div><div class="ns-r"><div class="ns-t" id="ns3t">You see their profile</div><div class="ns-s" id="ns3s">Skill, idea, city. You decide if you're interested.</div></div></div><div class="ns"><div class="ns-dot idle">4</div><div class="ns-r"><div class="ns-t">Unlock for $10 <span class="badge-r">Only then</span></div><div class="ns-s" id="ns4s">Get their contact. Reach out. Build something real.</div></div></div></div>
+    <div class="prof"><div class="prof-top"><div class="prof-av">👤</div><div><div class="prof-name" id="profName">Your Profile</div><div class="prof-saved">✓ Saved and active</div></div></div><div class="prof-tags" id="profTags"></div><div class="prof-rows" id="profRows"></div></div>
+    <div class="ref-compact">
+      <div class="ref-top">
+        <div class="ref-top-left">
+          <div class="ref-compact-title">Bring 2 friends → free unlock</div>
+          <div class="ref-compact-sub">Both sign up through your link. Your next match unlock is free.</div>
+        </div>
+        <div class="ref-dots-inline">
+          <div class="ref-prog-dot" id="dot0"></div>
+          <div class="ref-prog-dot" id="dot1"></div>
+        </div>
+      </div>
+      <div class="ref-prog-status-inline" id="refStatus"><strong>0 of 2</strong> friends joined</div>
+      <div class="ref-link-row">
+        <div class="ref-link-val-sm" id="myCode">youbet.network/?ref=—</div>
+        <button class="ref-copy-btn-sm" id="copyBtn" onclick="copyLink()">Copy</button>
+      </div>
+      <button class="btn-share" onclick="doShare()">Share your link →</button>
+    </div></div>
+    <div class="board-prev"><div class="bp-lbl">While you wait — projects that need your skill</div><div id="bpCards"></div><button class="btn-board" onclick="location.href='/project-board.html'">Browse all projects 📋</button></div>
+    <div class="social"><div class="social-lbl">Stay in the loop while you wait</div><div class="social-row"><a href="https://instagram.com/youbet.network" class="soc-btn">📸 Instagram</a><a href="https://tiktok.com/@youbet.network" class="soc-btn">🎵 TikTok</a></div></div>
+  </div>
+</div>
+<script>
+(function(){try{const p=new URLSearchParams(window.location.search),r=p.get('ref');if(r){const h=r.replace('@','');sessionStorage.setItem('yb_ref',h);window.addEventListener('DOMContentLoaded',function(){const el=document.getElementById('pillTags');if(el){el.innerHTML='<span class="ptag" style="background:#34A853">🎁 Invited by @'+h+'</span>';setTimeout(()=>{el.innerHTML='<span class="pill-empty">your profile builds here...</span>';},3000);}});}}catch(e){}})();
+const d={lookType:'',lookIco:'',lookL:'',s2val:'',s2L:'',s2ico:'',s2multi:[],s2multiL:[],s3val:'',s3L:'',s3ico:'',s3multi:[],s3multiL:[],s4val:'',s4L:'',s4ico:'',projName:'',projDesc:'',commit:'',commitIco:'',traits:[],traitL:[],relation:'',relationL:'',matters:[],mattersL:[],weakness:'',weaknessL:'',weaknessIco:'',age:'',loc:'',locL:'',city:'',name:'',email:'',ig:'',refCode:'',ans:{},ansL:{},ansI:{},ansM:{},ansML:{},ansTxt:{}};
+let step=1,TOTAL=13;
+const PATHS={
+skill:{total:13,pillKeys:['skillType','stage','seriousness'],steps:[
+{key:'skillType',ico:'🧩',q:'What skill are you missing most?',sub:'Pick the biggest gap stopping you right now.',type:'choice',req:true,opts:[
+{e:'tech',ico:'💻',t:'Tech / coding',s:'Apps, websites, AI tools, backend, automations.',oc:'#3B82F6'},
+{e:'design',ico:'🎨',t:'Design / branding',s:'Logo, visuals, UI, product look, brand identity.',oc:'#FF2B2B'},
+{e:'sales',ico:'🤝',t:'Sales',s:'Getting customers, outreach, closing deals.',oc:'#34A853'},
+{e:'marketing',ico:'📈',t:'Marketing / content',s:'TikTok, Instagram, ads, attention, growth.',oc:'#f97316'},
+{e:'ops',ico:'⚙️',t:'Operations',s:'Systems, tasks, team, logistics, execution.',oc:'#8B5CF6'},
+{e:'finance',ico:'💰',t:'Finance / strategy',s:'Pricing, business model, numbers, planning.',oc:'#EAB308'},
+{e:'unsure',ico:'❓',t:'Not sure yet',s:"I know I need help, but I don't know the exact skill.",oc:'#6B7280'}]},
+{key:'industry',ico:'🏗️',q:"What space is this in?",sub:"Pick the industry closest to what you're building — we match you with people who know it.",type:'choice',req:true,opts:[
+{e:'fashion',ico:'👕',t:'Clothing & Fashion',s:'Streetwear, apparel, design.',oc:'#FF2B2B'},
+{e:'tech',ico:'💻',t:'Tech & AI',s:'Software, startups, automation.',oc:'#3B82F6'},
+{e:'music',ico:'🎵',t:'Music & Arts',s:'Labels, studios, artists.',oc:'#8B5CF6'},
+{e:'sports',ico:'🏀',t:'Sports & Fitness',s:'Coaching, academies, gear.',oc:'#34A853'},
+{e:'content',ico:'🎬',t:'Content & Media',s:'Creators, studios, storytelling.',oc:'#EC4899'},
+{e:'food',ico:'🍔',t:'Food & Hospitality',s:'Restaurants, catering, delivery.',oc:'#f97316'},
+{e:'health',ico:'💊',t:'Health & Wellness',s:'Fitness, supplements, wellness, lifestyle.',oc:'#34A853'},
+{e:'beauty',ico:'💄',t:'Beauty & Skincare',s:'Cosmetics, skincare, aesthetics.',oc:'#EC4899'},
+{e:'local',ico:'🏪',t:'Local Business',s:'Trades, clinics, restaurants, real estate.',oc:'#EAB308'},
+{e:'ecomm',ico:'🛒',t:'E-commerce',s:'Online stores, products, DTC.',oc:'#3B82F6'},
+{e:'events',ico:'🎟️',t:'Events & Community',s:'Parties, meetups, networking, communities.',oc:'#8B5CF6'},
+{e:'agency',ico:'💼',t:'Agency / Services',s:'Marketing, consulting, done-for-you offers.',oc:'#14B8A6'},
+{e:'gaming',ico:'🎮',t:'Gaming & Esports',s:'Studios, streaming, tournaments.',oc:'#8B5CF6'},
+{e:'real_estate',ico:'🏠',t:'Real Estate',s:'Property, development, investing.',oc:'#EAB308'},
+{e:'photography',ico:'📸',t:'Photography & Film',s:'Production, studios, content.',oc:'#f97316'},
+{e:'education',ico:'🎓',t:'Education & Coaching',s:'Courses, tutoring, learning.',oc:'#3B82F6'},
+{e:'travel',ico:'✈️',t:'Travel & Lifestyle',s:'Agencies, experiences, hospitality.',oc:'#14B8A6'},
+{e:'crypto',ico:'🔗',t:'Crypto & Web3',s:'Blockchain, NFTs, DeFi.',oc:'#8B5CF6'},
+{e:'other',ico:'✏️',t:'Something else',s:"My industry is specific — I'll type it.",oc:'#9CA3AF'},
+{e:'open',ico:'🌱',t:'Still open',s:"I care more about the person than the space.",oc:'#6B7280'}]},
+{key:'industrySubCat',ico:'🎯',type:'dynamic',req:false,dynFn:'getCFSubCategoryCfg'},
+{key:'stage',ico:'📊',q:'What stage are you in?',sub:'Be honest — this helps avoid wrong matches.',type:'choice',req:true,opts:[
+{e:'idea',ico:'💡',t:'Idea only',s:"Nothing built yet. I'm still shaping it.",oc:'#FF2B2B'},
+{e:'research',ico:'🔍',t:'Researching / validating',s:'Testing the idea. Talking to people. Seeing if it works.',oc:'#f97316'},
+{e:'building',ico:'🛠️',t:'Started building',s:"Something is being made, but it's early.",oc:'#EAB308'},
+{e:'launched',ico:'🚀',t:'Launched',s:'It exists. People can see it or use it.',oc:'#34A853'},
+{e:'users',ico:'👥',t:'Getting users / customers',s:'People are starting to come in.',oc:'#3B82F6'},
+{e:'revenue',ico:'💵',t:'Making revenue',s:'Money is coming in.',oc:'#8B5CF6'},
+{e:'scaling',ico:'📈',t:'Scaling',s:"It's working. I need help growing faster.",oc:'#EC4899'}]},
+{key:'specificNeed',ico:'🎯',type:'dynamic',req:true,dynFn:'getSkillNeedCfg'},
+{key:'describe',ico:'✍️',q:'Tell us about your project.',sub:'This is the first thing your match reads about you — make it real.',type:'text',req:false,fields:[
+{id:'projNameS',label:'Project or company name',placeholder:'Optional'},
+{id:'projDescS',label:"Describe what you're building",placeholder:"What is it, who is it for, and what stage is it at?",multiline:true,maxlen:200,hint:'The right person reads this and knows immediately if they can help.'}]},
+{key:'bring',ico:'💪',q:'What do you bring?',sub:'A good match needs to know why they should work with you.',type:'choice',req:true,opts:[
+{e:'idea',ico:'💡',t:'The idea',s:"I know what should be built.",oc:'#FF2B2B'},
+{e:'money',ico:'💰',t:'Money to invest',s:'I can pay, fund, or invest into the project.',oc:'#EAB308'},
+{e:'sales_ab',ico:'🤝',t:'Sales ability',s:'I can talk to people and bring customers.',oc:'#34A853'},
+{e:'mkt_ab',ico:'📈',t:'Marketing / content',s:'I can create attention and demand.',oc:'#f97316'},
+{e:'audience',ico:'👥',t:'Audience / community',s:'I already have people I can reach.',oc:'#8B5CF6'},
+{e:'industry',ico:'🧠',t:'Industry knowledge',s:'I understand the space deeply.',oc:'#3B82F6'},
+{e:'design_taste',ico:'🎨',t:'Design / brand taste',s:'I know how it should look and feel.',oc:'#EC4899'},
+{e:'energy',ico:'🔥',t:'Energy and time',s:"I'm willing to do the work.",oc:'#14B8A6'}]},
+{key:'relationship',ico:'🤝',q:'What kind of relationship do you want?',sub:'This separates co-founders, freelancers, advisors, and teammates.',type:'choice',req:true,opts:[
+{e:'cofounder',ico:'🤝',t:'Co-founder',s:'They own part of the vision and build long term.',oc:'#FF2B2B'},
+{e:'partner',ico:'⚡',t:'Project partner',s:'We work on this project together, but not necessarily forever.',oc:'#f97316'},
+{e:'freelancer',ico:'💸',t:'Paid freelancer',s:'I want to hire someone to do the work.',oc:'#EAB308'},
+{e:'advisor',ico:'🧠',t:'Advisor / mentor',s:'I need guidance from someone who knows this skill.',oc:'#34A853'},
+{e:'teammate',ico:'👥',t:'Teammate',s:'I want someone to help consistently.',oc:'#3B82F6'},
+{e:'unsure',ico:'🌊',t:'Not sure yet',s:'I want to meet the right person first.',oc:'#8B5CF6'}]},
+{key:'seriousness',ico:'🔥',q:'How serious are you right now?',sub:'We match people at the same level. No wasted conversations.',type:'choice',req:true,opts:[
+{e:'all_in',ico:'🔥',t:'All in — this is my main focus',s:"Full speed. I'm building my life around this right now.",oc:'#FF2B2B'},
+{e:'serious',ico:'💼',t:'Serious — building on the side',s:"I have school or work, but I'm committed.",oc:'#f97316'},
+{e:'exploring',ico:'🌱',t:'Exploring — still figuring it out',s:"I'm not fully committed yet, but I want to connect.",oc:'#3B82F6'}]},
+{key:'matters',ico:'⭐',q:'What matters most in this person?',sub:'Pick everything that matters to you.',type:'multi',req:false,opts:[
+{e:'skill_great',ico:'🧩',t:'They are great at the skill',s:"They can actually do what I can't.",oc:'#3B82F6'},
+{e:'same_space',ico:'🏭',t:'They care about the same space',s:'They understand the industry or audience.',oc:'#34A853'},
+{e:'moves_fast',ico:'⚡',t:'They move fast',s:"They don't just talk — they execute.",oc:'#FF2B2B'},
+{e:'communicates',ico:'💬',t:'They communicate well',s:'Clear, honest, no guessing games.',oc:'#f97316'},
+{e:'serious',ico:'🔥',t:'They are serious',s:"They're not just playing around.",oc:'#8B5CF6'},
+{e:'trustworthy',ico:'🛡️',t:'They are trustworthy',s:'Someone I can rely on.',oc:'#EAB308'},
+{e:'same_outcome',ico:'🎯',t:'They want the same outcome',s:'Freelance, partner, advisor, or long-term build.',oc:'#EC4899'}]}
+
+]},
+operator:{total:13,pillKeys:['needHelp','operatorType','seriousness'],steps:[
+{key:'needHelp',ico:'⚙️',q:'What do you need help operating?',sub:'Pick the part that feels messy, slow, or hard to manage.',type:'choice',req:true,opts:[
+{e:'daily',ico:'✅',t:'Daily execution',s:'Tasks, deadlines, follow-ups, making sure things get done.',oc:'#FF2B2B'},
+{e:'team',ico:'👥',t:'Team / people',s:'Managing freelancers, creators, staff, or partners.',oc:'#f97316'},
+{e:'systems',ico:'📋',t:'Systems / processes',s:'Building repeatable workflows so things stop feeling messy.',oc:'#34A853'},
+{e:'customer_ops',ico:'💬',t:'Customer operations',s:'Support, onboarding, replies, client experience.',oc:'#3B82F6'},
+{e:'events_ops',ico:'🎟️',t:'Event / community operations',s:'Planning, logistics, vendors, schedules, people.',oc:'#8B5CF6'},
+{e:'growth_ops',ico:'📈',t:'Growth operations',s:'Turning sales, content, and offers into a real machine.',oc:'#EAB308'}]},
+{key:'industry',ico:'🏗️',q:"What space is this in?",sub:"Pick the industry closest to your business — we match you with people who know it.",type:'choice',req:true,opts:[
+{e:'fashion',ico:'👕',t:'Clothing & Fashion',s:'Streetwear, apparel, design.',oc:'#FF2B2B'},
+{e:'tech',ico:'💻',t:'Tech & AI',s:'Software, startups, automation.',oc:'#3B82F6'},
+{e:'music',ico:'🎵',t:'Music & Arts',s:'Labels, studios, artists.',oc:'#8B5CF6'},
+{e:'sports',ico:'🏀',t:'Sports & Fitness',s:'Coaching, academies, gear.',oc:'#34A853'},
+{e:'content',ico:'🎬',t:'Content & Media',s:'Creators, studios, storytelling.',oc:'#EC4899'},
+{e:'food',ico:'🍔',t:'Food & Hospitality',s:'Restaurants, catering, delivery.',oc:'#f97316'},
+{e:'health',ico:'💊',t:'Health & Wellness',s:'Fitness, supplements, wellness, lifestyle.',oc:'#34A853'},
+{e:'beauty',ico:'💄',t:'Beauty & Skincare',s:'Cosmetics, skincare, aesthetics.',oc:'#EC4899'},
+{e:'local',ico:'🏪',t:'Local Business',s:'Trades, clinics, restaurants, real estate.',oc:'#EAB308'},
+{e:'ecomm',ico:'🛒',t:'E-commerce',s:'Online stores, products, DTC.',oc:'#3B82F6'},
+{e:'events',ico:'🎟️',t:'Events & Community',s:'Parties, meetups, networking, communities.',oc:'#8B5CF6'},
+{e:'agency',ico:'💼',t:'Agency / Services',s:'Marketing, consulting, done-for-you offers.',oc:'#14B8A6'},
+{e:'gaming',ico:'🎮',t:'Gaming & Esports',s:'Studios, streaming, tournaments.',oc:'#8B5CF6'},
+{e:'real_estate',ico:'🏠',t:'Real Estate',s:'Property, development, investing.',oc:'#EAB308'},
+{e:'photography',ico:'📸',t:'Photography & Film',s:'Production, studios, content.',oc:'#f97316'},
+{e:'education',ico:'🎓',t:'Education & Coaching',s:'Courses, tutoring, learning.',oc:'#3B82F6'},
+{e:'travel',ico:'✈️',t:'Travel & Lifestyle',s:'Agencies, experiences, hospitality.',oc:'#14B8A6'},
+{e:'crypto',ico:'🔗',t:'Crypto & Web3',s:'Blockchain, NFTs, DeFi.',oc:'#8B5CF6'},
+{e:'other',ico:'✏️',t:'Something else',s:"My industry is specific — I'll type it.",oc:'#9CA3AF'},
+{e:'open',ico:'🌱',t:'Still open',s:"I care more about the person than the space.",oc:'#6B7280'}]},
+{key:'industrySubCat',ico:'🎯',type:'dynamic',req:false,dynFn:'getCFSubCategoryCfg'},
+{key:'stage',ico:'📊',q:'What stage are you at?',sub:'This tells us what kind of operator can actually help.',type:'choice',req:true,opts:[
+{e:'no_system',ico:'💡',t:'Idea but no system',s:"I know the direction, but nothing is organised yet.",oc:'#FF2B2B'},
+{e:'messy',ico:'🌀',t:'Started but messy',s:"Things are moving, but it feels chaotic.",oc:'#f97316'},
+{e:'users',ico:'👥',t:'Users / customers coming in',s:"People are interested, but I need structure.",oc:'#EAB308'},
+{e:'team',ico:'🧑‍🤝‍🧑',t:'Team involved',s:"I have people helping, but they need management.",oc:'#34A853'},
+{e:'revenue',ico:'💵',t:'Making money',s:"Revenue is coming in, but operations are weak.",oc:'#3B82F6'},
+{e:'scaling',ico:'📈',t:'Scaling',s:"I need someone to handle the backend of growth.",oc:'#8B5CF6'}]},
+{key:'operatorType',ico:'🎯',q:'What kind of operator do you need?',sub:'Different operators solve different problems.',type:'choice',req:true,opts:[
+{e:'execution',ico:'⚡',t:'Execution operator',s:'Makes sure tasks get done fast.',oc:'#FF2B2B'},
+{e:'systems',ico:'📋',t:'Systems operator',s:'Builds workflows, SOPs, automations, and processes.',oc:'#3B82F6'},
+{e:'people',ico:'👥',t:'People operator',s:'Manages team members and communication.',oc:'#f97316'},
+{e:'growth',ico:'📈',t:'Growth operator',s:'Turns marketing, sales, and content into repeatable growth.',oc:'#34A853'},
+{e:'events_log',ico:'🎟️',t:'Event / logistics operator',s:'Handles vendors, setup, timing, and details.',oc:'#8B5CF6'},
+{e:'client',ico:'💬',t:'Client success operator',s:'Handles onboarding, support, customers, and retention.',oc:'#EAB308'}]},
+{key:'biggestProblem',ico:'🔎',q:'What is the biggest problem right now?',sub:'This helps your match understand the real pressure.',type:'choice',req:true,opts:[
+{e:'too_many_ideas',ico:'🧠',t:'Too many ideas, not enough execution',s:"I know what to do, but things don't get finished.",oc:'#FF2B2B'},
+{e:'messy',ico:'🌀',t:'Everything feels messy',s:'No clear system, structure, or workflow.',oc:'#f97316'},
+{e:'dont_finish',ico:'🛑',t:"I start but don't finish",s:'Projects lose momentum.',oc:'#EAB308'},
+{e:'need_people',ico:'👥',t:'I need someone to manage people',s:'Freelancers, staff, creators, partners, or vendors.',oc:'#34A853'},
+{e:'need_system',ico:'📋',t:'I need this turned into a system',s:'I want something repeatable.',oc:'#3B82F6'},
+{e:'cant_handle',ico:'📈',t:"I'm growing but can't handle it alone",s:"There's more demand than I can manage.",oc:'#8B5CF6'}]},
+{key:'bring',ico:'💪',q:'What do you bring?',sub:'Operators match best with someone who has a strong front-end.',type:'choice',req:true,opts:[
+{e:'vision',ico:'💡',t:'Vision / ideas',s:'I know where this should go.',oc:'#FF2B2B'},
+{e:'sales',ico:'🤝',t:'Sales',s:'I can get customers or close deals.',oc:'#34A853'},
+{e:'marketing',ico:'📈',t:'Marketing / content',s:'I can create attention and demand.',oc:'#f97316'},
+{e:'product',ico:'💻',t:'Product / tech',s:'I can build or shape the product.',oc:'#3B82F6'},
+{e:'money',ico:'💰',t:'Money / resources',s:'I can fund or support the project.',oc:'#EAB308'},
+{e:'audience',ico:'👥',t:'Audience / community',s:'I have people I can reach.',oc:'#8B5CF6'},
+{e:'industry',ico:'🧠',t:'Industry knowledge',s:'I understand the market deeply.',oc:'#EC4899'}]},
+{key:'relationship',ico:'🤝',q:'What kind of relationship do you want with the operator?',sub:'Be clear about what role they are stepping into.',type:'choice',req:true,opts:[
+{e:'cofounder',ico:'🤝',t:'Co-founder',s:'They own part of the business and build long term.',oc:'#FF2B2B'},
+{e:'partner',ico:'⚡',t:'Project partner',s:'They help run one project or launch.',oc:'#f97316'},
+{e:'paid',ico:'💸',t:'Paid operator',s:'I want to hire them.',oc:'#EAB308'},
+{e:'accountability',ico:'🔥',t:'Accountability partner',s:'I need someone to keep me moving.',oc:'#34A853'},
+{e:'unsure',ico:'🌊',t:'Not sure yet',s:'I want to meet the right person first.',oc:'#3B82F6'}]},
+{key:'seriousness',ico:'🔥',q:'How serious are you right now?',sub:"Operators don't want to organise people who aren't serious.",type:'choice',req:true,opts:[
+{e:'all_in',ico:'🔥',t:'All in — this is my main focus',s:"I'm moving seriously now.",oc:'#FF2B2B'},
+{e:'serious',ico:'💼',t:'Serious — building on the side',s:"I have school or work, but I'm committed.",oc:'#f97316'},
+{e:'testing',ico:'🌱',t:'Testing first',s:"I want to see if this can become real.",oc:'#3B82F6'},
+{e:'looking',ico:'👀',t:'Just looking around',s:"I want to meet people before deciding.",oc:'#8B5CF6'}]},
+{key:'matters',ico:'⭐',q:'What matters most in an operator?',sub:'Pick everything that matters to you.',type:'multi',req:false,opts:[
+{e:'executes',ico:'✅',t:'They execute without excuses',s:'They get things done.',oc:'#FF2B2B'},
+{e:'organized',ico:'📋',t:'They are organised',s:'They bring structure to chaos.',oc:'#3B82F6'},
+{e:'manages_people',ico:'👥',t:'They can manage people',s:'They know how to lead and follow up.',oc:'#f97316'},
+{e:'communicates',ico:'💬',t:'They communicate clearly',s:'No confusion, no disappearing.',oc:'#34A853'},
+{e:'handles_growth',ico:'📈',t:'They can handle growth',s:"They don't break when things get bigger.",oc:'#8B5CF6'},
+{e:'reliable',ico:'🛡️',t:'They are reliable',s:'I can trust them with responsibility.',oc:'#EAB308'}]}
+
+]},
+join:{total:13,pillKeys:['projectType','role','wantInReturn'],steps:[
+{key:'projectType',ico:'🌐',q:'What kind of project do you want to join?',sub:'Pick the world you want to be part of.',type:'choice',req:true,opts:[
+{e:'startup',ico:'📱',t:'Startup / app',s:'Software, SaaS, marketplace, platform.',oc:'#3B82F6'},
+{e:'ecomm',ico:'📦',t:'E-commerce / product brand',s:'Clothing, beauty, food, physical products.',oc:'#FF2B2B'},
+{e:'content',ico:'🎬',t:'Content / media',s:'Creators, channels, newsletters, podcasts.',oc:'#EC4899'},
+{e:'events',ico:'🎟️',t:'Events / community',s:'Parties, meetups, memberships, networking.',oc:'#8B5CF6'},
+{e:'agency',ico:'🧰',t:'Agency / service business',s:'Marketing, consulting, local services, clients.',oc:'#34A853'},
+{e:'fashion',ico:'👕',t:'Fashion / clothing',s:'Streetwear, apparel, design, drops.',oc:'#f97316'},
+{e:'ai',ico:'🤖',t:'AI / automation',s:'Tools, workflows, agents, automations.',oc:'#EAB308'},
+{e:'health',ico:'🧬',t:'Health / wellness',s:'Fitness, nutrition, biohacking, lifestyle.',oc:'#14B8A6'},
+{e:'local',ico:'🏪',t:'Local business',s:'Restaurants, gyms, clinics, trades, real estate.',oc:'#6B7280'},
+{e:'open',ico:'🌊',t:'Open to anything interesting',s:'I care more about the people and vision.',oc:'#0EA5E9'}]},
+{key:'role',ico:'🎯',q:'What role do you want to play?',sub:'What should the team count on you for?',type:'choice',req:true,opts:[
+{e:'builder',ico:'💻',t:'Builder',s:'Tech, product, website, app, systems.',oc:'#3B82F6'},
+{e:'creator',ico:'🎨',t:'Creator',s:'Content, videos, design, social media.',oc:'#EC4899'},
+{e:'seller',ico:'🤝',t:'Seller',s:'Sales, outreach, closing, partnerships.',oc:'#34A853'},
+{e:'marketer',ico:'📈',t:'Marketer',s:'Growth, ads, branding, strategy.',oc:'#f97316'},
+{e:'operator',ico:'⚙️',t:'Operator',s:'Organisation, tasks, systems, management.',oc:'#8B5CF6'},
+{e:'strategist',ico:'🧠',t:'Idea / strategy person',s:'Thinking, positioning, business model, planning.',oc:'#FF2B2B'}]},
+{key:'bring',ico:'💪',q:'What can you bring right now?',sub:'Be honest about your strongest value.',type:'choice',req:true,opts:[
+{e:'time',ico:'⏳',t:'Time',s:'I can put in hours and help move things.',oc:'#FF2B2B'},
+{e:'skills',ico:'🧩',t:'Skills',s:'I have a specific ability people need.',oc:'#3B82F6'},
+{e:'money',ico:'💰',t:'Money',s:'I can invest or support financially.',oc:'#EAB308'},
+{e:'audience',ico:'👥',t:'Audience',s:'I can bring attention or distribution.',oc:'#f97316'},
+{e:'connections',ico:'🔗',t:'Connections',s:'I know people who can help.',oc:'#34A853'},
+{e:'energy',ico:'🔥',t:'Energy / work ethic',s:"I'm hungry and willing to learn.",oc:'#EC4899'},
+{e:'industry',ico:'🧠',t:'Industry knowledge',s:'I understand a specific market.',oc:'#8B5CF6'},
+{e:'learning',ico:'🌱',t:'Still learning, but serious',s:"I don't know everything yet, but I'll show up.",oc:'#6B7280'}]},
+{key:'stageToJoin',ico:'📊',q:'What stage do you want to join?',sub:'Some people like early chaos. Some people want proof.',type:'choice',req:true,opts:[
+{e:'idea',ico:'💡',t:'Idea stage',s:'Help shape it from the beginning.',oc:'#FF2B2B'},
+{e:'building',ico:'🛠️',t:'Early building stage',s:'They already started, but need help.',oc:'#f97316'},
+{e:'launched',ico:'🚀',t:'Launched',s:'There is already a real product or project.',oc:'#34A853'},
+{e:'revenue',ico:'💵',t:'Making revenue',s:'It already makes money and needs growth.',oc:'#3B82F6'},
+{e:'scaling',ico:'📈',t:'Scaling',s:"It's working and needs more people.",oc:'#8B5CF6'},
+{e:'any',ico:'🌊',t:'Any stage if the people are right',s:'I care more about the team.',oc:'#6B7280'}]},
+{key:'wantInReturn',ico:'🎁',q:'What do you want in return?',sub:'This keeps expectations clear from the start.',type:'choice',req:true,opts:[
+{e:'equity',ico:'🤝',t:'Equity / ownership',s:'I want to own part of what I help build.',oc:'#FF2B2B'},
+{e:'paid',ico:'💸',t:'Paid role',s:'I want to get paid for my work.',oc:'#EAB308'},
+{e:'experience',ico:'🧠',t:'Experience',s:'I want to learn and build my portfolio.',oc:'#3B82F6'},
+{e:'network',ico:'👥',t:'Network',s:'I want to meet ambitious people.',oc:'#34A853'},
+{e:'opportunity',ico:'⚡',t:'Opportunity',s:'I want a chance to prove myself.',oc:'#8B5CF6'},
+{e:'unsure',ico:'🌊',t:'Not sure yet',s:'Depends on the project and people.',oc:'#6B7280'}]},
+{key:'seriousness',ico:'🔥',q:'How serious are you?',sub:'Projects need people who match their level.',type:'choice',req:true,opts:[
+{e:'all_in',ico:'🔥',t:'All in',s:"I'm ready to commit hard.",oc:'#FF2B2B'},
+{e:'serious',ico:'💼',t:'Serious part-time',s:'I have school or work, but I can show up consistently.',oc:'#f97316'},
+{e:'exploring',ico:'🌱',t:'Just exploring',s:'I want to see what opportunities exist.',oc:'#3B82F6'},
+{e:'selective',ico:'👀',t:"Only if it's really good",s:"I'll commit if the match is strong.",oc:'#8B5CF6'}]},
+{key:'founderType',ico:'⚡',q:'What type of founder or team do you want to join?',sub:'The people matter as much as the idea.',type:'choice',req:true,opts:[
+{e:'intense',ico:'⚡',t:'Fast and intense',s:'High speed, high ambition, no excuses.',oc:'#FF2B2B'},
+{e:'creative',ico:'🎨',t:'Creative and ambitious',s:'Taste, ideas, originality, energy.',oc:'#EC4899'},
+{e:'organized',ico:'📋',t:'Organised and serious',s:'Clear plan, structure, execution.',oc:'#3B82F6'},
+{e:'young',ico:'🎓',t:'Young founders / students',s:'People around my age building early.',oc:'#34A853'},
+{e:'experienced',ico:'🧠',t:'Experienced founders',s:'People who know what they are doing.',oc:'#8B5CF6'},
+{e:'chill',ico:'🌊',t:'Chill but consistent',s:'Less chaos, steady progress.',oc:'#f97316'}]},
+{key:'matters',ico:'⭐',q:'What matters most to you?',sub:'Pick what makes an opportunity worth your time.',type:'multi',req:false,opts:[
+{e:'exciting_idea',ico:'💡',t:'The idea is exciting',s:'I want to care about what we are building.',oc:'#FF2B2B'},
+{e:'serious_founder',ico:'🔥',t:'The founder is serious',s:'I want to work with someone committed.',oc:'#f97316'},
+{e:'good_energy',ico:'👥',t:'The team has good energy',s:'I want the people to feel right.',oc:'#34A853'},
+{e:'money_potential',ico:'💰',t:'There is real money potential',s:'I want upside.',oc:'#EAB308'},
+{e:'learn_alot',ico:'🧠',t:'I can learn a lot',s:'I want growth and experience.',oc:'#3B82F6'},
+{e:'ownership',ico:'🤝',t:'I can own part of it',s:'I want long-term upside.',oc:'#8B5CF6'}]},
+{key:'opportunityType',ico:'🚀',q:'What kind of opportunity should we show you?',sub:'Tell us what type of door you want opened.',type:'choice',req:true,opts:[
+{e:'cofounder_opp',ico:'🤝',t:'Co-founder opportunities',s:'Join someone as a serious long-term partner.',oc:'#FF2B2B'},
+{e:'project_partner',ico:'⚡',t:'Project partner roles',s:'Help build a project together.',oc:'#f97316'},
+{e:'paid_startup',ico:'💸',t:'Paid startup roles',s:'Get paid to help an early team.',oc:'#EAB308'},
+{e:'intern',ico:'🧠',t:'Internship / learning roles',s:'Gain experience and prove yourself.',oc:'#3B82F6'},
+{e:'creator_role',ico:'🎬',t:'Creator / content roles',s:'Help with social, video, design, media.',oc:'#EC4899'},
+{e:'growth_role',ico:'📈',t:'Sales / growth roles',s:'Help bring customers, users, or attention.',oc:'#34A853'},
+{e:'open_role',ico:'🌊',t:'Open roles in early projects',s:'Show me anything that fits.',oc:'#8B5CF6'}]},
+{key:'describe',ico:'✍️',q:"Tell us what you're looking to join.",sub:'This helps founders know if you fit their vision.',type:'text',req:false,fields:[
+{id:'joinDesc1',label:'Short intro',placeholder:"What kind of project, team, or opportunity are you looking for?",multiline:true,maxlen:200,hint:'This is the first thing founders read. Make it real.'},
+{id:'joinDesc2',label:'What can you help with?',placeholder:'Skills, time, energy, audience, sales, content, operations, anything useful.',multiline:true,maxlen:200}]}
+]},
+mindset:{total:13,pillKeys:['peopleType','whyMeet','vibe'],steps:[
+{key:'peopleType',ico:'🔥',q:'What kind of people do you want around you?',sub:'Pick the energy you want in your circle.',type:'choice',req:true,opts:[
+{e:'founders',ico:'🚀',t:'Founders',s:'People building companies, apps, brands, or projects.',oc:'#FF2B2B'},
+{e:'creators',ico:'🎨',t:'Creators',s:'People making content, design, media, or art.',oc:'#EC4899'},
+{e:'sales_biz',ico:'🤝',t:'Sales / business people',s:'People good at talking, selling, networking, closing.',oc:'#34A853'},
+{e:'builders',ico:'💻',t:'Builders',s:'People who can code, design, build, or make things real.',oc:'#3B82F6'},
+{e:'growth',ico:'📈',t:'Growth people',s:'People who understand attention, marketing, and scale.',oc:'#f97316'},
+{e:'hungry',ico:'🔥',t:'Hungry beginners',s:'People early, but serious and ambitious.',oc:'#EAB308'},
+{e:'thinkers',ico:'🧠',t:'Deep thinkers',s:'People into strategy, ideas, self-improvement, and business.',oc:'#8B5CF6'}]},
+{key:'interests',ico:'🎯',q:'What are you most interested in?',sub:'Shared interests make better connections.',type:'multi',req:false,opts:[
+{e:'ai_tech',ico:'🤖',t:'AI / tech',s:'Apps, software, automation, startups.',oc:'#3B82F6'},
+{e:'fashion',ico:'👕',t:'Fashion / clothing',s:'Streetwear, apparel, design, drops.',oc:'#FF2B2B'},
+{e:'content',ico:'🎬',t:'Content / media',s:'TikTok, YouTube, creators, personal brands.',oc:'#EC4899'},
+{e:'events',ico:'🎟️',t:'Events / community',s:'Parties, networking, meetups, social scenes.',oc:'#8B5CF6'},
+{e:'health',ico:'🧬',t:'Health / wellness',s:'Fitness, nutrition, biohacking, lifestyle.',oc:'#34A853'},
+{e:'ecomm',ico:'📦',t:'E-commerce / products',s:'Brands, physical products, online stores.',oc:'#f97316'},
+{e:'local_biz',ico:'🏪',t:'Local business',s:'Restaurants, gyms, services, real-world businesses.',oc:'#EAB308'},
+{e:'money',ico:'💰',t:'Money / investing',s:'Business, sales, wealth, investing.',oc:'#14B8A6'},
+{e:'open',ico:'🌊',t:'Open to anything ambitious',s:'I care more about energy than niche.',oc:'#6B7280'}]},
+{key:'whyMeet',ico:'💡',q:'Why do you want to meet them?',sub:'This tells us what kind of connection to create.',type:'choice',req:true,opts:[
+{e:'future_partners',ico:'🤝',t:'Find future partners',s:'I may want to build with someone later.',oc:'#FF2B2B'},
+{e:'accountability',ico:'🔥',t:'Accountability',s:'I want people who push me to do more.',oc:'#f97316'},
+{e:'learn',ico:'🧠',t:'Learn faster',s:'I want to be around smarter or more experienced people.',oc:'#3B82F6'},
+{e:'circle',ico:'👥',t:'Build a circle',s:'I want ambitious friends, not random networking.',oc:'#34A853'},
+{e:'opportunities',ico:'⚡',t:'Find opportunities',s:'I want to hear about projects, roles, and ideas.',oc:'#8B5CF6'},
+{e:'inspiration',ico:'🌱',t:'Get inspired',s:'I want to be around people who make me think bigger.',oc:'#EAB308'}]},
+{key:'whereNow',ico:'📍',q:'Where are you right now?',sub:"No fake flexing — pick your real stage.",type:'choice',req:true,opts:[
+{e:'starting',ico:'🌱',t:'Just starting',s:"I'm early, but I'm serious.",oc:'#34A853'},
+{e:'ideas',ico:'💡',t:'Full of ideas',s:'I have ideas and want people to think with.',oc:'#FF2B2B'},
+{e:'building',ico:'🛠️',t:'Building something',s:'I already have something in motion.',oc:'#f97316'},
+{e:'making_money',ico:'💵',t:'Making money',s:"I'm already getting results.",oc:'#EAB308'},
+{e:'scaling',ico:'📈',t:'Scaling',s:"I'm trying to grow bigger.",oc:'#3B82F6'},
+{e:'searching',ico:'🔎',t:'Searching for direction',s:"I'm ambitious but still figuring out what to build.",oc:'#8B5CF6'}]},
+{key:'youBring',ico:'💪',q:'What do you bring to the room?',sub:'Every strong circle needs value on both sides.',type:'choice',req:true,opts:[
+{e:'ideas',ico:'💡',t:'Ideas',s:'I think of opportunities and directions.',oc:'#FF2B2B'},
+{e:'energy',ico:'🔥',t:'Energy',s:'I bring momentum and ambition.',oc:'#f97316'},
+{e:'taste',ico:'🎨',t:'Taste / creativity',s:'I understand branding, design, content, or culture.',oc:'#EC4899'},
+{e:'people_skills',ico:'🤝',t:'People skills',s:'I can talk, network, sell, or connect.',oc:'#34A853'},
+{e:'building',ico:'💻',t:'Building skills',s:'I can make things real.',oc:'#3B82F6'},
+{e:'growth_sk',ico:'📈',t:'Growth skills',s:'I understand attention, content, or marketing.',oc:'#8B5CF6'},
+{e:'knowledge',ico:'🧠',t:'Knowledge',s:'I study business, investing, self-improvement, or a niche.',oc:'#EAB308'},
+{e:'consistency',ico:'⏳',t:'Time and consistency',s:'I show up.',oc:'#14B8A6'}]},
+{key:'seriousness',ico:'🔥',q:'How serious are you?',sub:'We match energy with energy.',type:'choice',req:true,opts:[
+{e:'extremely',ico:'🔥',t:'Extremely serious',s:'I want to change my life.',oc:'#FF2B2B'},
+{e:'serious_busy',ico:'💼',t:'Serious but busy',s:"I have school or work, but I'm still committed.",oc:'#f97316'},
+{e:'getting_serious',ico:'🌱',t:'Getting serious',s:"I'm trying to become more disciplined.",oc:'#3B82F6'},
+{e:'curious',ico:'👀',t:'Curious',s:'I want to meet people and see what happens.',oc:'#8B5CF6'}]},
+{key:'vibe',ico:'🎯',q:'What kind of vibe fits you best?',sub:'Not everyone ambitious works the same way.',type:'choice',req:true,opts:[
+{e:'fast_intense',ico:'⚡',t:'Fast and intense',s:'Big goals, fast action, high energy.',oc:'#FF2B2B'},
+{e:'strategic',ico:'🧠',t:'Strategic and thoughtful',s:'Deep conversations, smart decisions, long-term thinking.',oc:'#3B82F6'},
+{e:'creative',ico:'🎨',t:'Creative and bold',s:'Taste, culture, ideas, originality.',oc:'#EC4899'},
+{e:'disciplined',ico:'📋',t:'Disciplined and consistent',s:'Systems, habits, steady progress.',oc:'#34A853'},
+{e:'chill',ico:'🌊',t:'Chill but ambitious',s:'Good energy, low ego, still serious.',oc:'#f97316'},
+{e:'competitive',ico:'🏆',t:'Competitive',s:'I want people who push me hard.',oc:'#EAB308'}]},
+{key:'connectHow',ico:'🔗',q:'How do you want to connect?',sub:'Pick the kind of interaction you actually want.',type:'choice',req:true,opts:[
+{e:'one_on_one',ico:'💬',t:'1-on-1 matches',s:'Introduce me to individual people.',oc:'#FF2B2B'},
+{e:'small_group',ico:'👥',t:'Small group',s:'Put me around a few similar people.',oc:'#f97316'},
+{e:'events',ico:'🎟️',t:'Events / meetups',s:'I want real-world or online gatherings.',oc:'#34A853'},
+{e:'accountability',ico:'🔥',t:'Accountability group',s:'I want people checking in and pushing me.',oc:'#3B82F6'},
+{e:'project_based',ico:'⚡',t:'Project-based',s:'Show me people who may build something with me.',oc:'#8B5CF6'}]},
+{key:'matters',ico:'⭐',q:'What matters most in your kind of people?',sub:'Pick everything that matters.',type:'multi',req:false,opts:[
+{e:'same_ambition',ico:'🔥',t:'Same ambition',s:'They want more out of life.',oc:'#FF2B2B'},
+{e:'same_mindset',ico:'🧠',t:'Same mindset',s:'They think bigger than average people.',oc:'#3B82F6'},
+{e:'action_taking',ico:'⚡',t:'Action-taking',s:'They actually do things.',oc:'#f97316'},
+{e:'good_comms',ico:'💬',t:'Good communication',s:'Clear, honest, easy to talk to.',oc:'#34A853'},
+{e:'trust',ico:'🛡️',t:'Trust / loyalty',s:'No weird energy, no snake behaviour.',oc:'#8B5CF6'},
+{e:'similar_goals',ico:'🎯',t:'Similar goals',s:"We're moving in the same direction.",oc:'#EAB308'},
+{e:'same_interests',ico:'🏭',t:'Same interests',s:'We care about the same spaces.',oc:'#EC4899'}]},
+{key:'describe',ico:'✍️',q:'Tell people what kind of circle you want.',sub:'This helps us match you with the right people.',type:'text',req:false,fields:[
+{id:'mindDesc1',label:'What kind of people do you want to meet?',placeholder:'Young founders into tech, fashion, events, content, or making money.',multiline:true,maxlen:200,hint:'This is the first thing people read about you. Make it real.'},
+{id:'mindDesc2',label:'What are you working on or interested in?',placeholder:"Tell people what you're building, learning, or trying to become.",multiline:true,maxlen:200}]}
+]},
+cofounder:{total:13,pillKeys:['industry','stage','seriousness'],steps:[
+{key:'stage',ico:'📊',q:'What stage are you in?',sub:"Be honest — this shapes who your co-founder needs to be and what they're walking into.",type:'choice',req:true,opts:[
+{e:'idea',ico:'💡',t:'Idea only',s:"I have the concept, but nothing has been built yet.",oc:'#FF2B2B'},
+{e:'research',ico:'🔍',t:'Researching / validating',s:'Testing the idea. Talking to people. Figuring out if it works.',oc:'#f97316'},
+{e:'mvp',ico:'🛠️',t:'Building MVP',s:'In active development. Something is being made.',oc:'#EAB308'},
+{e:'launched',ico:'🚀',t:'Launched',s:"It's live. Real people can use it.",oc:'#34A853'},
+{e:'users',ico:'👥',t:'Getting users',s:'Live and growing. Working on getting more people in.',oc:'#3B82F6'},
+{e:'revenue',ico:'💰',t:'Making revenue',s:"Money is coming in. I need help scaling the income.",oc:'#8B5CF6'},
+{e:'scaling',ico:'📈',t:'Scaling',s:"Growing fast. Need the right person to handle the scale.",oc:'#EC4899'}]},
+{key:'industry',ico:'🏗️',q:'What space is this in?',sub:"Pick the industry closest to what you're building — we match you with people who know it.",type:'choice',req:true,opts:[{e:'fashion',ico:'👕',t:'Clothing & Fashion',s:'Streetwear, apparel, design.',oc:'#FF2B2B'},{e:'tech',ico:'💻',t:'Tech & AI',s:'Software, startups, automation.',oc:'#3B82F6'},{e:'music',ico:'🎵',t:'Music & Arts',s:'Labels, studios, artists.',oc:'#8B5CF6'},{e:'sports',ico:'🏀',t:'Sports & Fitness',s:'Coaching, academies, gear.',oc:'#34A853'},{e:'content',ico:'🎬',t:'Content & Media',s:'Creators, studios, storytelling.',oc:'#EC4899'},{e:'food',ico:'🍔',t:'Food & Hospitality',s:'Restaurants, catering, delivery.',oc:'#f97316'},{e:'health',ico:'💊',t:'Health & Wellness',s:'Fitness, supplements, wellness, lifestyle.',oc:'#34A853'},{e:'beauty',ico:'💄',t:'Beauty & Skincare',s:'Cosmetics, skincare, aesthetics.',oc:'#EC4899'},{e:'local',ico:'🏪',t:'Local Business',s:'Trades, clinics, restaurants, real estate.',oc:'#EAB308'},{e:'ecomm',ico:'🛒',t:'E-commerce',s:'Online stores, products, DTC.',oc:'#3B82F6'},{e:'events',ico:'🎟️',t:'Events & Community',s:'Parties, meetups, networking, communities.',oc:'#8B5CF6'},{e:'agency',ico:'💼',t:'Agency / Services',s:'Marketing, consulting, done-for-you offers.',oc:'#14B8A6'},{e:'gaming',ico:'🎮',t:'Gaming & Esports',s:'Studios, streaming, tournaments.',oc:'#8B5CF6'},{e:'real_estate',ico:'🏠',t:'Real Estate',s:'Property, development, investing.',oc:'#EAB308'},{e:'photography',ico:'📸',t:'Photography & Film',s:'Production, studios, content.',oc:'#f97316'},{e:'education',ico:'🎓',t:'Education & Coaching',s:'Courses, tutoring, learning.',oc:'#3B82F6'},{e:'travel',ico:'✈️',t:'Travel & Lifestyle',s:'Agencies, experiences, hospitality.',oc:'#14B8A6'},{e:'crypto',ico:'🔗',t:'Crypto & Web3',s:'Blockchain, NFTs, DeFi.',oc:'#8B5CF6'},{e:'other',ico:'✏️',t:'Something else',s:"My industry is specific — I'll type it.",oc:'#9CA3AF'},
+{e:'open',ico:'🌱',t:'Still open',s:"I care more about the person than the space.",oc:'#6B7280'}]},
+{key:'subCategory',ico:'🎯',type:'dynamic',req:false,dynFn:'getCFSubCategoryCfg'},
+{key:'describe',ico:'✍️',q:'Tell us about your project.',sub:"This is the first thing your match reads about you — make it real.",type:'text',req:false,fields:[
+{id:'cfProjName',label:'Project or company name',placeholder:'Optional'},
+{id:'cfProjDesc',label:"Describe what you're building",placeholder:"What is it, who is it for, and what stage is it at?",multiline:true,maxlen:200,hint:'The right person reads this and knows immediately if they can help.'}]},
+{key:'seriousness',ico:'🔥',q:'How serious are you right now?',sub:"We match people at the same level. All-in with all-in. No wasted conversations.",type:'choice',req:true,opts:[
+{e:'all_in',ico:'🔥',t:'All in — this is my main focus',s:'Full speed. Building my life around this right now.',oc:'#FF2B2B'},
+{e:'serious',ico:'💼',t:'Serious — building on the side for now',s:"Still have a job or school. Ready to go all in once it moves.",oc:'#f97316'},
+{e:'exploring',ico:'🌱',t:'Exploring — still figuring things out',s:"Not fully committed yet. Looking to connect and see what clicks.",oc:'#3B82F6'}]},
+{key:'cfType',ico:'🪞',q:'What kind of co-founder do you need?',sub:"This is the most important question. Be specific — the right type changes everything.",type:'choice',req:true,opts:[
+{e:'tech',ico:'💻',t:'Technical co-founder',s:'Someone who can build the product.',oc:'#3B82F6'},
+{e:'sales',ico:'🤝',t:'Sales co-founder',s:'Someone who can get customers and close deals.',oc:'#34A853'},
+{e:'marketing',ico:'📊',t:'Marketing / content co-founder',s:'Someone who can grow attention and demand.',oc:'#f97316'},
+{e:'ops',ico:'⚙️',t:'Operations co-founder',s:'Someone who can run systems, people, and execution.',oc:'#8B5CF6'},
+{e:'product',ico:'🎯',t:'Product / strategy co-founder',s:'Someone who can shape the idea and make smart decisions.',oc:'#EAB308'},
+{e:'creative',ico:'🎨',t:'Creative / brand co-founder',s:'Someone who can make the product feel different and desirable.',oc:'#FF2B2B'}]},
+{key:'relationship',ico:'🤝',q:'What kind of relationship do you want?',sub:"This separates real co-founders from casual partners.",type:'choice',req:true,opts:[
+{e:'fifty_fifty',ico:'🤝',t:'Equal 50/50 partner',s:'We build and own it together.',oc:'#FF2B2B'},
+{e:'vision_led',ico:'🔭',t:'Vision-led partnership',s:'I have the vision, but I want a serious partner.',oc:'#f97316'},
+{e:'execution_led',ico:'⚡',t:'Execution-led partnership',s:'I want someone who pushes action and speed.',oc:'#34A853'},
+{e:'trial',ico:'🧪',t:'Trial first',s:'Work together before deciding on equity.',oc:'#3B82F6'},
+{e:'unsure',ico:'🌊',t:'Not sure yet',s:'I want to meet the right person first.',oc:'#8B5CF6'}]},
+{key:'matters',ico:'⭐',q:'What matters most in a co-founder?',sub:"Pick everything that matters to you.",type:'multi',req:false,opts:[
+{e:'ambition',ico:'🔥',t:'Same ambition',s:'They want what you want, at the same level.',oc:'#FF2B2B'},
+{e:'skill',ico:'🧩',t:'Complementary skill',s:"They fill the gap you can't fill yourself.",oc:'#3B82F6'},
+{e:'industry',ico:'🏭',t:'Same industry interest',s:'They care about the same space you do.',oc:'#34A853'},
+{e:'ethic',ico:'💪',t:'Strong work ethic',s:'They show up, do the work, no excuses.',oc:'#f97316'},
+{e:'comms',ico:'🗣️',t:'Good communication',s:'Clear, honest, no guessing games.',oc:'#8B5CF6'},
+{e:'trust',ico:'🛡️',t:'Trust / loyalty',s:'Someone you can count on when things get hard.',oc:'#EAB308'},
+{e:'longterm',ico:'🌍',t:'Long-term mindset',s:'Not looking for quick wins. Building something that lasts.',oc:'#EC4899'}]},
+{key:'youBring',ico:'💡',q:'What do you bring?',sub:"A co-founder needs to know why they should build with you.",type:'choice',req:true,opts:[
+{e:'vision',ico:'💡',t:'Vision / ideas',s:'I see what should exist.',oc:'#FF2B2B'},
+{e:'sales',ico:'🤝',t:'Sales',s:'I can talk to people and bring customers.',oc:'#34A853'},
+{e:'tech',ico:'💻',t:'Tech / building',s:'I can build the product.',oc:'#3B82F6'},
+{e:'marketing',ico:'📈',t:'Marketing / content',s:'I can create attention and demand.',oc:'#f97316'},
+{e:'design',ico:'🎨',t:'Design / branding',s:'I know how things should look and feel.',oc:'#EC4899'},
+{e:'ops',ico:'⚙️',t:'Operations',s:'I can organise people, systems, and execution.',oc:'#8B5CF6'},
+{e:'money',ico:'💰',t:'Money / resources',s:'I can invest, fund, or bring access.',oc:'#EAB308'},
+{e:'knowledge',ico:'🧠',t:'Industry knowledge',s:'I understand the space deeply.',oc:'#6B7280'},
+{e:'audience',ico:'👥',t:'Audience / community',s:'I already have people I can reach.',oc:'#14B8A6'}]},
+{key:'outcome',ico:'🚀',q:'What outcome do you want from youbet?',sub:"Tell us what kind of match would feel like a win.",type:'choice',req:true,opts:[
+{e:'cofounder',ico:'🤝',t:'Find one serious co-founder',s:'The right person to build with long-term.',oc:'#FF2B2B'},
+{e:'skill_match',ico:'🧩',t:'Find someone with a missing skill',s:"Someone to fill the gap I can't fill myself.",oc:'#3B82F6'},
+{e:'small_team',ico:'👥',t:'Build a small team',s:'2-3 people who complement each other.',oc:'#34A853'},
+{e:'meet_first',ico:'💬',t:'Meet serious people first',s:"I want conversations before committing to anything.",oc:'#f97316'},
+{e:'opportunities',ico:'🚀',t:'Get invited to strong opportunities',s:"Show me what's already moving.",oc:'#8B5CF6'},
+{e:'explore',ico:'🌱',t:'Explore matches before deciding',s:"I want to see what's out there.",oc:'#6B7280'}]}
+]}
+};
+const cats=[{e:'👕',n:'Clothing & Fashion',s:'Streetwear, apparel, design',c:'#FF2B2B'},{e:'💻',n:'Tech & AI',s:'Software, startups, automation',c:'#3B82F6'},{e:'🎵',n:'Music & Arts',s:'Labels, studios, artists',c:'#8B5CF6'},{e:'🏀',n:'Sports & Fitness',s:'Coaching, academies, gear',c:'#34A853'},{e:'🎬',n:'Content & Media',s:'Creators, studios, storytelling',c:'#EC4899'},{e:'🍔',n:'Food & Hospitality',s:'Restaurants, catering, delivery',c:'#f97316'},{e:'🎨',n:'Design & Creative',s:'Agencies, visuals, art direction',c:'#FF2B2B'},{e:'📈',n:'Business & Finance',s:'Strategy, investing, e-commerce',c:'#14B8A6'},{e:'🏠',n:'Real Estate',s:'Property, development, investing',c:'#EAB308'},{e:'💊',n:'Health & Wellness',s:'Supplements, mental health, apps',c:'#34A853'},{e:'💄',n:'Beauty & Skincare',s:'Cosmetics, care, aesthetics',c:'#EC4899'},{e:'🎮',n:'Gaming & Esports',s:'Studios, streaming, tournaments',c:'#8B5CF6'},{e:'📸',n:'Photography & Film',s:'Production, studios, content',c:'#f97316'},{e:'🎓',n:'Education & Coaching',s:'Courses, tutoring, learning',c:'#3B82F6'},{e:'✈️',n:'Travel & Lifestyle',s:'Agencies, experiences, hospitality',c:'#14B8A6'},{e:'⚖️',n:'Law & Consulting',s:'Advisory, professional services',c:'#6B7280'},{e:'🚗',n:'Automotive',s:'Dealerships, mods, rentals',c:'#EAB308'},{e:'🏗️',n:'Architecture & Interior',s:'Design, renovation, development',c:'#f97316'},{e:'🌱',n:'Sustainability',s:'Green tech, environment, impact',c:'#34A853'},{e:'🎪',n:'Events & Entertainment',s:'Festivals, shows, experiences',c:'#EC4899'},{e:'🔗',n:'Crypto & Web3',s:'Blockchain, NFTs, DeFi',c:'#8B5CF6'},{e:'🛒',n:'E-Commerce',s:'Online stores, dropshipping, DTC',c:'#3B82F6'},{e:'❤️',n:'Non-Profit & Social',s:'Charity, community, impact',c:'#FF2B2B'},{e:'💪',n:'Fitness & Personal Training',s:'Gyms, coaching, online training',c:'#34A853'},{e:'📊',n:'Trading & Investing',s:'Stocks, forex, crypto trading',c:'#EAB308'}];
+const drills={'Clothing & Fashion':{ico:'👕',q:"What's your clothing style?",sub:'Niche = precise match.',cc:'#FF2B2B',opts:[{ico:'🛹',e:'streetwear',t:'Streetwear & Urban',s:'Hype, culture, drops, sneakers'},{ico:'💎',e:'luxury',t:'Luxury & High-end',s:'Premium, exclusive, designer'},{ico:'⚪',e:'minimal',t:'Minimalist & Clean',s:'Timeless, simple, refined'},{ico:'🌿',e:'sustainable',t:'Sustainable & Ethical',s:'Eco-conscious, slow fashion'},{ico:'👟',e:'sports',t:'Sportswear & Athletic',s:'Performance, activewear'},{ico:'🎭',e:'vintage',t:'Vintage & Archive',s:'Retro, secondhand, rare pieces'}]},'Tech & AI':{ico:'💻',q:'What kind of tech?',sub:"Tech is huge — tell us your lane.",cc:'#3B82F6',opts:[{ico:'📱',e:'mobile',t:'Mobile Apps',s:'iOS, Android, consumer'},{ico:'🤖',e:'ai',t:'AI & Machine Learning',s:'LLMs, automation, AI tools'},{ico:'☁️',e:'saas',t:'SaaS & B2B Software',s:'Subscriptions, enterprise'},{ico:'🛒',e:'ecomtech',t:'E-commerce Tech',s:'Shopify, retail tech, DTC'},{ico:'🔗',e:'web3',t:'Web3 & Blockchain',s:'Crypto, NFTs, decentralized'},{ico:'🔒',e:'cyber',t:'Cybersecurity',s:'Privacy, security, infosec'}]},'Content & Media':{ico:'🎬',q:'What platform?',sub:'Platform defines your partner.',cc:'#EC4899',opts:[{ico:'📱',e:'tiktok',t:'TikTok',s:'Short form, viral, trends'},{ico:'📺',e:'youtube',t:'YouTube',s:'Long form, education, entertainment'},{ico:'📸',e:'instagram',t:'Instagram',s:'Photos, Reels, lifestyle'},{ico:'🎙️',e:'podcast',t:'Podcast & Audio',s:'Interviews, storytelling'},{ico:'✍️',e:'newsletter',t:'Newsletter & Written',s:'Substack, blogs, email'},{ico:'🎮',e:'twitch',t:'Twitch & Live',s:'Gaming, streaming, live shows'}]},'E-Commerce':{ico:'🛒',q:"What's your e-commerce model?",sub:'Find a partner who knows your model.',cc:'#3B82F6',opts:[{ico:'📦',e:'dropshipping',t:'Dropshipping',s:'No inventory, supplier-direct'},{ico:'🏷️',e:'dtc',t:'DTC & Private Label',s:'Own brand, direct to customer'},{ico:'🌐',e:'marketplace',t:'Marketplace',s:'Platform, aggregator'},{ico:'📱',e:'social',t:'Social Commerce',s:'TikTok shop, Instagram'},{ico:'♻️',e:'reselling',t:'Reselling & Arbitrage',s:'Flipping, arbitrage'},{ico:'📬',e:'subscription',t:'Subscription Box',s:'Recurring, curated, membership'}]},'Business & Finance':{ico:'📈',q:"What's your business focus?",sub:'Tell us your lane.',cc:'#14B8A6',opts:[{ico:'🛒',e:'ecommerce',t:'E-commerce & Retail',s:'Online stores, Amazon, DTC'},{ico:'💼',e:'consulting',t:'Consulting & Services',s:'B2B, advisory, professional'},{ico:'💰',e:'investing',t:'Investing & Finance',s:'Stocks, real estate, portfolio'},{ico:'🚀',e:'startup',t:'Tech Startup',s:'Venture-backed, SaaS, product'},{ico:'🏪',e:'franchise',t:'Franchise & Physical',s:'Physical locations, franchise'},{ico:'🌐',e:'agency',t:'Agency & Marketing',s:'Creative, digital, performance'}]}};
+const s2Cfgs={cofounder:{ico:'📈',q:"What stage are you in?",sub:"Be honest — this shapes who your co-founder needs to be.",multi:false,opts:[{ico:'💡',e:'idea',t:'Idea only',s:'I have the concept. Nothing has been built yet.',oc:'#FF2B2B'},{ico:'🔎',e:'research',t:'Researching / validating',s:'Testing the idea. Talking to people. Figuring out if it works.',oc:'#f97316'},{ico:'🔨',e:'mvp',t:'Building MVP',s:'In active development. Something is being made.',oc:'#EAB308'},{ico:'🚀',e:'launched',t:'Launched',s:"It's live. Real people can use it.",oc:'#34A853'},{ico:'👥',e:'users',t:'Getting users',s:'Live and growing. Working on getting more people in.',oc:'#3B82F6'},{ico:'💰',e:'revenue',t:'Making revenue',s:"Money is coming in. I need help scaling the income.",oc:'#8B5CF6'},{ico:'📈',e:'scaling',t:'Scaling',s:"Growing fast. Need the right person to handle the scale.",oc:'#EC4899'}]}};
+function esc(s){return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+function getS3Cfg(){return{ico:'🏗️',q:"What space is this in?",sub:"Pick the industry closest to what you're building.",ctx:'Co-founder · '+d.s2L,type:'cats',multi:false};}
+function getS4Cfg(){const dd=drills[d.s3val];if(!dd)return null;return{ico:dd.ico,q:dd.q,sub:dd.sub,cc:dd.cc,ctx:d.s3val,opts:dd.opts,type:'single'};}
+function buildStep(sn,cfg){
+  const el=document.getElementById('s'+sn);if(!el)return;
+  let h=`<span class="s-ico">${cfg.ico}</span><div class="s-lbl">Step ${sn} of ${TOTAL}</div><div class="s-q">${cfg.q}</div><div class="s-sub">${cfg.sub}</div>`;
+  if(cfg.ctx)h+=`<div class="s-ctx"><span>✦</span>${cfg.ctx}</div>`;
+  if(cfg.type==='cats'){
+    h+=`<div class="search-wrap"><span>🔎</span><input class="search-inp" type="text" placeholder="Search categories..." oninput="searchCats(${sn},this.value,${cfg.multi})" autocomplete="off"></div>`;
+    h+=`<div class="pop-lbl">🔥 Popular</div><div class="chips" id="s${sn}chips">`;
+    cats.slice(0,6).forEach(c=>{h+=`<div class="chip" data-n="${c.n}" onclick="pickPopChip(${sn},this,'${c.e}','${c.n.replace(/'/g,"\\'")}','${c.c}',${cfg.multi})">${c.e} ${c.n.split(' ')[0]}</div>`;});
+    h+=`</div><div class="sec-lbl">All 25 categories</div><div class="cat-grid" id="s${sn}grid"></div>`;
+    h+=`<div class="or-div">or</div><input class="other-inp" type="text" placeholder="✏️ Type your own..." oninput="setOtherCat(${sn},this.value)">`;
+    el.innerHTML=h;buildCatGrid(sn,cfg.multi,'');
+  }else{h+=`<div class="opts">`;(cfg.opts||[]).forEach(o=>{const fn=cfg.multi?`togMulti(${sn},this,'${o.e}','${o.t.replace(/'/g,"\\'")}','${o.ico||o.e}')`:`pickSingle(${sn},this,'${o.ico||o.e}','${o.e}','${o.t.replace(/'/g,"\\'")}')`;h+=`<div class="opt" style="--oc:${o.oc||o.cc||'#FF2B2B'}" onclick="${fn}"><div class="opt-bg"></div><span class="opt-ico">${o.ico||'✦'}</span><div class="opt-body"><div class="opt-n">${o.t}</div><div class="opt-s">${o.s}</div></div><div class="opt-chk">✓</div></div>`;});h+=`</div>`;el.innerHTML=h;}
+}
+function buildCatGrid(sn,multi,filter){const g=document.getElementById('s'+sn+'grid');if(!g)return;const list=filter?cats.filter(c=>c.n.toLowerCase().includes(filter.toLowerCase())||c.s.toLowerCase().includes(filter.toLowerCase())):cats;if(!list.length){g.innerHTML='<div class="no-res">No results — type below 👇</div>';return;}const isSel=(n)=>(sn===3&&!multi&&d.s3val===n)||(sn===3&&multi&&d.s3multi.includes(n))||(sn===4&&d.s4val===n);const fn=(c)=>multi?`pickMultiCat(${sn},this,'${c.e}','${c.n.replace(/'/g,"\\'")}','${c.c}')`:`pickSingleCat(${sn},this,'${c.e}','${c.n.replace(/'/g,"\\'")}','${c.c}')`;g.innerHTML=list.map(c=>`<div class="cat${isSel(c.n)?' on':''}" style="--cc:${c.c}" onclick="${fn(c)}"><div class="cat-bg"></div><div class="cat-top"><span class="cat-e">${c.e}</span><div class="cat-chk">✓</div></div><div class="cat-n">${c.n}</div><div class="cat-s">${c.s}</div></div>`).join('');}
+function searchCats(sn,v,multi){buildCatGrid(sn,multi,v);}
+function pickSingleCat(sn,el,e,n,c){document.querySelectorAll('#s'+sn+'grid .cat').forEach(i=>i.classList.remove('on'));el.classList.add('on');document.querySelectorAll('#s'+sn+'chips .chip').forEach(p=>p.classList.toggle('on',p.dataset.n===n));if(sn===3){d.s3val=n;d.s3L=n;d.s3ico=e;}else{d.s4val=n;d.s4L=n;d.s4ico=e;}updatePill();}
+function pickMultiCat(sn,el,e,n){el.classList.toggle('on');const on=el.classList.contains('on');if(on){d.s3multi.push(n);d.s3multiL.push(n);}else{const i=d.s3multi.indexOf(n);if(i>-1){d.s3multi.splice(i,1);d.s3multiL.splice(i,1);}}d.s3val=d.s3multi[0]||'';d.s3L=d.s3multi[0]||'';d.s3ico=e;const sc=document.getElementById('s'+sn+'selct');if(sc){sc.style.display=d.s3multi.length?'block':'none';sc.textContent='✓ '+d.s3multi.length+' selected';}updatePill();}
+function pickPopChip(sn,chip,e,n,c,multi){if(multi){pickMultiCat(sn,chip,e,n);}else{document.querySelectorAll('#s'+sn+'grid .cat').forEach(i=>i.classList.remove('on'));document.querySelectorAll('#s'+sn+'chips .chip').forEach(p=>p.classList.remove('on'));chip.classList.add('on');if(sn===3){d.s3val=n;d.s3L=n;d.s3ico=e;}else{d.s4val=n;d.s4L=n;d.s4ico=e;}updatePill();}}
+function setOtherCat(sn,val){if(!val)return;if(sn===3){d.s3val=val;d.s3L=val;d.s3ico='✏️';}else{d.s4val=val;d.s4L=val;d.s4ico='✏️';}document.querySelectorAll('#s'+sn+'grid .cat').forEach(i=>i.classList.remove('on'));updatePill();}
+function pickSingle(sn,el,ico,val,label){el.closest('.opts').querySelectorAll('.opt').forEach(o=>{o.classList.remove('on');o.querySelector('.opt-chk').style.color='transparent';});el.classList.add('on');el.querySelector('.opt-chk').style.color='#fff';if(sn===3){d.s3val=val;d.s3L=label;d.s3ico=ico;}else if(sn===4){d.s4val=val;d.s4L=label;d.s4ico=ico;}updatePill();}
+function togMulti(sn,el,val,label,ico){el.classList.toggle('on');const on=el.classList.contains('on');el.querySelector('.opt-chk').style.color=on?'#fff':'transparent';if(sn===2){if(on){d.s2multi.push(val);d.s2multiL.push(label);}else{const i=d.s2multi.indexOf(val);if(i>-1){d.s2multi.splice(i,1);d.s2multiL.splice(i,1);}}}updatePill();}
+function setS5Text(){const niche=d.s4L||d.s3L||'';const ic=document.getElementById('s5ico'),q=document.getElementById('s5q'),sub=document.getElementById('s5sub'),ta=document.getElementById('projDesc'),pn=document.getElementById('projName'),hint=document.getElementById('s5hint');if(!q)return;if(ic)ic.textContent='✍️';q.textContent=niche?`Tell us about your ${niche} project.`:"Tell us what you're building.";if(sub)sub.textContent="This is the first thing your match reads about you — make it real.";if(pn)pn.placeholder='Project or company name (optional)';if(ta)ta.placeholder="Describe what you're building. What is it, who's it for, what stage is it at?";if(hint)hint.textContent="Be specific. The right person is out there reading this.";}
+function countChars(el){const n=el.value.length;const ct=document.getElementById('charCt');if(ct){ct.textContent=n+' / 200';ct.style.color=n>180?'var(--red)':'var(--tx3)';}}
+const cfWeaknessOpts=[{ico:'💻',e:'tech',t:'Technical co-founder',s:'Someone who can build the product.',oc:'#3B82F6'},{ico:'🤝',e:'sales',t:'Sales co-founder',s:'Someone who can get customers and close deals.',oc:'#34A853'},{ico:'📊',e:'marketing',t:'Marketing / content co-founder',s:'Someone who can grow attention and demand.',oc:'#f97316'},{ico:'⚙️',e:'ops',t:'Operations co-founder',s:'Someone who can run systems, people, and execution.',oc:'#8B5CF6'},{ico:'🎯',e:'product',t:'Product / strategy co-founder',s:'Someone who can shape the idea and make smart decisions.',oc:'#EAB308'},{ico:'🎨',e:'design',t:'Creative / brand co-founder',s:'Someone who can make the product feel different and desirable.',oc:'#FF2B2B'}];
+function buildS7(){const el=document.getElementById('s7opts');if(!el)return;el.innerHTML=cfWeaknessOpts.map(o=>`<div class="opt" style="--oc:${o.oc}" onclick="pickWeakness(this,'${o.e}','${o.t.replace(/'/g,"\\'")}','${o.ico}')"><div class="opt-bg"></div><span class="opt-ico">${o.ico}</span><div class="opt-body"><div class="opt-n">${o.t}</div><div class="opt-s">${o.s}</div></div><div class="opt-chk">✓</div></div>`).join('');}
+function pickWeakness(el,val,label,ico){document.querySelectorAll('#s7opts .opt').forEach(o=>{o.classList.remove('on');o.querySelector('.opt-chk').style.color='transparent';});el.classList.add('on');el.querySelector('.opt-chk').style.color='#fff';d.weakness=val;d.weaknessL=label;d.weaknessIco=ico;}
+function buildS8(){const el=document.getElementById('s8opts');if(!el)return;const opts=[{ico:'🤝',oc:'#FF2B2B',val:'50_50',label:'Equal 50/50 partner',sub:'We build and own it together.'},{ico:'🔭',oc:'#f97316',val:'vision',label:'Vision-led partnership',sub:'I have the vision, but I want a serious partner.'},{ico:'⚡',oc:'#34A853',val:'execution',label:'Execution-led partnership',sub:'I want someone who pushes action and speed.'},{ico:'🧪',oc:'#3B82F6',val:'trial',label:'Trial first',sub:'Work together before deciding on equity.'},{ico:'🌊',oc:'#8B5CF6',val:'open',label:'Not sure yet',sub:'I want to meet the right person first.'}];el.innerHTML=opts.map(o=>`<div class="opt" style="--oc:${o.oc}" onclick="pickRelation(this,'${o.val}','${o.label}')"><div class="opt-bg"></div><span class="opt-ico">${o.ico}</span><div class="opt-body"><div class="opt-n">${o.label}</div><div class="opt-s">${o.sub}</div></div><div class="opt-chk">✓</div></div>`).join('');}
+function pickRelation(el,val,label){document.querySelectorAll('#s8opts .opt').forEach(o=>{o.classList.remove('on');o.querySelector('.opt-chk').style.color='transparent';});el.classList.add('on');el.querySelector('.opt-chk').style.color='#fff';d.relation=val;d.relationL=label;}
+function buildS9(){const el=document.getElementById('s11');if(!el)return;const opts=[{ico:'🔥',oc:'#FF2B2B',val:'ambition',label:'Same ambition',sub:'They want what you want, at the same level.'},{ico:'🧩',oc:'#3B82F6',val:'skill',label:'Complementary skill',sub:'They fill the gap you cannot fill yourself.'},{ico:'🏭',oc:'#34A853',val:'industry',label:'Same industry interest',sub:'They care about the same space you do.'},{ico:'💪',oc:'#f97316',val:'ethic',label:'Strong work ethic',sub:'They show up, do the work, no excuses.'},{ico:'🗣️',oc:'#8B5CF6',val:'comms',label:'Good communication',sub:'Clear, honest, no guessing games.'},{ico:'🛡️',oc:'#EAB308',val:'trust',label:'Trust / loyalty',sub:'Someone you can count on when things get hard.'},{ico:'🌍',oc:'#EC4899',val:'longterm',label:'Long-term mindset',sub:'Not looking for quick wins. Building something that lasts.'}];el.innerHTML=`<span class="s-ico">⭐</span><div class="s-lbl">Step 9 of 11</div><div class="s-q">What matters most in a co-founder?</div><div class="s-sub">Pick everything that matters to you.</div><div class="multi-hint">Pick all that apply</div><div class="opts">${opts.map(o=>`<div class="opt" style="--oc:${o.oc}" onclick="togMatters(this,'${o.val}','${o.label}')"><div class="opt-bg"></div><span class="opt-ico">${o.ico}</span><div class="opt-body"><div class="opt-n">${o.label}</div><div class="opt-s">${o.sub}</div></div><div class="opt-chk">✓</div></div>`).join('')}</div>`;}
+function togMatters(el,val,label){el.classList.toggle('on');const on=el.classList.contains('on');el.querySelector('.opt-chk').style.color=on?'#fff':'transparent';if(on){d.matters.push(val);d.mattersL.push(label);}else{const i=d.matters.indexOf(val);if(i>-1){d.matters.splice(i,1);d.mattersL.splice(i,1);}}}
+function pickCommit(el,ico,label){document.querySelectorAll('#s6 .opt').forEach(o=>{o.classList.remove('on');o.querySelector('.opt-chk').style.color='transparent';});el.classList.add('on');el.querySelector('.opt-chk').style.color='#fff';d.commit=label;d.commitIco=ico;updatePill();}
+function pickLoc(el,ico,label){document.querySelectorAll('#s9 .opts .opt').forEach(o=>{o.classList.remove('on');o.querySelector('.opt-chk').style.color='transparent';});el.classList.add('on');el.querySelector('.opt-chk').style.color='#fff';d.loc=ico;d.locL=label;}
+function pickAge(el,age){document.querySelectorAll('.age-card').forEach(c=>c.classList.remove('on'));el.classList.add('on');d.age=age;}
+const allCities=[
+  // Deutschland 🇩🇪
+  'Berlin','Hamburg','Munich','München','Cologne','Köln','Frankfurt','Stuttgart',
+  'Düsseldorf','Dortmund','Essen','Leipzig','Bremen','Dresden','Hanover','Hannover',
+  'Nuremberg','Nürnberg','Duisburg','Bochum','Wuppertal','Bielefeld','Bonn',
+  'Mannheim','Karlsruhe','Augsburg','Wiesbaden','Münster','Gelsenkirchen','Aachen',
+  'Kiel','Lübeck','Freiburg','Erfurt','Mainz','Rostock','Kassel','Halle','Magdeburg',
+  // Österreich 🇦🇹
+  'Vienna','Wien','Graz','Linz','Salzburg','Innsbruck',
+  // Schweiz 🇨🇭
+  'Zurich','Zürich','Geneva','Genf','Basel','Bern','Lausanne',
+  // Europa
+  'London','Paris','Amsterdam','Barcelona','Madrid','Lisbon','Rome','Milan',
+  'Brussels','Copenhagen','Oslo','Stockholm','Helsinki','Dublin','Prague',
+  'Warsaw','Budapest','Bucharest','Athens','Kiev','Kyiv','Sofia','Zagreb',
+  'Ljubljana','Bratislava','Tallinn','Riga','Vilnius','Rotterdam','Antwerp',
+  'Lyon','Marseille','Nice','Toulouse','Valencia','Seville','Bilbao',
+  'Porto','Naples','Turin','Florence','Bologna','Venice','Palermo',
+  // Nordamerika
+  'New York','Los Angeles','Chicago','Houston','Phoenix','Philadelphia',
+  'San Antonio','San Diego','Dallas','San Jose','Austin','Jacksonville',
+  'San Francisco','Columbus','Charlotte','Indianapolis','Seattle','Denver',
+  'Nashville','Oklahoma City','Las Vegas','Louisville','Baltimore','Milwaukee',
+  'Toronto','Montreal','Vancouver','Calgary','Edmonton','Ottawa','Quebec City',
+  'Mexico City','Guadalajara','Monterrey',
+  // Südamerika
+  'São Paulo','Rio de Janeiro','Buenos Aires','Lima','Bogotá','Santiago',
+  'Caracas','Quito','La Paz','Montevideo','Asunción','Medellín',
+  // Asien
+  'Tokyo','Shanghai','Beijing','Hong Kong','Singapore','Seoul','Mumbai',
+  'Delhi','Bangalore','Hyderabad','Chennai','Kolkata','Jakarta','Manila',
+  'Bangkok','Kuala Lumpur','Taipei','Ho Chi Minh City','Hanoi','Dhaka',
+  'Karachi','Lahore','Islamabad','Colombo','Kathmandu','Yangon',
+  // Mittlerer Osten
+  'Dubai','Abu Dhabi','Riyadh','Jeddah','Doha','Kuwait City','Muscat',
+  'Beirut','Tel Aviv','Jerusalem','Amman','Cairo','Alexandria',
+  // Afrika
+  'Lagos','Nairobi','Johannesburg','Cape Town','Accra','Abidjan','Dakar',
+  'Dar es Salaam','Addis Ababa','Casablanca','Tunis','Kigali','Kampala',
+  // Ozeanien
+  'Sydney','Melbourne','Brisbane','Perth','Auckland','Wellington',
+  // Remote
+  'Remote',
+];
+function onCityInput(v){
+  document.getElementById('cityClear').style.display=v?'block':'none';
+  const sg=document.getElementById('citySugs');
+  if(!v){sg.style.display='none';return;}
+  const m=allCities.filter(c=>c.toLowerCase().includes(v.toLowerCase())).slice(0,6);
+  if(m.length){
+    sg.innerHTML=m.map(c=>`<div class="city-sug" onclick="pickCity('${c.replace(/'/g,"\'")}')"><span>📍</span><span>${c}</span></div>`).join('');
+  } else {
+    sg.innerHTML=`<div class="city-sug city-sug-use" onclick="pickCity('${v.replace(/'/g,"\'")}')"><span>📍</span><strong>${v}</strong><span class="sug-use">✓ Use this city</span></div>`;
+  }
+  sg.style.display='block';
+}
+function pickCity(city){d.city=city;document.getElementById('cityIn').value='';document.getElementById('citySugs').style.display='none';document.getElementById('cityChosen').style.display='flex';document.getElementById('cityChosenName').textContent=city;document.getElementById('cityClear').style.display='none';document.querySelectorAll('#s9 .chips .chip').forEach(c=>c.classList.toggle('on',c.textContent.includes(city)));}
+function clearCity(){d.city='';document.getElementById('cityIn').value='';document.getElementById('cityChosen').style.display='none';document.getElementById('cityClear').style.display='none';document.getElementById('citySugs').style.display='none';document.querySelectorAll('#s9 .chips .chip').forEach(c=>c.classList.remove('on'));document.getElementById('cityIn').focus();}
+function getSkillNeedCfg(){const skill=d.ans['skillType']||'';const Q="What exactly do you need help with?",SUB="Make the skill gap specific.";const M={tech:{ico:'💻',opts:[{e:'website',ico:'🌐',t:'Website',s:'Landing page, business site, web app.',oc:'#3B82F6'},{e:'mobile',ico:'📱',t:'Mobile app',s:'iOS, Android, consumer app.',oc:'#FF2B2B'},{e:'marketplace',ico:'🔁',t:'Marketplace',s:'People, products, or services connecting together.',oc:'#34A853'},{e:'ai_auto',ico:'🤖',t:'AI / automation',s:'Chatbots, workflows, tools, automations.',oc:'#8B5CF6'},{e:'backend',ico:'🗄️',t:'Backend / database',s:'User accounts, payments, data, infrastructure.',oc:'#EAB308'},{e:'mvp',ico:'🧪',t:'MVP',s:'A first version people can test.',oc:'#f97316'}]},design:{ico:'🎨',opts:[{e:'logo',ico:'🪪',t:'Logo / identity',s:'Logo, typography, colors, full identity.',oc:'#FF2B2B'},{e:'web_design',ico:'🖥️',t:'Website design',s:'Landing page, homepage, web visuals.',oc:'#3B82F6'},{e:'app_ui',ico:'📱',t:'App UI / UX',s:'Screens, user flow, product experience.',oc:'#34A853'},{e:'social_design',ico:'📲',t:'Social media design',s:'Posts, templates, profile, content style.',oc:'#EC4899'},{e:'packaging',ico:'📦',t:'Product packaging',s:'Box, label, physical product presentation.',oc:'#f97316'},{e:'brand_dir',ico:'🧭',t:'Brand direction',s:'The overall look, feel, and positioning.',oc:'#8B5CF6'}]},sales:{ico:'🤝',opts:[{e:'cold_outreach',ico:'📩',t:'Cold outreach',s:'DMs, email, calls, prospecting.',oc:'#FF2B2B'},{e:'closing',ico:'🤝',t:'Closing customers',s:'Turning conversations into paying customers.',oc:'#34A853'},{e:'partnerships',ico:'🔗',t:'Partnerships',s:'Finding brands, creators, or companies to work with.',oc:'#3B82F6'},{e:'scripts',ico:'📝',t:'Sales scripts',s:'What to say, how to pitch, how to follow up.',oc:'#f97316'},{e:'lead_gen',ico:'🎯',t:'Lead generation',s:'Finding people who may actually buy.',oc:'#8B5CF6'},{e:'positioning',ico:'💬',t:'Offer positioning',s:'Making the offer easier to understand and sell.',oc:'#EAB308'}]},marketing:{ico:'📈',opts:[{e:'shortform',ico:'🎥',t:'Short-form videos',s:'TikTok, Reels, Shorts.',oc:'#FF2B2B'},{e:'social_growth',ico:'📲',t:'Instagram / TikTok growth',s:'Growing attention on social platforms.',oc:'#f97316'},{e:'paid_ads',ico:'💸',t:'Paid ads',s:'Meta, TikTok, Google, paid traffic.',oc:'#3B82F6'},{e:'brand_strategy',ico:'🧠',t:'Brand strategy',s:'Positioning, messaging, content direction.',oc:'#8B5CF6'},{e:'creators',ico:'🤳',t:'Creator partnerships',s:'Influencers, UGC, collaborations.',oc:'#EC4899'},{e:'community',ico:'👥',t:'Community growth',s:'Turning followers into a real audience.',oc:'#34A853'}]},ops:{ico:'⚙️',opts:[{e:'daily',ico:'✅',t:'Daily tasks',s:'Making sure things get done.',oc:'#FF2B2B'},{e:'team_mgmt',ico:'👥',t:'Team management',s:'Managing people, freelancers, creators, staff.',oc:'#f97316'},{e:'systems',ico:'📋',t:'Systems / SOPs',s:'Workflows, checklists, repeatable processes.',oc:'#34A853'},{e:'support',ico:'💬',t:'Customer support',s:'Onboarding, replies, client experience.',oc:'#3B82F6'},{e:'events',ico:'🎟️',t:'Event logistics',s:'Vendors, timing, people, setup, checklists.',oc:'#8B5CF6'},{e:'proj_mgmt',ico:'🗂️',t:'Project management',s:'Keeping the project moving.',oc:'#EAB308'}]},finance:{ico:'💰',opts:[{e:'pricing',ico:'🏷️',t:'Pricing',s:'How much to charge.',oc:'#EAB308'},{e:'biz_model',ico:'🧩',t:'Business model',s:'How the business actually makes money.',oc:'#FF2B2B'},{e:'fundraising',ico:'💼',t:'Fundraising',s:'Investors, pitch, capital.',oc:'#3B82F6'},{e:'profit',ico:'📊',t:'Profit planning',s:'Costs, margins, revenue, cash flow.',oc:'#34A853'},{e:'research',ico:'🔍',t:'Market research',s:'Understanding demand, audience, competition.',oc:'#8B5CF6'},{e:'strategy',ico:'🧭',t:'Strategy / direction',s:'What to focus on next.',oc:'#f97316'}]},unsure:{ico:'🤔',opts:[{e:'diagnose',ico:'🧠',t:'Help me figure out what I need',s:'I need someone to diagnose the gap.',oc:'#FF2B2B'},{e:'review',ico:'🔎',t:'Someone to review my idea',s:'I want honest outside perspective.',oc:'#3B82F6'},{e:'prioritize',ico:'📌',t:'Someone to help me prioritize',s:'I need to know what matters first.',oc:'#34A853'},{e:'experience',ico:'🧓',t:'Someone with experience',s:'I want someone who has done it before.',oc:'#8B5CF6'},{e:'build_with',ico:'🤝',t:'Someone to build with',s:"I don't want to figure it out alone.",oc:'#f97316'},{e:'feedback',ico:'💬',t:'Honest feedback',s:"Tell me what I'm missing.",oc:'#EAB308'}]}};const cfg=M[skill];if(!cfg)return null;return{ico:cfg.ico,q:Q,sub:SUB,opts:cfg.opts};}
+
+function getCFSubCategoryCfg(){
+  const ind=d.ans['industry']||'';
+  const Q="What's your specific lane?",SUB="Niche = precise match.";
+  const M={
+    fashion:{ico:'👕',q:"What kind of fashion?",sub:"Fashion is wide — tell us your lane.",opts:[
+      {e:'streetwear',ico:'🛹',t:'Streetwear',s:'Hoodies, tees, drops, culture.',oc:'#FF2B2B'},
+      {e:'footwear',ico:'👟',t:'Footwear',s:'Sneakers, shoes, performance, lifestyle.',oc:'#3B82F6'},
+      {e:'accessories',ico:'🧢',t:'Accessories',s:'Hats, bags, jewelry, small goods.',oc:'#EAB308'},
+      {e:'luxury',ico:'🧵',t:'Luxury / premium',s:'High-end, minimal, elevated product.',oc:'#8B5CF6'},
+      {e:'manufacturing',ico:'🏭',t:'Manufacturing / sourcing',s:'Factories, samples, supply chain.',oc:'#34A853'},
+      {e:'fashion_content',ico:'🎨',t:'Fashion content / brand',s:'Campaigns, visuals, storytelling.',oc:'#EC4899'}]},
+    tech:{ico:'💻',q:"What kind of tech?",sub:"Tech is huge — tell us your lane.",opts:[
+      {e:'mobile',ico:'📱',t:'Mobile Apps',s:'iOS, Android, consumer.',oc:'#3B82F6'},
+      {e:'ai_ml',ico:'🤖',t:'AI & Machine Learning',s:'LLMs, automation, AI tools.',oc:'#8B5CF6'},
+      {e:'saas',ico:'☁️',t:'SaaS & B2B Software',s:'Subscriptions, enterprise.',oc:'#34A853'},
+      {e:'ecomm_tech',ico:'🛒',t:'E-commerce Tech',s:'Shopify, retail tech, DTC.',oc:'#f97316'},
+      {e:'web3',ico:'🔗',t:'Web3 & Blockchain',s:'Crypto, NFTs, decentralized.',oc:'#EAB308'},
+      {e:'cybersec',ico:'🔒',t:'Cybersecurity',s:'Privacy, security, infosec.',oc:'#EC4899'}]},
+    music:{ico:'🎵',q:"What's your sound?",sub:"Find someone who speaks your language.",opts:[
+      {e:'hiphop',ico:'🎤',t:'Hip-hop & Rap',s:'Beats, bars, trap, drill.',oc:'#FF2B2B'},
+      {e:'electronic',ico:'🎧',t:'Electronic & Dance',s:'House, techno, EDM.',oc:'#3B82F6'},
+      {e:'rock',ico:'🎸',t:'Rock & Alternative',s:'Indie, punk, metal.',oc:'#8B5CF6'},
+      {e:'rnb',ico:'🎷',t:'R&B & Soul',s:'Neo soul, funk, smooth.',oc:'#EC4899'},
+      {e:'pop',ico:'🎹',t:'Pop & Commercial',s:'Charts, mainstream, radio.',oc:'#f97316'},
+      {e:'other_music',ico:'🎻',t:'Other / Mixed Genre',s:'Jazz, classical, world, fusion.',oc:'#EAB308'}]},
+    sports:{ico:'🏀',q:"What's your sport?",sub:"Find your person in your exact discipline.",opts:[
+      {e:'basketball',ico:'🏀',t:'Basketball',s:'Coaching, training, leagues.',oc:'#f97316'},
+      {e:'soccer',ico:'⚽',t:'Soccer & Football',s:'Clubs, coaching, academies.',oc:'#34A853'},
+      {e:'mma',ico:'🥊',t:'MMA & Combat Sports',s:'Boxing, wrestling, martial arts.',oc:'#FF2B2B'},
+      {e:'gym',ico:'🏋️',t:'Gym & Lifting',s:'Bodybuilding, powerlifting.',oc:'#8B5CF6'},
+      {e:'running',ico:'🏃',t:'Running & Athletics',s:'Track, marathon, trail.',oc:'#3B82F6'},
+      {e:'other_sports',ico:'🎾',t:'Other Sport',s:'Tennis, golf, swimming, cycling.',oc:'#EAB308'}]},
+    content:{ico:'🎬',q:"What kind of media?",sub:"Pick the format you want to build around.",opts:[
+      {e:'shortform',ico:'🎥',t:'Short-form content',s:'TikTok, Reels, Shorts.',oc:'#FF2B2B'},
+      {e:'youtube',ico:'📺',t:'YouTube / long-form',s:'Shows, documentaries, education.',oc:'#3B82F6'},
+      {e:'podcast',ico:'🎙️',t:'Podcast',s:'Audio, interviews, conversations.',oc:'#8B5CF6'},
+      {e:'newsletter',ico:'📰',t:'Newsletter / writing',s:'Email, essays, publishing.',oc:'#EAB308'},
+      {e:'production',ico:'🎬',t:'Production studio',s:'Client content, shoots, creative direction.',oc:'#34A853'},
+      {e:'creator_brand',ico:'🤳',t:'Creator brand',s:'Personal brand, influencer, audience.',oc:'#EC4899'}]},
+    food:{ico:'🍔',q:"What type of food business?",sub:"Your lane in the food world.",opts:[
+      {e:'restaurant',ico:'🍽️',t:'Restaurant & Dining',s:'Full service, casual, fine dining.',oc:'#f97316'},
+      {e:'fast_food',ico:'🚀',t:'Fast Food & QSR',s:'Quick service, franchising.',oc:'#FF2B2B'},
+      {e:'delivery',ico:'🚚',t:'Delivery & Ghost Kitchen',s:'Delivery-first, dark kitchen.',oc:'#3B82F6'},
+      {e:'health_food',ico:'🥗',t:'Health & Wellness Food',s:'Clean eating, organic, functional.',oc:'#34A853'},
+      {e:'beverage',ico:'🥂',t:'Beverage & Drinks',s:'Coffee, juice, energy drinks.',oc:'#8B5CF6'},
+      {e:'catering',ico:'🎂',t:'Catering & Events',s:'Events, private dining.',oc:'#EAB308'}]},
+    health:{ico:'💊',q:"What's your wellness focus?",sub:"Find someone who understands your space.",opts:[
+      {e:'mental',ico:'🧘',t:'Mental Health & Mindfulness',s:'Therapy tech, meditation.',oc:'#8B5CF6'},
+      {e:'supplements',ico:'💊',t:'Supplements & Nutrition',s:'Vitamins, protein, health products.',oc:'#34A853'},
+      {e:'fitness',ico:'🏃',t:'Fitness & Movement',s:'Training, yoga, physical wellness.',oc:'#FF2B2B'},
+      {e:'sleep',ico:'😴',t:'Sleep & Recovery',s:'Sleep tech, biohacking.',oc:'#3B82F6'},
+      {e:'holistic',ico:'🌿',t:'Holistic & Alternative',s:'Natural remedies, herbalism.',oc:'#EAB308'},
+      {e:'health_tech',ico:'👨‍⚕️',t:'Health Tech',s:'Apps, wearables, telehealth.',oc:'#EC4899'}]},
+    local:{ico:'🏪',q:"What kind of local business?",sub:"Tell us your exact type.",opts:[
+      {e:'restaurant_loc',ico:'🍽️',t:'Restaurant & Food',s:'Dining, takeaway, catering.',oc:'#f97316'},
+      {e:'gym_studio',ico:'🏋️',t:'Gym / Studio',s:'Fitness, yoga, martial arts.',oc:'#34A853'},
+      {e:'clinic',ico:'🏥',t:'Clinic / Healthcare',s:'Medical, dental, therapy.',oc:'#3B82F6'},
+      {e:'real_estate',ico:'🏠',t:'Real Estate',s:'Property, rentals, development.',oc:'#EAB308'},
+      {e:'retail',ico:'🛍️',t:'Retail Shop',s:'Products, boutique, store.',oc:'#EC4899'},
+      {e:'trades',ico:'🔧',t:'Trades & Services',s:'Electrician, plumber, cleaning, logistics.',oc:'#8B5CF6'}]},
+    ecomm:{ico:'🛒',q:"What's your e-commerce model?",sub:"Find a partner who knows your model.",opts:[
+      {e:'dropshipping',ico:'📦',t:'Dropshipping',s:'No inventory, supplier-direct.',oc:'#3B82F6'},
+      {e:'dtc',ico:'🏷️',t:'DTC & Private Label',s:'Own brand, direct to customer.',oc:'#FF2B2B'},
+      {e:'marketplace',ico:'🌐',t:'Marketplace',s:'Platform, aggregator.',oc:'#34A853'},
+      {e:'social_comm',ico:'📱',t:'Social Commerce',s:'TikTok shop, Instagram.',oc:'#EC4899'},
+      {e:'reselling',ico:'♻️',t:'Reselling & Arbitrage',s:'Flipping, arbitrage.',oc:'#EAB308'},
+      {e:'subscription',ico:'📬',t:'Subscription Box',s:'Recurring, curated, membership.',oc:'#8B5CF6'}]},
+    events:{ico:'🎟️',q:"What kind of events / community?",sub:"Tell us what kind of people you want to gather.",opts:[
+      {e:'parties',ico:'🎉',t:'Parties',s:'Social events, nightlife, youth culture.',oc:'#FF2B2B'},
+      {e:'networking',ico:'🤝',t:'Networking events',s:'Founders, creators, professionals.',oc:'#3B82F6'},
+      {e:'fitness_comm',ico:'🏋️',t:'Fitness community',s:'Training, sports, wellness groups.',oc:'#34A853'},
+      {e:'music_events',ico:'🎵',t:'Music events',s:'Artists, DJs, concerts, culture.',oc:'#8B5CF6'},
+      {e:'founder_comm',ico:'💼',t:'Founder community',s:'Builders, entrepreneurs, business people.',oc:'#f97316'},
+      {e:'online_comm',ico:'🌐',t:'Online community',s:'Discord, group chats, digital network.',oc:'#EAB308'}]},
+    agency:{ico:'💼',q:"What type of agency / service?",sub:"Find a co-founder who gets your model.",opts:[
+      {e:'mkt_agency',ico:'📈',t:'Marketing agency',s:'Social, paid, SEO, content.',oc:'#f97316'},
+      {e:'consulting',ico:'💡',t:'Consulting / advisory',s:'Strategy, business, growth.',oc:'#FF2B2B'},
+      {e:'design_studio',ico:'🎨',t:'Design studio',s:'Branding, creative, visuals.',oc:'#EC4899'},
+      {e:'pr_comms',ico:'📣',t:'PR & comms',s:'Press, reputation, storytelling.',oc:'#3B82F6'},
+      {e:'tech_agency',ico:'💻',t:'Tech / dev agency',s:'Software, builds, automations.',oc:'#8B5CF6'},
+      {e:'local_services',ico:'🔧',t:'Local services',s:'Cleaning, logistics, trades.',oc:'#EAB308'}]},
+    open:{ico:'🌍',q:"What drives you most?",sub:"This helps us find someone who thinks like you.",opts:[
+      {e:'money_wealth',ico:'💰',t:'Money & wealth',s:"I want to build something that makes real money.",oc:'#EAB308'},
+      {e:'tech_innov',ico:'🤖',t:'Tech & innovation',s:'I want to build something that changes how things work.',oc:'#3B82F6'},
+      {e:'creative_culture',ico:'🎨',t:'Creative & culture',s:"I want to build something that looks and feels different.",oc:'#EC4899'},
+      {e:'people_impact',ico:'👥',t:'People & community',s:'I want to bring people together.',oc:'#34A853'},
+      {e:'health_impact',ico:'🌿',t:'Health & impact',s:'I want to help people live better.',oc:'#f97316'},
+      {e:'still_figuring',ico:'🌱',t:"Still figuring it out",s:"I know I want to build. I'm finding the right direction.",oc:'#6B7280'}]},
+    beauty:{ico:'💄',q:"What's your beauty niche?",sub:"Find someone who speaks your language.",opts:[
+      {e:'skincare',ico:'✨',t:'Skincare',s:'Serums, moisturisers, routines.',oc:'#EC4899'},
+      {e:'makeup',ico:'💄',t:'Makeup & Cosmetics',s:'Colour, looks, artistry.',oc:'#FF2B2B'},
+      {e:'haircare',ico:'💇',t:'Hair Care',s:'Products, styling, treatments.',oc:'#8B5CF6'},
+      {e:'natural_beauty',ico:'🌿',t:'Natural & Clean Beauty',s:'Organic, non-toxic.',oc:'#34A853'},
+      {e:'nails',ico:'💅',t:'Nails & Body',s:'Nail art, body care, fragrance.',oc:'#f97316'},
+      {e:'beauty_ecomm',ico:'🛍️',t:'Beauty E-commerce',s:'DTC, marketplace, subscription.',oc:'#3B82F6'}]},
+    gaming:{ico:'🎮',q:"What's your gaming niche?",sub:"Find someone who lives in the same world.",opts:[
+      {e:'esports',ico:'🏆',t:'Esports & Competitive',s:'Teams, tournaments, leagues.',oc:'#FF2B2B'},
+      {e:'game_streaming',ico:'📺',t:'Content & Streaming',s:'Twitch, YouTube gaming, creators.',oc:'#f97316'},
+      {e:'game_dev',ico:'💻',t:'Game Development',s:'Building games, engines, tools.',oc:'#3B82F6'},
+      {e:'mobile_gaming',ico:'📱',t:'Mobile Gaming',s:'Casual, hyper-casual, free-to-play.',oc:'#34A853'},
+      {e:'vr_gaming',ico:'🥽',t:'VR & Immersive',s:'Virtual reality, AR gaming.',oc:'#8B5CF6'},
+      {e:'web3_gaming',ico:'🃏',t:'Web3 Gaming',s:'Play-to-earn, blockchain games.',oc:'#EAB308'}]},
+    real_estate:{ico:'🏠',q:"What's your real estate focus?",sub:"Your corner of the market.",opts:[
+      {e:'residential',ico:'🏘️',t:'Residential',s:'Homes, apartments, rentals.',oc:'#EAB308'},
+      {e:'commercial',ico:'🏢',t:'Commercial',s:'Office, retail, industrial.',oc:'#3B82F6'},
+      {e:'development',ico:'🏗️',t:'Development & Flipping',s:'Building, renovating, flipping.',oc:'#f97316'},
+      {e:'re_investment',ico:'💼',t:'Investment & Portfolio',s:'REITs, multi-family, passive.',oc:'#34A853'},
+      {e:'short_term',ico:'✈️',t:'Short-term Rentals',s:'Airbnb, vacation rentals.',oc:'#FF2B2B'},
+      {e:'re_content',ico:'📱',t:'Real Estate Content',s:'Education, social, brand.',oc:'#8B5CF6'}]},
+    photography:{ico:'📸',q:"What's your visual focus?",sub:"Find the perfect creative partner.",opts:[
+      {e:'commercial_photo',ico:'📸',t:'Commercial & Advertising',s:'Campaigns, products, brands.',oc:'#f97316'},
+      {e:'film_narrative',ico:'🎬',t:'Film & Narrative',s:'Short films, features, storytelling.',oc:'#FF2B2B'},
+      {e:'editorial',ico:'📰',t:'Editorial & Documentary',s:'Journalism, news, documentary.',oc:'#3B82F6'},
+      {e:'events_photo',ico:'👰',t:'Events & Weddings',s:'Weddings, corporate, celebrations.',oc:'#EC4899'},
+      {e:'nature_photo',ico:'🌿',t:'Nature & Travel',s:'Landscape, wildlife, travel.',oc:'#34A853'},
+      {e:'music_video',ico:'🎵',t:'Music Video',s:'Artists, visuals, music.',oc:'#8B5CF6'}]},
+    education:{ico:'🎓',q:"What do you teach or coach?",sub:"Find someone in your exact niche.",opts:[
+      {e:'biz_coaching',ico:'💼',t:'Business & Entrepreneurship',s:'Startups, sales, leadership.',oc:'#FF2B2B'},
+      {e:'fitness_coaching',ico:'💪',t:'Fitness & Sports',s:'Personal training, coaching.',oc:'#34A853'},
+      {e:'mindset_coaching',ico:'🧠',t:'Mindset & Life Coaching',s:'Motivation, growth, habits.',oc:'#3B82F6'},
+      {e:'tech_education',ico:'💻',t:'Tech & Coding',s:'Programming, bootcamps, STEM.',oc:'#8B5CF6'},
+      {e:'creative_edu',ico:'🎨',t:'Creative Skills',s:'Art, music, design, writing.',oc:'#EC4899'},
+      {e:'academic',ico:'📚',t:'Academic & Tutoring',s:'School subjects, test prep.',oc:'#EAB308'}]},
+    travel:{ico:'✈️',q:"What's your travel focus?",sub:"Find someone who lives in the same world.",opts:[
+      {e:'travel_agency',ico:'✈️',t:'Travel Agency & Planning',s:'Booking, packages, experiences.',oc:'#14B8A6'},
+      {e:'hospitality',ico:'🏨',t:'Hotels & Accommodation',s:'Boutique hotels, hostels.',oc:'#3B82F6'},
+      {e:'adventure',ico:'🎒',t:'Adventure & Experiences',s:'Tours, activities, outdoor.',oc:'#34A853'},
+      {e:'travel_content',ico:'✍️',t:'Travel Content',s:'Travel creators, influencers.',oc:'#EC4899'},
+      {e:'corporate_travel',ico:'💼',t:'Corporate Travel',s:'Business travel, concierge.',oc:'#f97316'},
+      {e:'digital_nomad',ico:'🌍',t:'Digital Nomad',s:'Remote work, co-living.',oc:'#8B5CF6'}]},
+    crypto:{ico:'🔗',q:"What's your Web3 focus?",sub:"Find someone who understands the space.",opts:[
+      {e:'defi',ico:'🪙',t:'DeFi & Finance',s:'Protocols, trading, yield farming.',oc:'#EAB308'},
+      {e:'nft_art',ico:'🎨',t:'NFTs & Digital Art',s:'Collections, marketplaces.',oc:'#EC4899'},
+      {e:'web3_gaming_sub',ico:'🎮',t:'Web3 Gaming',s:'Play-to-earn, metaverse.',oc:'#8B5CF6'},
+      {e:'infrastructure',ico:'🏗️',t:'Infrastructure & Dev Tools',s:'Chains, protocols, tools.',oc:'#3B82F6'},
+      {e:'consumer_web3',ico:'📱',t:'Consumer & Social',s:'Social apps, DAOs.',oc:'#34A853'},
+      {e:'compliance',ico:'⚖️',t:'Compliance & Security',s:'Regulation, auditing.',oc:'#FF2B2B'}]}
+  };
+  const cfg=M[ind];
+  if(!cfg)return null;
+  return{ico:cfg.ico,q:cfg.q,sub:cfg.sub,opts:cfg.opts};
+}
+function buildCurrentStepHTML(){const t=d.lookType,cfg=PATHS[t];if(!cfg)return'';const def=cfg.steps[step-2];if(!def)return'';return buildStepHTML(def);}
+function buildStepHTML(def){let h='';if(def.type==='dynamic'){const dynCfg=window[def.dynFn]();h+=`<span class="s-ico">${dynCfg?dynCfg.ico:def.ico||'🎯'}</span><div class="s-lbl">Step ${step} of ${TOTAL}</div>`;if(dynCfg){h+=`<div class="s-q">${dynCfg.q}</div>`;if(dynCfg.sub)h+=`<div class="s-sub">${dynCfg.sub}</div>`;h+=buildChoiceHtml(def.key,dynCfg.opts);}}else{h+=`<span class="s-ico">${def.ico}</span><div class="s-lbl">Step ${step} of ${TOTAL}</div><div class="s-q">${def.q}</div>`;if(def.sub)h+=`<div class="s-sub">${def.sub}</div>`;if(def.type==='choice')h+=buildChoiceHtml(def.key,def.opts);else if(def.type==='multi'){h+=`<div class="multi-hint">Pick all that apply</div>`;h+=buildMultiHtml(def.key,def.opts);}else if(def.type==='text')h+=buildTextHtml(def);}return h;}
+function buildChoiceHtml(key,opts){
+  const cur=d.ans[key]||'';
+  const isKnown=opts.some(o=>o.e===cur);
+  const selE=isKnown?cur:(cur?'other':'');
+  const customVal=(!isKnown&&cur&&cur!=='other')?cur:'';
+  let h='<div class="opts">'+opts.map(o=>{const sel=selE===o.e;return`<div class="opt${sel?' on':''}" style="--oc:${o.oc}" onclick="pickAns('${key}',this,'${esc(o.e)}','${esc(o.t)}','${esc(o.ico||'')}')"><div class="opt-bg"></div><span class="opt-ico">${o.ico}</span><div class="opt-body"><div class="opt-n">${o.t}</div><div class="opt-s">${o.s}</div></div><div class="opt-chk"${sel?' style="color:#fff"':''}>✓</div></div>`;}).join('')+'</div>';
+  if(key==='industry'&&(selE==='other'||customVal)){h+=`<div class="type-own-wrap" style="margin-top:12px;"><div class="field-label">Your industry or space</div><input class="inp" id="industryOwnInput" type="text" placeholder="E.g. Architecture, Farming, Logistics..." autocomplete="off" value="${esc(customVal)}" oninput="saveCustomIndustry(this.value)" style="margin-bottom:0"></div>`;}
+  return h;
+}
+function buildMultiHtml(key,opts){const cur=d.ansM[key]||[];return'<div class="opts">'+opts.map(o=>{const sel=cur.includes(o.e);return`<div class="opt${sel?' on':''}" style="--oc:${o.oc}" onclick="togAns('${key}',this,'${esc(o.e)}','${esc(o.t)}')"><div class="opt-bg"></div><span class="opt-ico">${o.ico}</span><div class="opt-body"><div class="opt-n">${o.t}</div><div class="opt-s">${o.s}</div></div><div class="opt-chk"${sel?' style="color:#fff"':''}>✓</div></div>`;}).join('')+'</div>';}
+function buildTextHtml(def){let h='';(def.fields||[]).forEach(f=>{const fid=def.key+'_'+f.id;if(f.multiline){h+=`<div class="field-label">${f.label}</div><textarea class="inp ta" id="${fid}" data-k="${fid}" placeholder="${esc(f.placeholder)}" maxlength="${f.maxlen||200}" rows="5" oninput="saveTxt('${def.key}','${f.id}',this.value);countChars2(this,'${fid}ct')"></textarea><div class="char-row"><span class="char-hint">${f.hint||''}</span><span class="char-ct" id="${fid}ct">0 / ${f.maxlen||200}</span></div>`;}else{h+=`<div class="field-label">${f.label}</div><input class="inp" id="${fid}" data-k="${fid}" type="text" placeholder="${esc(f.placeholder)}" oninput="saveTxt('${def.key}','${f.id}',this.value)">`;}});return h;}
+function restorePathViewValues(){document.querySelectorAll('#pathView [data-k]').forEach(el=>{const k=el.getAttribute('data-k');if(!k)return;const v=d.ansTxt[k]||'';if(el.tagName==='TEXTAREA'){el.value=v;const ct=document.getElementById(el.id+'ct');if(ct&&v)ct.textContent=v.length+' / '+(el.maxLength||200);}else{el.value=v;}});}
+function pickAns(key,el,val,label,ico){
+  el.closest('.opts').querySelectorAll('.opt').forEach(o=>{o.classList.remove('on');const c=o.querySelector('.opt-chk');if(c)c.style.color='transparent';});
+  el.classList.add('on');el.querySelector('.opt-chk').style.color='#fff';
+  d.ans[key]=val;d.ansL[key]=label;d.ansI[key]=ico;
+  if(key==='industry'){
+    const pv=document.getElementById('pathView');
+    const ew=pv&&pv.querySelector('.type-own-wrap');
+    if(val==='other'){
+      if(!ew&&pv){const w=document.createElement('div');w.className='type-own-wrap';w.style.marginTop='12px';w.innerHTML='<div class="field-label">Your industry or space</div><input class="inp" id="industryOwnInput" type="text" placeholder="E.g. Architecture, Farming, Logistics..." autocomplete="off" oninput="saveCustomIndustry(this.value)" style="margin-bottom:0">';pv.appendChild(w);setTimeout(()=>{const i=document.getElementById('industryOwnInput');if(i)i.focus();},80);}
+    } else {if(ew)ew.remove();}
+  }
+  updatePill();
+}
+function togAns(key,el,val,label){el.classList.toggle('on');const on=el.classList.contains('on');el.querySelector('.opt-chk').style.color=on?'#fff':'transparent';if(!d.ansM[key])d.ansM[key]=[];if(!d.ansML[key])d.ansML[key]=[];if(on){d.ansM[key].push(val);d.ansML[key].push(label);}else{const i=d.ansM[key].indexOf(val);if(i>-1){d.ansM[key].splice(i,1);d.ansML[key].splice(i,1);}}}
+function saveTxt(key,fid,val){d.ansTxt[key+'_'+fid]=val;}
+function saveCustomIndustry(v){v=(v||'').trim();if(v){d.ans['industry']=v;d.ansL['industry']=v;d.ansI['industry']='✏️';}else{d.ans['industry']='other';d.ansL['industry']='Something else';d.ansI['industry']='✏️';}updatePill();}
+function countChars2(el,ctId){const n=el.value.length;const ct=document.getElementById(ctId);if(ct){ct.textContent=n+' / '+(el.maxLength||200);ct.style.color=n>180?'var(--red)':'var(--tx3)';}}
+function saveCurrentTextFields(){const t=d.lookType,cfg=PATHS[t];if(!cfg||step<2||step>11)return;const def=cfg.steps[step-2];if(!def||def.type!=='text')return;(def.fields||[]).forEach(f=>{const el=document.getElementById(def.key+'_'+f.id);if(el)d.ansTxt[def.key+'_'+f.id]=el.value;});}
+function elFor(n){if(n>=2&&n<=11)return 'pathView';if(n===12)return 's9';if(n===13)return 's10';return 's'+n;}
+function goTo(newStep,dir){
+  // Auto-skip null-return dynamic steps (e.g. unknown industry has no sub-categories)
+  if(newStep>=2&&newStep<=11&&d.lookType&&PATHS[d.lookType]){
+    const _def=PATHS[d.lookType].steps[newStep-2];
+    if(_def&&_def.type==='dynamic'&&!_def.req&&window[_def.dynFn]){
+      if(!window[_def.dynFn]()){goTo(newStep+dir,dir);return;}
+    }
+  }
+  const oldStep=step;const curId=elFor(oldStep);step=newStep;const nxtId=elFor(newStep);const cur=document.getElementById(curId);const nxt=document.getElementById(nxtId);if(!nxt)return;if(curId==='pathView'&&nxtId==='pathView'){cur.style.transition='opacity .15s,transform .15s';cur.style.opacity='0';cur.style.transform=dir>0?'translateX(20px)':'translateX(-20px)';setTimeout(()=>{cur.innerHTML=buildCurrentStepHTML();restorePathViewValues();cur.style.opacity='0';cur.style.transform=dir>0?'translateX(-20px)':'translateX(20px)';requestAnimationFrame(()=>requestAnimationFrame(()=>{cur.style.opacity='1';cur.style.transform='translateX(0)';window.scrollTo(0,0);setTimeout(()=>{cur.style.cssText='';},300);}));},160);updateUI();return;}if(nxtId==='pathView'){nxt.innerHTML=buildCurrentStepHTML();restorePathViewValues();}cur.style.transition='transform .3s cubic-bezier(.4,0,.2,1),opacity .3s';cur.style.transform=dir>0?'translateX(-30px)':'translateX(30px)';cur.style.opacity='0';setTimeout(()=>{cur.classList.remove('active');cur.style.cssText='';nxt.style.transform=dir>0?'translateX(30px)':'translateX(-30px)';nxt.style.opacity='0';nxt.classList.add('active');requestAnimationFrame(()=>requestAnimationFrame(()=>{nxt.style.transition='transform .3s cubic-bezier(.4,0,.2,1),opacity .3s';nxt.style.transform='translateX(0)';nxt.style.opacity='1';window.scrollTo(0,0);setTimeout(()=>{nxt.style.cssText='';},320);}));},260);updateUI();}
+function pickLook(el,type,ico,label){document.querySelectorAll('#s1 .opt').forEach(o=>{o.classList.remove('on');o.querySelector('.opt-chk').style.color='transparent';});el.classList.add('on');el.querySelector('.opt-chk').style.color='#fff';d.lookType=type;d.lookIco=ico;d.lookL=label;TOTAL=13;updatePill();}
+function next(){if(!isValid()){shakeStep();return;}const t=d.lookType;const cfg=PATHS[t];if(!cfg)return;if(step===1){d.ans={};d.ansL={};d.ansI={};d.ansM={};d.ansML={};d.ansTxt={};}saveCurrentTextFields();
+  // Save any typed custom industry before advancing
+  if(d.ans['industry']==='other'){const _ii=document.getElementById('industryOwnInput');if(_ii&&_ii.value.trim())saveCustomIndustry(_ii.value);}
+  if(step===cfg.total){submitFinal();return;}if(step===cfg.total-1){const cv=document.getElementById('cityIn')?.value;if(cv&&!d.city)d.city=cv;}goTo(step+1,1);}
+function prev(){if(step<=1)return;goTo(step-1,-1);}
+function handleCofounderNext(){if(step===1){d.s2val='';d.s2L='';d.s2ico='';d.s2multi=[];d.s2multiL=[];buildStep(2,s2Cfgs.cofounder);goTo(2,1);return;}if(step===2){d.s3val='';d.s3L='';d.s3ico='';d.s3multi=[];d.s3multiL=[];buildStep(3,getS3Cfg());goTo(3,1);return;}if(step===3){d.s4val='';d.s4L='';d.s4ico='';const s4=getS4Cfg();if(s4){buildStep(4,s4);goTo(4,1);}else{setS5Text();goTo(5,1);}return;}if(step===4){setS5Text();goTo(5,1);return;}if(step===5){d.projName=document.getElementById('projName').value||'';d.projDesc=document.getElementById('projDesc').value||'';goTo(6,1);setTimeout(()=>{const t=document.getElementById('teasers');if(t)t.style.display='block';},500);return;}if(step===6){buildS7();goTo(7,1);return;}if(step===7){buildS8();goTo(8,1);return;}if(step===8){buildS9();goTo(9,1);return;}if(step===9){goTo(10,1);return;}if(step===10){const cv=document.getElementById('cityIn').value;if(cv&&!d.city)d.city=cv;goTo(11,1);return;}if(step===11){submitFinal();return;}}
+function handleCofounderPrev(){if(step===5&&!getS4Cfg()){goTo(3,-1);return;}if(step>1)goTo(step-1,-1);}
+function isValid(){if(step===1)return!!d.lookType;const cfg=PATHS[d.lookType];if(!cfg)return true;if(step>=2&&step<=11){const def=cfg.steps[step-2];if(!def||!def.req)return true;if(def.type==='choice'||def.type==='dynamic')return!!d.ans[def.key];return true;}if(step===cfg.total-1)return!!d.loc;return true;}
+function updateUI(){document.getElementById('progBar').style.width=(step/TOTAL*100)+'%';document.getElementById('stepBadge').textContent='Step '+step+' of '+TOTAL;const curEl=document.getElementById(elFor(step));if(curEl){const lbl=curEl.querySelector('.s-lbl');if(lbl)lbl.textContent='Step '+step+' of '+TOTAL;}document.getElementById('backBtn').style.display=step>1?'block':'none';document.getElementById('goBtn').textContent=step===TOTAL?'Find My Match 🔍':'Continue →';}
+function updatePill(){const tags=[],cols=[];if(d.lookIco){tags.push(d.lookIco);cols.push('#FF2B2B');}const pc=PATHS[d.lookType];if(pc){const pc2=['#f97316','#34A853','#3B82F6'];pc.pillKeys.forEach((k,i)=>{const ico=d.ansI[k];if(ico){tags.push(ico);cols.push(pc2[i]||'#8B5CF6');}});}const el=document.getElementById('pillTags');if(!el)return;if(!tags.length){el.innerHTML='<span class="pill-empty">your profile builds here...</span>';return;}el.innerHTML=tags.map((t,i)=>`<span class="ptag" style="background:${cols[i]}">${t}</span>`).join('');}
+function shakeStep(){let el;const cfg=PATHS[d.lookType];if(cfg){if(step===cfg.total-1)el=document.getElementById('s9');else if(step===cfg.total)el=document.getElementById('s10');else el=document.getElementById(elFor(step));}else el=document.getElementById('s1');if(!el)return;el.style.animation='shake .3s';setTimeout(()=>el.style.animation='',300);}
+function markErr(id){const el=document.getElementById(id);if(!el)return;el.classList.add('err');el.focus();setTimeout(()=>el.classList.remove('err'),1200);}
+function submitFinal(){d.name=document.getElementById('nameIn').value.trim();d.email=document.getElementById('emailIn').value.trim();d.ig=document.getElementById('igIn').value.trim().replace('@','');d.refCode=sessionStorage.getItem('yb_ref')||'';if(!d.name){markErr('nameIn');return;}if(!d.ig){markErr('igIn');return;}if(!d.email||!d.email.includes('@')){markErr('emailIn');return;}document.getElementById('goBtn').classList.add('pulse');setTimeout(()=>{fireConfetti();setTimeout(startScan,400);},300);}
+function fireConfetti(){const colors=['#FF2B2B','#FF4D4D','#3B82F6','#34A853','#8B5CF6','#EAB308','#EC4899'];const btn=document.getElementById('goBtn');const r=btn.getBoundingClientRect();for(let i=0;i<28;i++){const el=document.createElement('div');el.className='conf';el.style.cssText=`left:${r.left+Math.random()*r.width}px;top:${r.top}px;background:${colors[~~(Math.random()*colors.length)]};animation-delay:${Math.random()*.35}s;animation-duration:${.7+Math.random()*.5}s;`;document.body.appendChild(el);setTimeout(()=>el.remove(),1200);}}
+function startScan(){saveToSupabase();document.getElementById('btmBar').style.display='none';document.getElementById('pill').style.display='none';document.getElementById('scanOv').classList.add('open');let fi=0;const iv=setInterval(()=>{document.querySelectorAll('.fc').forEach(f=>f.classList.remove('show'));document.getElementById('fc'+(fi%5)).classList.add('show');fi++;},520);const mind=d.lookType==='mindset';const ss4=document.getElementById('ss4txt');if(ss4)ss4.textContent=mind?'Finding people who think like you':'Matching commitment levels';['ss1','ss2','ss3','ss4'].forEach((id,i)=>{setTimeout(()=>{const el=document.getElementById(id);el.classList.add('done');el.querySelector('.ss-dot').textContent='✓';},700+i*750);});setTimeout(()=>{clearInterval(iv);document.querySelectorAll('.fc').forEach(f=>f.classList.remove('show'));showSuccess();},4200);}
+function showSuccess(){const t=d.lookType,mind=t==='mindset';const descs={cofounder:'Searching for your co-founder now. Zero cost until we find them.',skill:'Searching for your skill match now. Zero cost until we find them.',operator:'Searching for your operator now. Zero cost until we find them.',join:'Searching for the right opportunity now. Zero cost until we find one.',mindset:'Finding your people now. Zero cost until we connect you.'};const sd=document.getElementById('sucDesc');if(sd)sd.textContent=descs[t]||descs.cofounder;const n3t=document.getElementById('ns3t');if(n3t)n3t.textContent=mind?'You see who fits your circle':'You see their profile';const n3s=document.getElementById('ns3s');if(n3s)n3s.textContent=mind?'Who they are, what they\'re about, their city. You decide.':'Skill, idea, city. You decide if you\'re interested.';const n4s=document.getElementById('ns4s');if(n4s)n4s.textContent=mind?'Get their contact. Reach out. Build your circle.':'Get their contact. Reach out. Build something real.';const handle=cleanIG(d.ig)||d.name.toLowerCase().replace(/\s+/g,'_');document.getElementById('myCode').textContent='youbet.network/?ref='+handle;if(d.name)document.getElementById('profName').textContent=d.name+"'s Profile";const profTags=[],profTagCols=[];if(d.lookIco){profTags.push(d.lookIco);profTagCols.push('#FF2B2B');}const pc3=PATHS[t];if(pc3){['#34A853','#3B82F6'].forEach((col,i)=>{const k=pc3.pillKeys[i+1];if(k&&d.ansI[k]){profTags.push(d.ansI[k]);profTagCols.push(col);}});}document.getElementById('profTags').innerHTML=profTags.map((tag,i)=>`<span class="prof-tag" style="background:${profTagCols[i]}">${tag}</span>`).join('');let rows=[{ico:d.lookIco||'🔍',val:d.lookL}];const pc2=PATHS[t];if(pc2){pc2.steps.filter(s=>s.type==='choice'&&d.ans[s.key]).slice(0,5).forEach(s=>{rows.push({ico:d.ansI[s.key]||'✦',val:d.ansL[s.key]||''});});}rows.push({ico:'📍',val:(d.city||'')+(d.locL?' · '+d.locL:'')},{ico:'🎂',val:d.age},{ico:'📸',val:d.ig?'@'+d.ig:''});document.getElementById('profRows').innerHTML=rows.filter(r=>r.val&&r.val.length>1).map(r=>`<div class="prof-row"><span>${r.ico}</span><span>${r.val}</span></div>`).join('');const bp=[{name:'OFFGRID',desc:'Premium streetwear brand. Need a closer.',role:'Sales',color:'#FF2B2B'},{name:'youbet',desc:'The partner-matching platform. Need a content creator.',role:'Content',color:'#3B82F6'},{name:'Cypher AI',desc:'AI agency with 3 clients. Need a developer.',role:'Tech',color:'#8B5CF6'}];document.getElementById('bpCards').innerHTML=bp.map(p=>`<div class="bp-card" onclick="location.href='/project-board.html'"><div class="bp-top"><div class="bp-name">${p.name}</div><div class="bp-role" style="background:${p.color}">${p.role}</div></div><div class="bp-desc">${p.desc}</div></div>`).join('');document.getElementById('sucOv').classList.add('open');let cnt=7603;function tick(){if(Math.random()<.3){cnt++;const el=document.getElementById('sucCnt');if(el)el.textContent=cnt.toLocaleString();}setTimeout(tick,Math.random()*4500+2000);}tick();}
+function doShare(){const handle=cleanIG(d.ig)||d.name.toLowerCase().replace(/\s+/g,'_');const text=`Sign up using my code @${handle} — we both move up the queue. youbet.network`;if(navigator.share)navigator.share({title:'youbet',text,url:'https://youbet.network'});else{navigator.clipboard?.writeText(text).then(()=>alert('Copied! Share it 🔗')).catch(()=>alert('youbet.network — code @'+handle));}}
+function copyLink(){const val=(document.getElementById('myCode')||{}).textContent||'youbet.network';navigator.clipboard.writeText(val).catch(()=>{});const btn=document.getElementById('copyBtn');if(btn){btn.textContent='Copied ✓';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2200);}}
+function updateRefProgress(n){n=Math.min(n||0,2);[0,1].forEach(i=>{const el=document.getElementById('dot'+i);if(el)el.classList.toggle('done',i<n);});const s=document.getElementById('refStatus');if(!s)return;if(n>=2)s.innerHTML='<strong style="color:#34A853">✓ 2 of 2</strong> — next unlock is <strong style="color:#34A853">FREE!</strong>';else s.innerHTML='<strong>'+n+' of 2</strong> friends joined';}
+updateUI();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  try{
+    var sb=window.supabase.createClient(
+      "https://kqbylqtsyplhdfdhplal.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxYnlscXRzeXBsaGRmZGhwbGFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODYyNjcsImV4cCI6MjA5NTc2MjI2N30.MNC5ZZAbsjeXyEpKJAtZ-RAxesBciG2uMgAsFQ7JCDk"
+    );
+    sb.auth.getSession().then(function(r){
+      var session=r.data.session;
+      if(!session)return;
+      var email=session.user.email||"";
+      var initial=(email[0]||"?").toUpperCase();
+      var loginEl=document.querySelector("a.nav-login");
+      if(!loginEl)return;
+      var pill=document.createElement("div");
+      pill.style.cssText="display:flex;align-items:center;position:relative;cursor:pointer";
+      pill.innerHTML="<div id='yb-av' style='width:34px;height:34px;border-radius:50%;background:linear-gradient(120deg,#FF2B2B,#FF4D4D);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;font-family:sans-serif'>"+initial+"</div>"
+        +"<div id='yb-menu' style='display:none;position:absolute;top:42px;right:0;background:#fff;border:1px solid #E9E9EC;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.14);padding:8px;min-width:170px;z-index:9999'>"
+        +"<a href='/match-quiz.html' style='display:block;padding:10px 14px;font-size:14px;color:#0B0B0F;text-decoration:none;border-radius:8px;font-family:sans-serif'>&#127919; Take quiz</a>"
+        +"<a href='/project-board.html' style='display:block;padding:10px 14px;font-size:14px;color:#0B0B0F;text-decoration:none;border-radius:8px;font-family:sans-serif'>&#128203; Project board</a>"
+        +"<div style='height:1px;background:#E9E9EC;margin:4px 0'></div>"
+        +"<a id='yb-out' href='#' style='display:block;padding:10px 14px;font-size:14px;color:#FF2B2B;text-decoration:none;border-radius:8px;font-family:sans-serif;font-weight:600'>Sign out</a>"
+        +"</div>";
+      pill.querySelector("#yb-av").addEventListener("click",function(e){
+        var m=document.getElementById("yb-menu");
+        m.style.display=m.style.display==="none"?"block":"none";
+        e.stopPropagation();
+      });
+      document.addEventListener("click",function(){
+        var m=document.getElementById("yb-menu");
+        if(m)m.style.display="none";
+      });
+      pill.querySelector("#yb-out").addEventListener("click",function(e){
+        e.preventDefault();
+        sb.auth.signOut().then(function(){ window.location.href="/login.html"; });
+      });
+      loginEl.style.display="none";
+      loginEl.parentNode.appendChild(pill);
+    });
+  }catch(e){console.warn("Auth nav:",e);}
+})();
+</script>
+</body>
+</html>
