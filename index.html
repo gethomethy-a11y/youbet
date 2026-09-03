@@ -5,7 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>youbet</title>
+
+<!-- ===== SEO / social sharing ===== -->
+<title>youbet — Find who you're missing</title>
+<meta name="description" content="Match with the co-founder or collaborator you need — based on execution, not networking.">
+<link rel="canonical" href="https://youbet.network">
+
+<!-- Open Graph (Facebook, LinkedIn, WhatsApp, iMessage previews) -->
+<meta property="og:title" content="youbet — Find who you're missing">
+<meta property="og:description" content="Match with the co-founder or collaborator you need — based on execution, not networking.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://youbet.network">
+<meta property="og:image" content="https://youbet.network/og-image.png">
+
+<!-- Twitter / X card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="youbet — Find who you're missing">
+<meta name="twitter:description" content="Match with the co-founder or collaborator you need — based on execution, not networking.">
+<meta name="twitter:image" content="https://youbet.network/og-image.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@600;700;800;900&display=swap" rel="stylesheet" onerror="this.remove()">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -867,6 +884,14 @@ h1.ob-h .r{color:var(--red)}
 <div class="phone" id="app"></div>
 <div id="toast"></div>
 <script>
+/* ================== FEATURE FLAGS ================== */
+// Flip a flag back to true to bring the feature back — nothing is deleted,
+// the UI is only hidden and the backend (RPCs, Stripe links) stays wired up.
+//   coinsEnabled:false  -> hides the coin balance chip, the coins hub,
+//                          the daily claim, and the coin purchase screen.
+//                          Does NOT affect youbet Pro / Premium.
+const FEATURES = { coinsEnabled: false };
+
 /* ================== BACKEND (Supabase) ================== */
 const CFG = window.YB_CONFIG || {DEMO:true};
 const DEMO = CFG.DEMO !== false;   // default: demo/preview mode
@@ -1361,7 +1386,7 @@ function campfireQuestion(){
   return CAMPFIRE_QUESTIONS[(isoWeek(new Date())-1)%CAMPFIRE_QUESTIONS.length];
 }
 const logoSVG='<svg viewBox="0 0 100 100"><rect width="100" height="100" rx="24" fill="#FF2B2B"/><circle cx="62" cy="34" r="13" fill="#fff" opacity=".55"/><path d="M40 74c0-12 10-20 22-20s22 8 22 20z" fill="#fff" opacity=".55"/><circle cx="40" cy="40" r="15" fill="#fff"/><path d="M14 82c0-14 12-23 26-23s26 9 26 23z" fill="#fff"/></svg>';
-function topnav(){return `<div class="nav"><div class="logo" onclick="go('home')">${logoSVG}<span class="logo-wm">you<em>b</em>et</span></div><div class="nav-r"><button class="bellbtn" onclick="openSearch()"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>${isSignedIn()?`<span class="coinchip" onclick="go('coins')"><span class="m red">b</span><span class="n" id="coinN">${S.coins}</span></span><div class="pfp" onclick="go('me')" style="${S.me.photo?photoBg(S.me.photo):''}">${hasImg(S.me.photo)?'':S.me.n[0].toUpperCase()}</div>`:`<button class="loginbtn" onclick="requireAuth()">Login</button>`}</div></div>`;}
+function topnav(){return `<div class="nav"><div class="logo" onclick="go('home')">${logoSVG}<span class="logo-wm">you<em>b</em>et</span></div><div class="nav-r"><button class="bellbtn" onclick="openSearch()"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>${isSignedIn()?`${FEATURES.coinsEnabled?`<span class="coinchip" onclick="go('coins')"><span class="m red">b</span><span class="n" id="coinN">${S.coins}</span></span>`:''}<div class="pfp" onclick="go('me')" style="${S.me.photo?photoBg(S.me.photo):''}">${hasImg(S.me.photo)?'':S.me.n[0].toUpperCase()}</div>`:`<button class="loginbtn" onclick="requireAuth()">Login</button>`}</div></div>`;}
 function openSearch(){S.searchQ='';go('search');}
 function backbar(t,fb){return `<div class="backbar"><button class="backbtn" onclick="back('${fb||'home'}')">‹</button><span class="backttl">${t}</span></div>`;}
 function inboxUnread(){
@@ -1642,7 +1667,7 @@ function rChat(){
   const e=E(c.id); if(!e){ return `${backbar('Chat','inbox')}<div class="empty" style="text-align:center;color:var(--tx3);padding:60px 40px">Conversation not found.</div>${bnav('inbox')}`; }
   c.unread=false;
   const sys = c.accepted ? (c.isProj?`You joined${c.pick?' as '+c.pick:''}`:`You're connected with ${e.n}`)
-            : c.pending ? `Request sent · costs 10 coins`
+            : c.pending ? (FEATURES.coinsEnabled?`Request sent · costs 10 coins`:`Request sent`)
             : null;
   const msgsHtml=c.msgs.map(m=>{
     const intentTag=m.intent?`<div class="msgintent">${m.intent}</div>`:'';
@@ -1820,6 +1845,8 @@ async function loadTeamChat(id){
   try{ const msgs=await YB.teamChat(id); if(Array.isArray(msgs)){ S.teamChats=S.teamChats||{}; S.teamChats[id]=msgs; if(S.view==='group'&&S.spaceTab==='chat')render(); } }catch(e){}
 }
 function rCoins(){
+  // hidden behind FEATURES.coinsEnabled — the router already redirects, this is a safety net
+  if(!FEATURES.coinsEnabled) return rMe();
   return `${backbar('youbet coins','home')}
   <div class="bc"><div class="row1"><span class="lab">youbet coins</span><span class="fcoin red">b</span></div><div class="big">${S.coins}</div><div class="sub">Spend 10 to connect with someone</div></div>
   <div class="streak"><div class="sh"><span class="st">Daily reward</span><span class="sd">+10 / day</span></div>
@@ -1837,6 +1864,7 @@ function rCoins(){
   ${bnav('home')}`;}
 
 function rBuyCoins(){
+  if(!FEATURES.coinsEnabled) return rMe();
   const packs=[
     {c:100,p:'$1.99',conn:10,save:''},
     {c:300,p:'$4.99',conn:30,save:'Save 15%'},
@@ -1855,11 +1883,12 @@ function rMember(){
   const bens=[
     ['See who viewed & saved you',"Know who's interested before you reach out"],
     ['2× visibility','Your card & posts shown first'],
-    ['200 bonus coins monthly','200 extra coins every month, on us'],
+    FEATURES.coinsEnabled?['200 bonus coins monthly','200 extra coins every month, on us']
+                         :['Unlimited connections','Reach out to as many people as you want'],
     ['Unlimited projects & posts','Free is limited to 1 of each'],
     ['Premium badge',"Gold coin on your card, shows you're Pro"],
   ];
-  return `${backbar('youbet Pro','coins')}
+  return `${backbar('youbet Pro',FEATURES.coinsEnabled?'coins':'me')}
   <div class="prom">
   <div class="phero"><div class="pk">◆ Premium · $9.99/mo</div><div class="pt">Get seen first.</div><div class="ps">Know who's interested and unlock everything.</div></div>
   <div class="plist">
@@ -1999,7 +2028,7 @@ function rMe(){
     <div class="crow" onclick="go('saved')"><div class="cic"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></div><div class="ct">Saved</div><span class="cn">${savedIds.length}</span><span class="chev">›</span></div>
     <div class="crow ${S.isPro?'':'lock'}" onclick="${S.isPro?"go('viewers')":"go('member')"}"><div class="cic"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><div class="ct">Who viewed you</div>${S.isPro?`<span class="cn">${S.viewers.length}</span>`:`<span class="clockic">🔒</span>`}<span class="chev">›</span></div>
   </div>
-  <div class="coincard" onclick="go('coins')"><span class="m red" style="width:26px;height:26px;font-size:12px">b</span><span class="cnum">${S.coins}</span><span class="cunit">coins</span><span class="cgo">Open ›</span></div>
+  ${FEATURES.coinsEnabled?`<div class="coincard" onclick="go('coins')"><span class="m red" style="width:26px;height:26px;font-size:12px">b</span><span class="cnum">${S.coins}</span><span class="cunit">coins</span><span class="cgo">Open ›</span></div>`:''}
   ${S.isPro?'':`<div class="pro" onclick="go('member')"><div class="pt">Go Premium</div><div class="ps">See who viewed you & unlock everything.</div><span class="pb">$9.99/mo ›</span></div>`}
   <div style="height:100px"></div>
   ${bnav('home')}`;}
@@ -2027,8 +2056,8 @@ function rHelp(){
   <div class="legal">
     <h2>Help center</h2>
     <p><b>Getting started.</b> Create your profile, tell people what you're looking for, and browse founders, builders and creators in the feed. Tap a profile to see more, then send a connect request.</p>
-    <p><b>Coins.</b> Connecting with someone costs 10 coins. You get coins for signing up, completing your profile, answering the weekly Campfire question, and claiming your daily reward. You can also buy more anytime from the Coins screen.</p>
-    <p><b>youbet Pro.</b> Pro lets you connect without spending coins, adds a Pro badge to your profile, and shows you who viewed you. Manage it from Settings.</p>
+    ${FEATURES.coinsEnabled?`<p><b>Coins.</b> Connecting with someone costs 10 coins. You get coins for signing up, completing your profile, answering the weekly Campfire question, and claiming your daily reward. You can also buy more anytime from the Coins screen.</p>`:''}
+    <p><b>youbet Pro.</b> Pro ${FEATURES.coinsEnabled?'lets you connect without spending coins, adds':'adds'} a Pro badge to your profile, and shows you who viewed you. Manage it from Settings.</p>
     <p><b>Projects.</b> Create a project, then post the roles you're looking to fill. People can apply directly from your project page.</p>
     <p><b>Blocking & safety.</b> You can block anyone from their profile. Blocked accounts can't see you and won't appear in your feed or search.</p>
     <p>Still need help? <span class="lk" onclick="go('contact')">Contact us</span>.</p>
@@ -2081,7 +2110,7 @@ function openNotif(id){
     if(e&&e.type==='project'){openGroup(n.who);}
     else{ if(!S.chats.find(c=>c.id===n.who))S.chats.unshift({id:n.who,msgs:[{me:0,t:'Hey! Excited to connect.'}],time:n.time,unread:false}); openChat(n.who); }
   }
-  else if(n.type==='coins'){go('coins');}
+  else if(n.type==='coins'){ if(FEATURES.coinsEnabled)go('coins'); else render(); }
   else if(n.type==='view'||n.type==='save'){openDetail(n.who);}
   else render();
 }
@@ -2143,7 +2172,7 @@ function rSettings(){
   <div class="setsec">
     <div class="setrow" onclick="go('editme')"><div class="seti">◑</div><div class="setb"><div class="sett">Edit profile</div></div><span class="chev">›</span></div>
     <div class="setrow" onclick="${S.isPro?"toast('You are on youbet Pro')":"go('member')"}"><div class="seti gold">b</div><div class="setb"><div class="sett">${S.isPro?'youbet Pro · active':'Upgrade to Pro'}</div></div><span class="chev">›</span></div>
-    <div class="setrow" onclick="go('coins')"><div class="seti red">b</div><div class="setb"><div class="sett">Coins & billing</div><div class="setm">${S.coins} coins</div></div><span class="chev">›</span></div>
+    ${FEATURES.coinsEnabled?`<div class="setrow" onclick="go('coins')"><div class="seti red">b</div><div class="setb"><div class="sett">Coins & billing</div><div class="setm">${S.coins} coins</div></div><span class="chev">›</span></div>`:''}
   </div>
   <div class="setlbl">Notifications</div>
   <div class="setsec">
@@ -2339,7 +2368,7 @@ function rOnboard(){
       <div class="ob-p" style="text-align:center;margin-bottom:22px">Here's how you'll show up on youbet:</div>
       <div class="ob-mini"><div class="av" style="width:52px;height:52px;border-radius:50%;font-size:20px;background:${OB.photo||'#111'}">${nm[0].toUpperCase()}</div><div style="flex:1"><div class="ob-mn">${nm}</div><div class="ob-mm">${OB.roleTxt||'Founder'} · ${OB.skills.slice(0,3).join(', ')||'—'}</div></div></div>
       <div style="height:14px"></div>
-      <div style="font-size:12.5px;color:var(--tx3);text-align:center">You got <b style="color:var(--tx)">50 coins</b> for completing your profile</div>
+      ${FEATURES.coinsEnabled?`<div style="font-size:12.5px;color:var(--tx3);text-align:center">You got <b style="color:var(--tx)">50 coins</b> for completing your profile</div>`:''}
     </div><div class="ob-spring"></div>
     <div class="ob-pad"><button class="ob-btn" onclick="obFinish(true)">Enter youbet</button></div><div style="height:26px"></div></div>`;
 }
@@ -2482,7 +2511,10 @@ function requireAuth(){
 function render(){
   if(S.onboarding){app.innerHTML=rOnboard();if(S.photoTarget)app.insertAdjacentHTML('beforeend',photoSheet());window.scrollTo(0,0);return;}
   const map={home:rHome,net:rNet,inbox:rInbox,detail:rDetail,chat:rChat,group:rGroup,applicants:rApplicants,coins:rCoins,buycoins:rBuyCoins,member:rMember,compose:rCompose,composePerson:rComposePerson,newproject:rNewProject,composeRole:rComposeRole,editRole:rEditRole,me:rMe,editme:rEditMe,settings:rSettings,notifs:rNotifs,search:rSearch,connections:rConnections,saved:rSaved,viewers:rViewers,blocked:rBlocked,help:rHelp,contact:rContact,legal:rLegal};
-  app.innerHTML=map[S.view||'home']();
+  let _v=S.view||'home';
+  // coins screens are hidden behind the feature flag — fall back to the profile screen
+  if(!FEATURES.coinsEnabled && (_v==='coins'||_v==='buycoins')) _v='me';
+  app.innerHTML=map[_v]();
   if(S.intent)app.insertAdjacentHTML('beforeend',intentSheet());
   if(S.share)app.insertAdjacentHTML('beforeend',shareSheet());
   if(S.invite)app.insertAdjacentHTML('beforeend',inviteSheet());
@@ -2496,6 +2528,7 @@ function go(v){
   // account-bound screens require sign-in; guests get the login gate
   // net + inbox are browsable as a guest (they show a sign-in prompt inside);
   // everything else account-bound still gates.
+  if(!FEATURES.coinsEnabled && (v==='coins'||v==='buycoins')) v='me';
   const gated=['me','coins','buycoins','member','connections','saved','viewers','settings','blocked','notifs','compose','composePerson','newproject','composeRole','editme','editRole'];
   if(gated.includes(v) && !requireAuth()) return;
   closeSheets();
@@ -2503,7 +2536,7 @@ function go(v){
   S.stack.push(S.view||'home');S.view=v;render();
   if(v==='blocked')loadBlocked();
   if(v==='me')loadMyApplicants();
-  if(v==='coins')loadRewards();
+  if(v==='coins'&&FEATURES.coinsEnabled)loadRewards();
   if(v==='inbox' && isSignedIn()){ S._inboxTouched=false; if((S.requests||[]).length){ S.inboxTab='reqs'; render(); } loadInbox(); loadMyApplicants(); }
 }
 async function loadMyApplicants(){
@@ -2597,7 +2630,7 @@ function respondSheet(e){
       <div class="sh-h"><div class="sh-who">${av(e,'a')}<span class="nm">Interested in ${e.n}'s post</span></div><div class="sh-t">You're interested in this specific post</div></div>
       <div class="respost">${post.ask||'their post'}</div>
       <div class="sh-field"><div class="sh-lab">How can you help with this?</div><textarea id="intentnote" placeholder="I can help with this - here's how..."></textarea></div>
-      <div class="sh-cost"><span class="m red" style="width:15px;height:15px;font-size:8px">b</span> Costs 10 coins</div>
+      ${FEATURES.coinsEnabled?`<div class="sh-cost"><span class="m red" style="width:15px;height:15px;font-size:8px">b</span> Costs 10 coins</div>`:''}
       <div class="sh-send"><button class="sh-btn" onclick="sendIntent()">Send</button></div>
     </div></div>`;
 }
@@ -2612,12 +2645,17 @@ function intentSheet(){
       <div class="sh-h"><div class="sh-who">${av(e,'a')}<span class="nm">${isProj?'Join '+e.n:'Connect with '+e.n}</span></div><div class="sh-t">${isProj?'Which role, or just connecting?':'What brings you here?'}</div></div>
       <div class="istack" id="intentcards">${opts.map((o,i)=>`<div class="ic ${i===S.intentPick?'on':''}" onclick="pickIntent(${i})"><div><div class="ict">${o.t}</div><div class="ics">${o.s}</div></div><span class="ick"></span></div>`).join('')}</div>
       <div class="sh-field"><div class="sh-lab">Add a note — why you're a fit</div><textarea id="intentnote" placeholder="${isProj?'Ex-Stripe, shipped code-review tooling. Can start now…':'I’ve built subscription apps before and love your angle…'}"></textarea></div>
-      <div class="sh-cost"><span class="m red" style="width:15px;height:15px;font-size:8px">b</span> Costs 10 coins</div>
+      ${FEATURES.coinsEnabled?`<div class="sh-cost"><span class="m red" style="width:15px;height:15px;font-size:8px">b</span> Costs 10 coins</div>`:''}
       <div class="sh-send"><button class="sh-btn" onclick="sendIntent()">${isProj?'Send request':'Send hi'}</button></div>
     </div></div>`;}
 async function sendIntent(){
   const id=S.intent;const e=E(id);const isProj=e.type==='project';
-  if(S.coins<10){S.pendingIntent=id;S.intent=null;toast('You need 10 coins to connect');return go('buycoins');}
+  if(S.coins<10){
+    // With coins hidden there is nowhere to top up, so don't send the user to a
+    // hidden screen — say it neutrally and stop. The request logic below is untouched.
+    if(!FEATURES.coinsEnabled){ S.intent=null; toast('You\u2019ve reached your connection limit for now'); render(); return; }
+    S.pendingIntent=id;S.intent=null;toast('You need 10 coins to connect');return go('buycoins');
+  }
   const opts=intentOpts(e);
   const pick=(opts[S.intentPick]||opts[0]).t;
   const note=(document.getElementById('intentnote')||{}).value||'';
@@ -2670,11 +2708,11 @@ async function sendIntent(){
   S.coins-=10;S.hiSent[id]=true;
   if(isProj){
     S.appliedTo=S.appliedTo||{}; S.appliedTo[id]=true;
-    S.intent=null; toast(`Request sent to ${e.n} · −10 coins`); render(); go('home');
+    S.intent=null; toast(FEATURES.coinsEnabled?`Request sent to ${e.n} · −10 coins`:`Request sent to ${e.n}`); render(); go('home');
     return;
   }
   S.intent=null;S.intentMode=null;
-  toast(`Request sent to ${e.n} · −10 coins`);
+  toast(FEATURES.coinsEnabled?`Request sent to ${e.n} · −10 coins`:`Request sent to ${e.n}`);
   render(); go('home');
 }
 function simAccept(id){
@@ -2834,9 +2872,9 @@ async function doShare(via){
   if(isMine&&!S.earned.share){
     if(!YB.demo()){
       const r=await YB.grantReward('share');
-      if(r.ok){ S.earned.share=true; if(r.balance!=null)S.coins=r.balance; toast('+10 coins earned'); }
+      if(r.ok){ S.earned.share=true; if(r.balance!=null)S.coins=r.balance; if(FEATURES.coinsEnabled)toast('+10 coins earned'); }
       else if(r.error==='already_claimed'){ S.earned.share=true; if(r.balance!=null)S.coins=r.balance; }
-    } else { S.earned.share=true; S.coins+=10; toast('+10 coins earned'); }
+    } else { S.earned.share=true; S.coins+=10; if(FEATURES.coinsEnabled)toast('+10 coins earned'); }
   }
   render();
 }
@@ -3157,7 +3195,7 @@ async function postAnswer(){
     if(!S.people[S.me.pid]) S.people.you_self={id:'you_self',type:'person',n:esc(S.me.n),c:'#111111',meta:[S.me.role,S.me.loc].filter(Boolean).map(esc).join(' · '),about:'',brings:[],ask:'',give:''};
     if(!S.earned.campfire){
       const r=await YB.grantReward('campfire');
-      if(r.ok){ S.earned.campfire=true; if(r.balance!=null)S.coins=r.balance; toast(`Answer shared · +${r.reward||15} coins`); }
+      if(r.ok){ S.earned.campfire=true; if(r.balance!=null)S.coins=r.balance; toast(FEATURES.coinsEnabled?`Answer shared · +${r.reward||15} coins`:'Answer shared'); }
       else if(r.error==='already_claimed'){ S.earned.campfire=true; if(r.balance!=null)S.coins=r.balance; toast('Answer shared'); }
       else { toast('Answer shared'); } // reward failed but post went through — leave it claimable
     } else toast('Answer shared');
@@ -3166,7 +3204,7 @@ async function postAnswer(){
   // demo
   S.camp.unshift({id:'me'+Date.now(),who:'you_self',t:body,n:0});
   S.people.you_self={id:'you_self',type:'person',n:'You',c:'#111111',meta:'Founder · Munich',about:'',brings:[],ask:'',give:''};
-  if(!S.earned.campfire){S.earned.campfire=true;S.coins+=15;toast('Answer shared · +15 coins');}
+  if(!S.earned.campfire){S.earned.campfire=true;S.coins+=15;toast(FEATURES.coinsEnabled?'Answer shared · +15 coins':'Answer shared');}
   else toast('Answer shared');
   render();
 }
@@ -3177,7 +3215,7 @@ function inviteSheet(){
   return `<div class="sheetbg" onclick="closeInvite()"><div class="sheet" onclick="event.stopPropagation()">
     <div class="grip"></div>
     <div class="shhd">Invite a friend</div>
-    <div class="shsub" style="padding:0 24px 4px;color:var(--tx3);font-size:13px">Earn +100 coins when a friend joins youbet with your link.</div>
+    <div class="shsub" style="padding:0 24px 4px;color:var(--tx3);font-size:13px">${FEATURES.coinsEnabled?'Earn +100 coins when a friend joins youbet with your link.':'Share your link — youbet gets better with the right people on it.'}</div>
     <div style="padding:14px 24px">
       <div class="invlink"><span class="invtxt">youbet.network/join/${slug}</span><button class="invcopy" onclick="inviteVia('copy')">Copy</button></div>
     </div>
@@ -3439,7 +3477,7 @@ async function publishPerson(){
     S.me.selfpostEver=Math.max(S.me.selfpostEver||0,1);
     let _p15=false;
     if(!editing && !S.earned.post){ try{ const pr=await YB.grantReward('post'); if(pr&&pr.ok&&pr.balance!=null){ S.earned.post=true; S.coins=pr.balance; _p15=true; } else if(pr&&pr.error==='already_claimed'){ S.earned.post=true; if(pr.balance!=null)S.coins=pr.balance; } }catch(e){} }
-    S.view=null;S.stack=[];toast(editing?'Post updated':(_p15?'Posted · +15 coins':'Posted'));go('me');
+    S.view=null;S.stack=[];toast(editing?'Post updated':((_p15&&FEATURES.coinsEnabled)?'Posted · +15 coins':'Posted'));go('me');
     return;
   }
   // DEMO
@@ -3454,7 +3492,7 @@ async function publishPerson(){
   if(!S.feed.includes('you_self'))S.feed.unshift('you_self');
   let _p15=false; if(!editing && !S.earned.post){ S.earned.post=true; S.coins+=15; _p15=true; }
   S.editPostId=null;S.editPostBody='';
-  S.view=null;S.stack=[];toast(editing?'Post updated':(_p15?'Posted · +15 coins':'Posted'));go('me');
+  S.view=null;S.stack=[];toast(editing?'Post updated':((_p15&&FEATURES.coinsEnabled)?'Posted · +15 coins':'Posted'));go('me');
 }
 function stashNP(){
   const g=id=>(document.getElementById(id)||{}).value;
