@@ -30,16 +30,16 @@
 window.YB_CONFIG = {
   SUPABASE_URL: 'https://kqbylqtsyplhdfdhplal.supabase.co',
   SUPABASE_KEY: 'sb_publishable_vqXEJvY2CswBAaqaa9FVig_a597ld8-',
-  // DEMO=true: klickbare Vorschau ohne echtes Login. DEMO=false: echtes Supabase (für Live/index.html).
+  // DEMO=true: clickable preview, no real login. DEMO=false: real Supabase (live site).
   DEMO: false,
-  // ===== STRIPE PAYMENT LINKS (provisorisch) =====
-  // Trage hier deine echten Stripe Payment Links ein (Stripe Dashboard -> Payment Links).
-  // Solange sie leer ('') sind, zeigt die App einen Hinweis statt eines toten Buttons.
+  // ===== STRIPE PAYMENT LINKS =====
+  // Real Payment Links from the Stripe Dashboard -> Payment Links.
+  // While a link is empty (''), the app shows a notice instead of a dead button.
   STRIPE: {
-    coins100: 'https://buy.stripe.com/dRm3cvaeuelr4OlcDM5kk07',   // Payment Link für 100 Coins ($1.99)
-    coins300: 'https://buy.stripe.com/9B6eVdbiy4KRcgNcDM5kk08',   // Payment Link für 300 Coins ($4.99)
-    coins700: 'https://buy.stripe.com/dRm3cvfyO4KR2GdgU25kk0b',   // Payment Link für 700 Coins ($8.99)
-    proMonthly: 'https://buy.stripe.com/bJe3cvcmC5OVa8FfPY5kk0a'  // Payment Link für youbet Pro ($9.99/mo)
+    coins100: 'https://buy.stripe.com/dRm3cvaeuelr4OlcDM5kk07',   // 100 coins ($1.99)
+    coins300: 'https://buy.stripe.com/9B6eVdbiy4KRcgNcDM5kk08',   // 300 coins ($4.99)
+    coins700: 'https://buy.stripe.com/dRm3cvfyO4KR2GdgU25kk0b',   // 700 coins ($8.99)
+    proMonthly: 'https://buy.stripe.com/bJe3cvcmC5OVa8FfPY5kk0a'  // youbet Pro ($9.99/mo)
   }
 };
 </script>
@@ -891,6 +891,34 @@ h1.ob-h .r{color:var(--red)}
 //                          the daily claim, and the coin purchase screen.
 //                          Does NOT affect youbet Pro / Premium.
 const FEATURES = { coinsEnabled: false };
+
+/* ================== ERROR COPY ==================
+   Backend calls hand back whatever Postgres/PostgREST said. That text is for
+   developers, not users, so it is translated here and anything unrecognised
+   falls back to the caller's plain-English message. */
+const ERR_COPY = {
+  not_authenticated: 'Please log in and try again',
+  already_connected: 'You’re already connected',
+  already_requested: 'You’ve already sent this request',
+  already_claimed:   'Already claimed',
+  blocked:           'This account isn’t available',
+  not_found:         'That’s no longer available',
+  self:              'That’s your own profile'
+};
+// the backend has used a few names for "you don't have enough credit"
+function isNoCreditsError(code){ return /insufficient|not_enough|no_credits|no_coins|balance/i.test(code||''); }
+function errMsg(res, fallback){
+  const code = String((res && (res.error || res.message)) || '').trim();
+  if(!code) return fallback;
+  if(ERR_COPY[code]) return ERR_COPY[code];
+  if(isNoCreditsError(code)){
+    return FEATURES.coinsEnabled ? 'Not enough coins — top up to connect'
+                                 : 'You’ve reached your connection limit for now';
+  }
+  // a short, sentence-like message is safe to show; anything with SQL//code shape is not
+  const looksTechnical = /_|[{}()<>;]|PGRST|violates|constraint|relation |function |syntax|null value|permission denied|duplicate key|JWT|row-level/i.test(code);
+  return (!looksTechnical && code.length<=70) ? code : fallback;
+}
 
 /* ================== BACKEND (Supabase) ================== */
 const CFG = window.YB_CONFIG || {DEMO:true};
@@ -1838,7 +1866,7 @@ async function sendGroup(){
   S.teamChats=S.teamChats||{}; S.teamChats[id]=S.teamChats[id]||[];
   S.teamChats[id].push({sender:S.uid, name:S.me.n, body:txt, kind:'msg'});
   render();
-  try{ const r=await YB.teamSend(id, txt); if(r&&r.ok===false){ toast(r.error||'Could not send'); } }catch(e){}
+  try{ const r=await YB.teamSend(id, txt); if(r&&r.ok===false){ toast(errMsg(r,'Could not send')); } }catch(e){}
 }
 async function loadTeamChat(id){
   if(YB.demo())return;
@@ -1935,7 +1963,7 @@ async function saveRole(){
   if(proj&&proj.roles&&proj.roles[idx]){ proj.roles[idx]={t:t.trim(),s:s.trim()}; }
   if(!YB.demo()){
     const res=await YB.updateRole(pid, idx, t.trim(), s.trim());
-    if(!res.ok){ toast(res.error||'Could not save'); return; }
+    if(!res.ok){ toast(errMsg(res,'Could not save')); return; }
   }
   toast('Role updated');back('group');
 }
@@ -1946,7 +1974,7 @@ async function deleteRoleConfirm(){
   if(proj&&proj.roles){ proj.roles.splice(idx,1); }
   if(!YB.demo()){
     const res=await YB.deleteRole(pid, idx);
-    if(!res.ok){ toast(res.error||'Could not delete'); return; }
+    if(!res.ok){ toast(errMsg(res,'Could not delete')); return; }
   }
   toast('Role deleted');back('group');
 }
@@ -2080,7 +2108,7 @@ function rLegal(){
     <p><b>2. Eligibility.</b> You must be at least 18 years old to use youbet. By using the app you confirm that you are.</p>
     <p><b>3. Your account.</b> You're responsible for the accuracy of your profile and for keeping your login secure. Don't impersonate others or misrepresent who you are.</p>
     <p><b>4. Acceptable use.</b> You agree not to use youbet to harass, spam, defraud, or post unlawful, misleading, or harmful content. We may suspend or remove accounts that break these rules.</p>
-    <p><b>5. Coins & payments.</b> Coins are a virtual in-app credit used to connect with others. Coins and youbet Pro subscriptions are paid features processed by our payment provider (Stripe). Purchases are generally non-refundable except where required by law. Subscriptions renew until cancelled; you can cancel anytime.</p>
+    <p><b>5. Payments.</b> ${FEATURES.coinsEnabled?'Coins are a virtual in-app credit used to connect with others. Coins and youbet Pro subscriptions are':'youbet Pro subscriptions are'} paid features processed by our payment provider (Stripe). Purchases are generally non-refundable except where required by law. Subscriptions renew until cancelled; you can cancel anytime.</p>
     <p><b>6. Content.</b> You keep ownership of what you post, but grant youbet a licence to display it within the app so the service can function. You're responsible for the content you share.</p>
     <p><b>7. No guarantees.</b> youbet helps people find collaborators, but we don't guarantee matches, outcomes, or the conduct of other users. Use your own judgment before working or sharing information with anyone you meet.</p>
     <p><b>8. Termination.</b> You can delete your account anytime from Settings. We may suspend accounts that violate these terms.</p>
@@ -2406,7 +2434,7 @@ async function obOAuth(provider){
   }
   toast('Redirecting…');
   const res=await YB.signInOAuth(provider);
-  if(!res.ok) toast(res.error||'Could not open '+provider+' login');
+  if(!res.ok) toast(errMsg(res,'Could not open '+provider+' login'));
   // On success the browser redirects to the provider, then back — boot()/onAuth handles the rest.
 }
 async function obAuth(){
@@ -2415,7 +2443,7 @@ async function obAuth(){
   const email=emailEl?emailEl.value.trim():'';
   const pw=pwEl?pwEl.value:'';
 
-  // ---- DEMO / Preview: klickbar ohne echtes Login ----
+  // ---- DEMO / Preview: clickable without a real login ----
   if(YB.demo()){
     if(OB.mode==='login'){
       S.me.n=S.me.n||'Yuen';S.me.role=S.me.role||'Founder';S.me.loc=S.me.loc||'Munich';
@@ -2427,13 +2455,13 @@ async function obAuth(){
     return;
   }
 
-  // ---- LIVE: echtes Supabase-Auth ----
+  // ---- LIVE: real Supabase auth ----
   if(!email||!pw){toast('Enter your email and password');return;}
   toast(OB.mode==='login'?'Logging in…':'Creating account…');
   const res = OB.mode==='login'
     ? await YB.signInEmail(email,pw,OB.stay)
     : await YB.signUpEmail(email,pw,OB.stay);
-  if(!res.ok){ toast(res.error||'Auth failed'); return; }
+  if(!res.ok){ toast(errMsg(res,'Auth failed')); return; }
 
   const user = res.user || await YB.currentUser();
   if(!user){ toast('Check your email to confirm your account.'); return; }
@@ -2484,7 +2512,7 @@ async function obFinish(applyProfile){
       if(user){ const prof=await YB.myProfile(user.id); if(prof){ S.me.pid=prof.id; S.me.email=prof.email||S.me.email; } }
       // completing onboarding IS completing your profile -> grant the +50 automatically
       try{
-        const r={ok:true};
+        const r=await YB.grantReward('profile');
         if(r&&(r.ok||r.error==='already_claimed')){ S.earned.profile=true; if(r.balance!=null)S.coins=r.balance; }
       }catch(e){}
       S.coins=await YB.myCoins();
@@ -2684,7 +2712,7 @@ async function sendIntent(){
     // do_connect spends the 10 coins and creates the request. For a "say hi" we pass the
     // note so it becomes the first chat message; for a request we pass NO note (no chat).
     const res = await YB.connect(targetPid, connectNote);
-    if(!res.ok){ toast(res.error||'Could not send'); return; }
+    if(!res.ok){ toast(errMsg(res,'Could not send')); return; }
     S.coins = await YB.myCoins();
     S.hiSent[id]=true;
     if(isProj){
@@ -2885,7 +2913,7 @@ function buyCoins(n){
     const res = YB.openCheckout(key, S.me.pid);
     if(res.missing){ toast('Payment setup coming soon'); return; }
     toast('Opening secure checkout…');
-    // Coins werden nach erfolgreicher Zahlung serverseitig (Stripe-Webhook) gutgeschrieben.
+    // Coins are credited server-side by the Stripe webhook once payment succeeds.
     return;
   }
   // ---- DEMO ----
@@ -2916,7 +2944,7 @@ async function saveMe(){
     toast('Saving…');
     try{
       const res=await YB.saveProfileRPC({name:rawN, role:rawRole, one_liner:rawBio||'', skills:rawSkills||[], city:rawLoc||'', kind:'person', onboarded:true});
-      if(res&&res.ok===false){ toast(res.error||'Could not save'); return; }
+      if(res&&res.ok===false){ toast(errMsg(res,'Could not save')); return; }
     }catch(e){ toast('Could not save'); return; }
   }
   // update in-memory values (kept raw; escaping happens at render time)
@@ -2989,7 +3017,7 @@ async function declineApp(appId, projId){
   render();
   if(!YB.demo()){
     const res=await YB.declineApplication(appId);
-    if(!res.ok){ toast(res.error||'Could not decline'); loadApplicants(projId); return; }
+    if(!res.ok){ toast(errMsg(res,'Could not decline')); loadApplicants(projId); return; }
   }
   toast('Declined');
 }
@@ -3001,7 +3029,7 @@ async function addTeamMember(appId, projId){
   render();
   if(!YB.demo()){
     const res=await YB.addToTeam(appId);
-    if(!res.ok){ toast(res.error||'Could not add'); if(a)a.is_team=false; render(); return; }
+    if(!res.ok){ toast(errMsg(res,'Could not add')); if(a)a.is_team=false; render(); return; }
   }
   toast(`${a?a.name:'They'} added to the team`);
 }
@@ -3046,7 +3074,7 @@ async function saveLinkSheet(){
   S.links[id].push({t:title, u:url, i:meta.i, c:meta.c});
   if(!YB.demo()){
     const res=await YB.updateProject(id,{links:S.links[id]});
-    if(!res.ok){ toast(res.error||'Could not save link'); }
+    if(!res.ok){ toast(errMsg(res,'Could not save link')); }
   }
   S.showLinkSheet=false; S.linkFor=null; S.linkType=null;
   toast('Link added'); render();
@@ -3081,7 +3109,7 @@ async function removeLink(id,i){
   if(S.links[id])S.links[id].splice(i,1);
   if(!YB.demo()){
     const res=await YB.updateProject(id,{links:S.links[id]||[]});
-    if(!res.ok){ toast(res.error||'Could not remove'); }
+    if(!res.ok){ toast(errMsg(res,'Could not remove')); }
   }
   toast('Link removed');render();
 }
@@ -3094,7 +3122,7 @@ async function removeMember(projectId, pid, name){
   if(e&&e.team) e.team=e.team.filter(m=>m.pid!==pid);
   if(S.applicantsData&&S.applicantsData[projectId]) S.applicantsData[projectId]=S.applicantsData[projectId].filter(a=>a.pid!==pid);
   if(S.memberOf) delete S.memberOf[pid];
-  if(!YB.demo()){ try{ const r=await YB.removeMember(projectId, pid); if(r&&r.ok===false){toast(r.error||'Could not remove');} }catch(err){} try{ await loadApplicants(projectId); }catch(err){} }
+  if(!YB.demo()){ try{ const r=await YB.removeMember(projectId, pid); if(r&&r.ok===false){toast(errMsg(r,'Could not remove'));} }catch(err){} try{ await loadApplicants(projectId); }catch(err){} }
   toast('Removed from team'); render();
 }
 async function saveWorkTags(id){
@@ -3106,7 +3134,7 @@ async function saveWorkTags(id){
   }
   if(!YB.demo()){
     const res=await YB.updateProject(id,{work_tags:tags});
-    if(!res.ok){ toast(res.error||'Could not save'); return; }
+    if(!res.ok){ toast(errMsg(res,'Could not save')); return; }
   }
   toast('Saved');closeManage();
 }
@@ -3170,7 +3198,7 @@ async function saveWorkChips(id){
   if(S.myprojects&&S.myprojects[id]) S.myprojects[id].work_tags=tags.slice();
   if(!YB.demo()){
     const res=await YB.updateProject(id,{work_tags:tags});
-    if(!res.ok){ toast(res.error||'Could not save'); S._mgWorkDirty=true; return; }
+    if(!res.ok){ toast(errMsg(res,'Could not save')); S._mgWorkDirty=true; return; }
   }
   toast('Saved');
 }
@@ -3190,7 +3218,7 @@ async function postAnswer(){
   const body=i.value.trim();
   if(!YB.demo()){
     const res=await YB.postCampfire(S.me.pid, S.me.n, body);
-    if(!res.ok){ toast(res.error||'Could not post'); return; }
+    if(!res.ok){ toast(errMsg(res,'Could not post')); return; }
     S.camp.unshift({id:'me'+Date.now(),who:S.me.pid||'you_self',t:esc(body),n:0,_name:esc(S.me.n)});
     if(!S.people[S.me.pid]) S.people.you_self={id:'you_self',type:'person',n:esc(S.me.n),c:'#111111',meta:[S.me.role,S.me.loc].filter(Boolean).map(esc).join(' · '),about:'',brings:[],ask:'',give:''};
     if(!S.earned.campfire){
@@ -3210,14 +3238,19 @@ async function postAnswer(){
 }
 function openInvite(){S.invite=true;render();}
 function closeInvite(){S.invite=false;render();}
+function inviteLink(){
+  // ?ref= (not /join/<slug>) so the link resolves on a static host with no rewrite rules
+  const ref=S.me.pid||(S.me.n||'you').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,12)||'you';
+  return `https://youbet.network/?ref=${encodeURIComponent(ref)}`;
+}
 function inviteSheet(){
-  const slug=(S.me.n||'you').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,12)||'you';
+  const shown=inviteLink().replace(/^https?:\/\//,'');
   return `<div class="sheetbg" onclick="closeInvite()"><div class="sheet" onclick="event.stopPropagation()">
     <div class="grip"></div>
     <div class="shhd">Invite a friend</div>
     <div class="shsub" style="padding:0 24px 4px;color:var(--tx3);font-size:13px">${FEATURES.coinsEnabled?'Earn +100 coins when a friend joins youbet with your link.':'Share your link — youbet gets better with the right people on it.'}</div>
     <div style="padding:14px 24px">
-      <div class="invlink"><span class="invtxt">youbet.network/join/${slug}</span><button class="invcopy" onclick="inviteVia('copy')">Copy</button></div>
+      <div class="invlink"><span class="invtxt">${shown}</span><button class="invcopy" onclick="inviteVia('copy')">Copy</button></div>
     </div>
     <div class="shareopts" style="padding:6px 20px 8px">
       ${[['WhatsApp','#25D366','W'],['Email','#5B6470','@'],['X','#000','X'],['More','#EEF0F2','•']].map(t=>`<div class="shareopt" onclick="inviteVia('${t[0]}')"><div class="si" style="background:${t[1]};color:${t[0]==='More'?'var(--tx2)':'#fff'}">${t[2]}</div><div class="sl">${t[0]}</div></div>`).join('')}
@@ -3226,8 +3259,7 @@ function inviteSheet(){
   </div></div>`;
 }
 async function inviteVia(via){
-  const slug=(S.me.n||'you').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,12)||'you';
-  const url=`https://youbet.network/join/${slug}`;
+  const url=inviteLink();
   const text=`Join me on youbet — where founders find co-founders and collaborators.`;
   const u=encodeURIComponent(url), tx=encodeURIComponent(text);
   if(via==='copy'){ const ok=await copyLink(url); closeInvite(); toast(ok?'Invite link copied':url); return; }
@@ -3263,7 +3295,7 @@ async function loadRewards(){
   // "Complete your profile" is granted automatically once you're signed in & onboarded.
   if(isSignedIn() && !S.earned.profile){
     try{
-      const r={ok:true};
+      const r=await YB.grantReward('profile');
       if(r && (r.ok||r.error==='already_claimed')){ S.earned.profile=true; if(r.balance!=null)S.coins=r.balance; }
     }catch(e){}
   }
@@ -3400,7 +3432,7 @@ async function deleteProject(id){
   if(!confirm(`Delete "${proj?proj.n:'this project'}"? This can't be undone.`))return;
   if(!YB.demo()){
     const res=await YB.deleteProject(id);
-    if(!res.ok){ toast(res.error||'Could not delete'); return; }
+    if(!res.ok){ toast(errMsg(res,'Could not delete')); return; }
   }
   if(S.myprojects) delete S.myprojects[id];
   if(S.projects) delete S.projects[id];
@@ -3413,7 +3445,7 @@ async function blockUser(id){
   if(!confirm(`Block ${e?e.n:'this person'}? They won't see you or appear in your feed.`))return;
   if(!YB.demo()){
     const res=await YB.blockUser(id);
-    if(!res.ok){ toast(res.error||'Could not block'); return; }
+    if(!res.ok){ toast(errMsg(res,'Could not block')); return; }
   }
   // remove locally from feed/search/people
   S.feed=(S.feed||[]).filter(f=>f!==id);
@@ -3425,7 +3457,7 @@ async function blockUser(id){
 async function unblockUser(id){
   if(!YB.demo()){
     const res=await YB.unblockUser(id);
-    if(!res.ok){ toast(res.error||'Could not unblock'); return; }
+    if(!res.ok){ toast(errMsg(res,'Could not unblock')); return; }
   }
   S.blocked=(S.blocked||[]).filter(b=>b.id!==id);
   toast('Unblocked');
@@ -3441,7 +3473,7 @@ async function doBlock(id){
   if(!confirm(`Block ${nm}? They won't be able to see you or message you, and won't appear in your feed.`))return;
   if(!YB.demo()){
     const res=await YB.blockUser(id);
-    if(res&&res.ok===false){ toast(res.error||'Could not block'); return; }
+    if(res&&res.ok===false){ toast(errMsg(res,'Could not block')); return; }
   }
   // remove from local feed/people/chats immediately
   S.feed=(S.feed||[]).filter(x=>x!==id);
@@ -3454,7 +3486,7 @@ async function doBlock(id){
 async function doUnblock(id){
   if(!YB.demo()){
     const res=await YB.unblockUser(id);
-    if(res&&res.ok===false){ toast(res.error||'Could not unblock'); return; }
+    if(res&&res.ok===false){ toast(errMsg(res,'Could not unblock')); return; }
   }
   S.blocked=(S.blocked||[]).filter(b=>b.id!==id);
   toast('Unblocked');render();
@@ -3471,7 +3503,7 @@ async function publishPerson(){
   if(!YB.demo()){
     const res = editing ? await YB.updatePost(S.editPostId, ask, give.trim()) : await YB.createPost(ask, give.trim());
     if(res && res.need_pro){ toast('Free plan: 1 post. Go Premium to post more.'); S.editPostId=null; go('member'); return; }
-    if(!res || res.ok===false){ toast((res&&res.error)||'Could not post'); return; }
+    if(!res || res.ok===false){ toast(errMsg(res,'Could not post')); return; }
     S.editPostId=null; S.editPostBody='';
     await loadMyPosts();
     S.me.selfpostEver=Math.max(S.me.selfpostEver||0,1);
@@ -3530,7 +3562,7 @@ async function createProject(){
       const fields={name, story:what||'', category:cat, stage:stageNames[stage]||'building'};
       if(typeof S.npPhoto==='string'&&S.npPhoto.startsWith('http'))fields.logo_url=S.npPhoto;
       const res=await YB.updateProject(id, fields);
-      if(!res.ok){ toast(res.error||'Could not save'); return; }
+      if(!res.ok){ toast(errMsg(res,'Could not save')); return; }
     }
     S.npTeam=[];S.npAdding=false;S.npName='';S.npWhat='';S.npPhoto=null;
     toast('Project updated');S.view=null;S.stack=[];go('me');
@@ -3574,7 +3606,7 @@ async function publishRole(){
         go('member');
         return;
       }
-      if(!res.ok){ toast(res.error||'Could not publish project'); return; }
+      if(!res.ok){ toast(errMsg(res,'Could not publish project')); return; }
       if(res.project){
         const rp=mapProjectRow(res.project);
         delete S.projects[p.id]; if(S.myprojects) delete S.myprojects[p.id];
@@ -3595,7 +3627,7 @@ async function publishRole(){
       go('member');
       return;
     }
-    if(!res || res.ok===false){ toast((res&&res.error)||'Could not post role'); return; }
+    if(!res || res.ok===false){ toast(errMsg(res,'Could not post role')); return; }
     // reflect locally
     p.roles = res.roles || p.roles || [];
     S.view=null;S.stack=[];toast('Role posted');go('home');loadFeed();
@@ -3737,7 +3769,7 @@ async function loadFeed(){
     // grant the profile reward automatically for onboarded users
     if(isSignedIn() && !S.earned.profile){
       try{
-        const r={ok:true};
+        const r=await YB.grantReward('profile');
         if(r && (r.ok||r.error==='already_claimed')){ S.earned.profile=true; if(r.balance!=null)S.coins=r.balance; }
       }catch(e){}
     }
@@ -3818,7 +3850,14 @@ async function openPendingShare(){
   }
 }
 async function boot(){
-  try{ const _p=new URLSearchParams(location.search).get('p'); if(_p) S.pendingShare=_p; }catch(e){}
+  try{
+    const _q=new URLSearchParams(location.search);
+    const _p=_q.get('p'); if(_p) S.pendingShare=_p;
+    // remember who invited this visitor so a signup can be credited later
+    const _ref=_q.get('ref');
+    if(_ref){ S.referredBy=_ref; try{ localStorage.setItem('yb_ref',_ref); }catch(e){} }
+    else { try{ S.referredBy=localStorage.getItem('yb_ref')||null; }catch(e){} }
+  }catch(e){}
   // Live: check for an existing session (this IS "stay logged in" — Supabase persists it)
   if(!YB.demo()){
     // If we just came back from an OAuth redirect, the URL carries the session.
