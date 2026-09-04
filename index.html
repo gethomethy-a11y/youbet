@@ -892,7 +892,14 @@ h1.ob-h .r{color:var(--red)}
 //   coinsEnabled:false -> all of the above are hidden and the coins/buycoins
 //                         routes fall back to the profile screen.
 // Neither setting affects youbet Pro / Premium.
-const FEATURES = { coinsEnabled: true };
+const FEATURES = {
+  coinsEnabled: true,
+  // The +100 invite reward is disabled server-side too (grant_reward returns
+  // reward_disabled): no signup is attributed to a referrer yet, so anyone could
+  // claim it without inviting anybody. Turn both on together once
+  // profiles.referred_by is populated at signup.
+  inviteRewardEnabled: false
+};
 
 /* ================== ERROR COPY ==================
    Backend calls hand back whatever Postgres/PostgREST said. That text is for
@@ -905,6 +912,8 @@ const ERR_COPY = {
   already_claimed:   'Already claimed',
   blocked:           'This account isn’t available',
   not_found:         'That’s no longer available',
+  not_earned:        'Do this first, then claim the reward',
+  reward_disabled:   'This reward isn’t available right now',
   self:              'That’s your own profile'
 };
 // the backend has used a few names for "you don't have enough credit"
@@ -1894,7 +1903,7 @@ function rCoins(){
   ${earnRow('post','Post what you\'re looking for','Share who or what you need',15)}
   ${earnRow('campfire','Answer the Campfire','Share your take this week',15)}
   ${earnRow('share','Share your card','Send your profile to a friend',10)}
-  ${earnRow('invite','Invite a friend','They join youbet',100)}
+  ${FEATURES.inviteRewardEnabled?earnRow('invite','Invite a friend','They join youbet',100):''}
   <button class="claim ${S.claimedToday?'claimed':''}" onclick="claim()">${S.claimedToday?'Claimed today ✓':'Claim today’s +10'}</button>
   <button class="buycoinsbtn" onclick="go('buycoins')"><span class="m red" style="width:15px;height:15px;font-size:8px;vertical-align:-2px">b</span>&nbsp; Buy coins</button>
   <button class="membtn" onclick="go('member')"><span class="m gold" style="width:15px;height:15px;font-size:8px;vertical-align:-2px">b</span>&nbsp; youbet Pro — go unlimited</button>
@@ -3258,7 +3267,7 @@ function inviteSheet(){
   return `<div class="sheetbg" onclick="closeInvite()"><div class="sheet" onclick="event.stopPropagation()">
     <div class="grip"></div>
     <div class="shhd">Invite a friend</div>
-    <div class="shsub" style="padding:0 24px 4px;color:var(--tx3);font-size:13px">${FEATURES.coinsEnabled?'Earn +100 coins when a friend joins youbet with your link.':'Share your link — youbet gets better with the right people on it.'}</div>
+    <div class="shsub" style="padding:0 24px 4px;color:var(--tx3);font-size:13px">${FEATURES.inviteRewardEnabled?'Earn +100 coins when a friend joins youbet with your link.':'Share your link — youbet gets better with the right people on it.'}</div>
     <div style="padding:14px 24px">
       <div class="invlink"><span class="invtxt">${shown}</span><button class="invcopy" onclick="inviteVia('copy')">Copy</button></div>
     </div>
