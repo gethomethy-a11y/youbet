@@ -885,12 +885,14 @@ h1.ob-h .r{color:var(--red)}
 <div id="toast"></div>
 <script>
 /* ================== FEATURE FLAGS ================== */
-// Flip a flag back to true to bring the feature back — nothing is deleted,
-// the UI is only hidden and the backend (RPCs, Stripe links) stays wired up.
-//   coinsEnabled:false  -> hides the coin balance chip, the coins hub,
-//                          the daily claim, and the coin purchase screen.
-//                          Does NOT affect youbet Pro / Premium.
-const FEATURES = { coinsEnabled: false };
+// Toggling a flag only shows or hides UI — nothing is deleted, and the backend
+// (RPCs, Stripe links) stays wired up either way.
+//   coinsEnabled:true  -> coin balance chip, coins hub, daily claim and the
+//                         coin purchase screen are all shown.
+//   coinsEnabled:false -> all of the above are hidden and the coins/buycoins
+//                         routes fall back to the profile screen.
+// Neither setting affects youbet Pro / Premium.
+const FEATURES = { coinsEnabled: true };
 
 /* ================== ERROR COPY ==================
    Backend calls hand back whatever Postgres/PostgREST said. That text is for
