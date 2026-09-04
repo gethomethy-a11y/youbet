@@ -1004,15 +1004,23 @@ const YB = {
     return null;
   },
   // ---- CREDITS (uses my_coins RPC) ----
+  // full payload: {balance, streak, claimed_today, gap}
+  async coinsInfo(){
+    if(DEMO) return {balance:50, streak:0, claimed_today:false};
+    try{
+      const {data} = await sb.rpc('my_coins');
+      if(data && typeof data==='object') return data;
+      return {balance: data||0};
+    }catch(e){ return {balance:0}; }
+  },
   async myCoins(){
-    if(DEMO) return 50;
-    try{ const {data} = await sb.rpc('my_coins'); return (data && (data.balance!=null?data.balance:data)) || 0; }
-    catch(e){ return 0; }
+    const info = await this.coinsInfo();
+    return (info && info.balance!=null) ? info.balance : 0;
   },
   async credits(profileId){ return this.myCoins(); },
   async claimDaily(){
     if(DEMO) return {ok:true, balance:null};
-    try{ const {data,error}=await sb.rpc('claim_daily'); if(error) return {ok:false,error:error.message}; return {ok:true, ...(data||{})}; }
+    try{ const {data,error}=await sb.rpc('claim_daily'); if(error) return {ok:false,error:error.message}; return {ok:!(data&&data.error), ...(data||{})}; }
     catch(e){ return {ok:false,error:String(e)}; }
   },
   async grantReward(kind){
@@ -2467,7 +2475,7 @@ async function obAuth(){
   if(!user){ toast('Check your email to confirm your account.'); return; }
 
   const prof = await YB.myProfile(user.id);
-  if(prof){ mapProfileToMe(prof); S.coins = await YB.myCoins(); }
+  if(prof){ mapProfileToMe(prof); await syncCoins(); }
 
   if(prof && prof.onboarded){
     S.onboarding=false;S.view=null;S.stack=[];toast('Welcome back');render();loadFeed();
@@ -3299,8 +3307,22 @@ async function loadRewards(){
       if(r && (r.ok||r.error==='already_claimed')){ S.earned.profile=true; if(r.balance!=null)S.coins=r.balance; }
     }catch(e){}
   }
-  try{ const bal=await YB.myCoins(); if(bal!=null)S.coins=bal; }catch(e){}
+  await syncCoins();
   render();
+}
+// pull balance + whether today's reward is already claimed from the server,
+// so the claim button is right after a reload instead of always looking fresh
+async function syncCoins(){
+  if(YB.demo()) return null;
+  try{
+    const info = await YB.coinsInfo();
+    if(info){
+      if(info.balance!=null) S.coins = info.balance;
+      if(info.claimed_today!=null) S.claimedToday = !!info.claimed_today;
+      if(info.streak!=null) S.streak = info.streak;
+    }
+    return info;
+  }catch(e){ return null; }
 }
 async function claim(){
   if(S.claimedToday)return toast('Already claimed today');
@@ -3308,7 +3330,9 @@ async function claim(){
     if(S._claimingDaily)return; S._claimingDaily=true;
     const res=await YB.claimDaily();
     S._claimingDaily=false;
-    if(res.ok){ S.claimedToday=true; S.coins=(res.balance!=null?res.balance:await YB.myCoins()); toast(`Daily reward claimed · +${res.reward||10}`); render(); return; }
+    if(res.ok){ S.claimedToday=true; if(res.streak!=null)S.streak=res.streak;
+      S.coins=(res.balance!=null?res.balance:await YB.myCoins());
+      toast(`Daily reward claimed · +${res.reward||10}`); render(); return; }
     if(res.error==='already_claimed'){ S.claimedToday=true; if(res.balance!=null)S.coins=res.balance; toast('Already claimed today'); render(); return; }
     toast(res.error==='not_authenticated'?'Log in to claim':'Could not claim — try again'); render(); return;
   }
@@ -3793,7 +3817,7 @@ async function routeSignedInUser(user){
   if(!user) return false;
   let prof=null;
   try{ prof=await YB.myProfile(user.id); }catch(e){}
-  if(prof){ mapProfileToMe(prof); try{S.coins=await YB.myCoins();}catch(e){} }
+  if(prof){ mapProfileToMe(prof); await syncCoins(); }
   else { S.me.email=user.email||S.me.email; }
   if(prof && prof.onboarded){
     // returning, complete user -> straight into the app
