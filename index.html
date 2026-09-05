@@ -2226,10 +2226,7 @@ function rSettings(){
   </div>
   <div class="setlbl">Notifications</div>
   <div class="setsec">
-    ${setToggle('nConnect','New connection requests',true)}
-    ${setToggle('nMsg','Messages',true)}
-    ${setToggle('nViews','Profile views',false)}
-    ${setToggle('nEmail','Email updates',false)}
+    ${setToggle('nEmail','Email notifications',true,'Connection requests, applicants, and your hourly summary of unread activity')}
   </div>
   <div class="setlbl">Privacy</div>
   <div class="setsec">
@@ -2251,18 +2248,27 @@ function rSettings(){
   </div>
   <div style="text-align:center;color:var(--tx3);font-size:11.5px;padding:20px 0 100px">youbet · v1.0</div>
   ${bnav('home')}`;}
-function setToggle(key,label,def){
+function setToggle(key,label,def,sub){
   const on=S.settings[key]!==undefined?S.settings[key]:def;
-  return `<div class="setrow"><div class="setb"><div class="sett">${label}</div></div><button class="tgl ${on?'on':''}" onclick="toggleSetting('${key}',${def})"><span class="tgldot"></span></button></div>`;
+  const subline=sub?`<div class="setm">${sub}</div>`:'';
+  return `<div class="setrow"><div class="setb"><div class="sett">${label}</div>${subline}</div><button class="tgl ${on?'on':''}" onclick="toggleSetting('${key}',${def})"><span class="tgldot"></span></button></div>`;
 }
-function toggleSetting(key,def){
+async function toggleSetting(key,def){
   const cur=S.settings[key]!==undefined?S.settings[key]:def;
   const next=!cur;
   S.settings[key]=next;render();
-  // Live: connection/email notifications map to profiles.notify_opt_out
-  if(!YB.demo() && (key==='nConnect'||key==='nEmail')){
-    // opted out when the toggle is OFF
-    YB.setNotifyOptOut(!next);
+  // nEmail is the single owner of profiles.notify_opt_out: switch OFF means
+  // opted out, and that one column governs every email youbet sends.
+  if(!YB.demo() && key==='nEmail'){
+    const res=await YB.setNotifyOptOut(!next);
+    if(!res||!res.ok){
+      // roll the switch back rather than showing a preference that was not saved
+      S.settings[key]=cur;
+      toast(errMsg(res,'Could not save that — try again'));
+      render();
+      return;
+    }
+    toast(next?'Email notifications on':'Email notifications off');
   }
 }
 async function doLogout(){
@@ -2440,6 +2446,9 @@ function mapProfileToMe(p){
   S.isPro = !!p.is_premium;
   S.me.projectsEver = p.projects_ever||0;
   S.me.selfpostEver = p.selfpost_ever||0;
+  // Email notifications: the switch is the inverse of the opt-out column.
+  // Loaded here so the toggle shows the stored value instead of a default.
+  S.settings.nEmail = !p.notify_opt_out;
   // daily reward: did I already claim today?
   if(p.last_claim_date){
     const today=new Date().toISOString().slice(0,10);
