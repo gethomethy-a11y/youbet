@@ -1955,18 +1955,23 @@ function rBuyCoins(){
   ${bnav('home')}`;}
 function rMember(){
   const bens=[
-    // "See who viewed you" removed: nothing records profile views, so the
-    // screen behind it is always empty. Saved-you still works, so it stays.
     ['See who saved you',"Know who's interested before you reach out"],
     ['2× visibility','Your card & posts shown first'],
     ['Unlimited projects & posts','Free is limited to 1 of each'],
     ['Premium badge',"A gold badge on your card, shows you're Pro"],
+  ];
+  // Not numbered and visibly greyed: nothing records profile views yet, so this
+  // is not part of what today's subscription buys. Move it into bens above once
+  // view tracking exists.
+  const soonPerks=[
+    ['See who viewed you','Not available yet — we\u2019ll turn it on when view tracking ships'],
   ];
   return `${backbar('youbet Pro',FEATURES.coinsEnabled?'coins':'me')}
   <div class="prom">
   <div class="phero"><div class="pk">◆ Premium · $9.99/mo</div><div class="pt">Get seen first.</div><div class="ps">Know who's interested and unlock everything.</div></div>
   <div class="plist">
     ${bens.map((b,i)=>`<div class="pli"><span class="pn">${String(i+1).padStart(2,'0')}</span><div><div class="plt">${b[0]}</div><div class="pls">${b[1]}</div></div></div>`).join('')}
+    ${soonPerks.map(b=>`<div class="pli" style="opacity:.5"><span class="pn">·</span><div><div class="plt">${b[0]} <span style="font-size:9.5px;font-weight:800;letter-spacing:.4px;border:1px solid currentColor;border-radius:100px;padding:2px 7px;margin-left:5px;vertical-align:2px">COMING SOON</span></div><div class="pls">${b[1]}</div></div></div>`).join('')}
   </div>
   <div class="pcta"><button class="pctabtn" onclick="goPro()">Go Premium · $9.99/mo</button><div class="pctasub">Cancel anytime</div></div>
   <div style="height:130px"></div>
