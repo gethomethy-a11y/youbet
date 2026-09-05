@@ -176,7 +176,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none}
 .d-av{width:64px;height:64px;border-radius:18px;font-size:24px}
 .d-av.person{border-radius:50%}
 .d-nm{font-family:var(--head);font-weight:800;font-size:21px;letter-spacing:-.4px}
-.goldcoin{width:16px;height:16px;font-size:8px;vertical-align:middle;margin-left:1px}
+.probadge{width:16px;height:16px;font-size:8px;vertical-align:middle;margin-left:1px}
 .p-nm{display:inline-flex;align-items:center;gap:6px}
 /* buy coins */
 .balc{margin:20px;border-radius:18px;background:#0D0D0D;color:#fff;padding:20px 22px;display:flex;align-items:center;gap:14px}
@@ -887,13 +887,16 @@ h1.ob-h .r{color:var(--red)}
 /* ================== FEATURE FLAGS ================== */
 // Toggling a flag only shows or hides UI — nothing is deleted, and the backend
 // (RPCs, Stripe links) stays wired up either way.
-//   coinsEnabled:true  -> coin balance chip, coins hub, daily claim and the
-//                         coin purchase screen are all shown.
-//   coinsEnabled:false -> all of the above are hidden and the coins/buycoins
-//                         routes fall back to the profile screen.
-// Neither setting affects youbet Pro / Premium.
+//   coinsEnabled:false -> coins are removed from the product. No balance chip,
+//                         no coins hub, no daily claim, no purchase packs, and
+//                         no "costs N coins" copy anywhere. Connecting is free:
+//                         do_connect no longer deducts anything server-side.
+//   coinsEnabled:true  -> brings the whole coin economy back. The tables, RPCs
+//                         and Stripe products are all still in place, so this is
+//                         the only switch needed on the client.
+// Neither setting affects youbet Pro / Premium, which is a separate feature.
 const FEATURES = {
-  coinsEnabled: true,
+  coinsEnabled: false,
   // The +100 invite reward is disabled server-side too (grant_reward returns
   // reward_disabled): no signup is attributed to a referrer yet, so anyone could
   // claim it without inviting anybody. Turn both on together once
@@ -923,8 +926,8 @@ function errMsg(res, fallback){
   if(!code) return fallback;
   if(ERR_COPY[code]) return ERR_COPY[code];
   if(isNoCreditsError(code)){
-    return FEATURES.coinsEnabled ? 'Not enough coins — top up to connect'
-                                 : 'You’ve reached your connection limit for now';
+    // with coins off nothing can run out, so fall back to the caller's wording
+    return FEATURES.coinsEnabled ? 'Not enough coins — top up to connect' : fallback;
   }
   // a short, sentence-like message is safe to show; anything with SQL//code shape is not
   const looksTechnical = /_|[{}()<>;]|PGRST|violates|constraint|relation |function |syntax|null value|permission denied|duplicate key|JWT|row-level/i.test(code);
@@ -1384,7 +1387,7 @@ window.YB = YB;
 /* ================== STATE ================== */
 const S={
   onboarding:false, guest:true,
-  coins:50, claimedToday:false, earned:{}, settings:{}, memberOf:{}, tab:'home', netTab:'projects', inboxTab:'msgs',
+  coins:0, claimedToday:false, earned:{}, settings:{}, memberOf:{}, tab:'home', netTab:'projects', inboxTab:'msgs',
   notifs:[],
   hiSent:{}, saved:{}, metoo:{}, stack:[], intent:null, intentPick:0, isPro:false,
   me:{n:'You',role:'',loc:'',bio:'',goodat:[],photo:null},
@@ -1504,11 +1507,11 @@ function respondBtn(id,postId){const e=E(id);const sent=S.hiSent&&S.hiSent[id];
   if(hasChatWith(id))return `<button class="hi open" onclick="event.stopPropagation();openChat('${id}')">Open chat</button>`;
   if(sent)return `<button class="hi applied" onclick="event.stopPropagation();toast('Request sent — waiting for them to accept')">Requested ✓</button>`;
   return `<button class="hi" onclick="event.stopPropagation();respondToPost('${id}','${postId||''}')">I'm interested</button>`;}
-function goldCoin(e){return e&&e.pro?'<span class="m gold goldcoin">b</span>':'';}
+function proBadge(e){return e&&e.pro?'<span class="m gold probadge">b</span>':'';}
 function postCard(id,bare,noact,noPrimary,onlyPostId){const e=E(id);
   const self=(id==='you_self'||(S.me.pid&&id===S.me.pid));
   const tgt=self?"go('me')":`openDetail('${id}')`;
-  const header=bare?'':`<div class="p-top" onclick="${tgt}">${av(e,'p-av')}<div><div class="p-nm">${e.n}${self?' <span class="youtag">You</span>':''}${goldCoin(e)}</div><div class="p-mta">${e.meta}</div></div></div>`;
+  const header=bare?'':`<div class="p-top" onclick="${tgt}">${av(e,'p-av')}<div><div class="p-nm">${e.n}${self?' <span class="youtag">You</span>':''}${proBadge(e)}</div><div class="p-mta">${e.meta}</div></div></div>`;
   const saveShare=`<button class="act2 ${S.saved[id]?'saved':''}" onclick="event.stopPropagation();toggleSave('${id}',this)">${S.saved[id]?'Saved':'Save'}</button><button class="act2" onclick="event.stopPropagation();openShare('${id}')">Share</button>`;
   const selfActs=`<div class="acts"><button class="act2" onclick="event.stopPropagation();editMyPost()">Edit</button><button class="act2" onclick="event.stopPropagation();openShare('${id}')">Share</button></div>`;
   const askClick=bare?'':`onclick="${tgt}"`;
@@ -1522,7 +1525,7 @@ function postCard(id,bare,noact,noPrimary,onlyPostId){const e=E(id);
     bodyC=`<div class="p-ask" ${askClick}>${pp.ask}</div><div class="p-give">${pp.give||''}</div>${acts(pp)}`;
   }
   return `<div class="post">${header}${bodyC}</div>`;}
-function dirRow(id){const e=E(id);const self=(id==='you_self');return `<div class="row" onclick="${self?"go('me')":`openDetail('${id}')`}">${av(e,'av-r')}<div class="bd2"><div class="nm">${e.n}${self?' <span class="youtag">You</span>':''}${goldCoin(e)}</div><div class="mta">${e.meta}</div></div><span class="chev">›</span></div>`;}
+function dirRow(id){const e=E(id);const self=(id==='you_self');return `<div class="row" onclick="${self?"go('me')":`openDetail('${id}')`}">${av(e,'av-r')}<div class="bd2"><div class="nm">${e.n}${self?' <span class="youtag">You</span>':''}${proBadge(e)}</div><div class="mta">${e.meta}</div></div><span class="chev">›</span></div>`;}
 
 /* ================== SCREENS ================== */
 function rHome(){
@@ -1603,7 +1606,7 @@ function rProject(e,fb){
   const roles=e.roles||[];
   const onTeam=!isMine(e.id)&&S.memberOf&&S.memberOf[e.id];
   return `${backbar('Project',fb)}
-  <div class="dhero">${av(e,'d-av')}<div><div class="d-nm">${e.n}${goldCoin(e)}</div><div class="d-mta">${e.meta}</div></div></div>
+  <div class="dhero">${av(e,'d-av')}<div><div class="d-nm">${e.n}${proBadge(e)}</div><div class="d-mta">${e.meta}</div></div></div>
   ${onTeam?`<div class="teambanner" onclick="openGroup('${e.id}')"><span class="tb-ic">✓</span><span>You're on this team — open the Team Space</span><span class="tb-ar">›</span></div>`:''}
   <div class="dsec"><div class="lblrow"><span class="dk" style="margin:0">Stage</span><span class="curtag">${S.stages[e.stage]}</span></div>${stageLine(e.stage)}</div>
   <div class="dsec"><div class="dk">About</div><div class="dtxt">${e.about}</div></div>
@@ -1641,7 +1644,7 @@ function rPerson(e,fb){
     ? `<div class="feed" style="padding:0 20px">${postCard(e.id,true)}</div>`
     : `<div class="dsec" style="padding-top:2px"><div class="dtxt" style="color:var(--tx3)">No posts yet</div></div>`;
   return `${backbar('Profile',fb)}
-  <div class="dhero">${av(e,'d-av')}<div><div class="d-nm">${e.n}${goldCoin(e)}</div><div class="d-mta">${e.meta}</div></div></div>
+  <div class="dhero">${av(e,'d-av')}<div><div class="d-nm">${e.n}${proBadge(e)}</div><div class="d-mta">${e.meta}</div></div></div>
   <div class="dsec"><div class="dtxt">${e.about}</div></div>
   <div class="dsec"><div class="dk">Good at</div><div class="dtags">${e.brings.map(b=>`<span class="dtag">${b}</span>`).join('')}</div></div>
   <div class="dsec" style="padding-bottom:2px"><div class="dk">Posts</div></div>
@@ -1849,7 +1852,7 @@ function rGroup(){
   const guestCta = isGuest?`<div class="guestbars"><button class="pcta-btn" onclick="openIntent('${id}')">I'm in</button></div>`:'';
 
   return `<div class="backbar"><button class="backbtn" onclick="back('${fb}')">‹</button><span class="backttl">${title}</span>${manage}</div>
-  <div class="tshero"><div class="tstop"><div class="av" style="${e.photo?photoBg(e.photo):'background:'+e.c}">${hasImg(e.photo)?'':e.n[0]}</div><div><div class="tsn">${e.n}${goldCoin(e)}</div><div class="tsm">${sub}</div>${badge}</div></div></div>
+  <div class="tshero"><div class="tstop"><div class="av" style="${e.photo?photoBg(e.photo):'background:'+e.c}">${hasImg(e.photo)?'':e.n[0]}</div><div><div class="tsn">${e.n}${proBadge(e)}</div><div class="tsm">${sub}</div>${badge}</div></div></div>
   <div class="tstabs">${tabsHtml}</div>
   ${body}${isGuest?'<div style="height:150px"></div>':''}${guestCta}
   ${(isGuest||(tab==='chat'&&!locked('chat')))?'':bnav('inbox')}`;}
@@ -1868,7 +1871,7 @@ function rApplicants(){
   const hidden=apps.length-shown.length;
   return `${backbar('Applicants','detail')}
   <div class="apphead"><div class="dk" style="margin:0">Applicants · ${apps.length}</div><div class="appfor">For: ${role} · ${e.n}</div></div>
-  ${shown.map(a=>{const p=E(a.id);return `<div class="approw"><div class="av" style="background:${p.c}">${p.n[0]}</div><div style="flex:1"><div class="appn">${p.n}${goldCoin(p)}</div><div class="appr">${p.meta}</div><div class="appnote">"${a.note}"</div></div></div>
+  ${shown.map(a=>{const p=E(a.id);return `<div class="approw"><div class="av" style="background:${p.c}">${p.n[0]}</div><div style="flex:1"><div class="appn">${p.n}${proBadge(p)}</div><div class="appr">${p.meta}</div><div class="appnote">"${a.note}"</div></div></div>
   <div class="appbrow"><button class="abtn acc" onclick="acceptApplicant('${a.id}','${id}')">Accept</button><button class="abtn dec" onclick="openDetail('${a.id}')">View</button><button class="abtn dec" onclick="toast('Ignored')">Ignore</button></div>`;}).join('')}
   ${hidden>0?`<div class="applocked"><div class="applk"><div class="lkt">${hidden} more applicant${hidden>1?'s':''}</div><div class="lks">See everyone who applied to your roles</div><button class="lkb" onclick="go('member')">Unlock with Pro</button></div></div>`:''}
   <div style="height:100px"></div>
@@ -1930,10 +1933,8 @@ function rMember(){
   const bens=[
     ['See who viewed & saved you',"Know who's interested before you reach out"],
     ['2× visibility','Your card & posts shown first'],
-    FEATURES.coinsEnabled?['200 bonus coins monthly','200 extra coins every month, on us']
-                         :['Unlimited connections','Reach out to as many people as you want'],
     ['Unlimited projects & posts','Free is limited to 1 of each'],
-    ['Premium badge',"Gold coin on your card, shows you're Pro"],
+    ['Premium badge',"A gold badge on your card, shows you're Pro"],
   ];
   return `${backbar('youbet Pro',FEATURES.coinsEnabled?'coins':'me')}
   <div class="prom">
@@ -2082,7 +2083,7 @@ function rMe(){
 function rConnections(){
   const conns=S.chats.filter(c=>!c.pending).map(c=>c.id).filter(id=>E(id));
   return `${backbar('Connections','me')}
-  ${conns.length?`<div style="padding:8px 20px">${conns.map(id=>{const e=E(id);return `<div class="mini" onclick="openChat('${id}')">${av(e,'ma'+(e.type==='project'?' sq':''))}<div><div class="mn">${e.n}${goldCoin(e)}</div><div class="mm">${e.meta}</div></div><span class="chev">›</span></div>`;}).join('')}</div>`:`<div class="empty" style="text-align:center;color:var(--tx3);font-size:13.5px;padding:60px 40px"><div class="et">No connections yet</div>Connect with someone to start building your network.</div>`}
+  ${conns.length?`<div style="padding:8px 20px">${conns.map(id=>{const e=E(id);return `<div class="mini" onclick="openChat('${id}')">${av(e,'ma'+(e.type==='project'?' sq':''))}<div><div class="mn">${e.n}${proBadge(e)}</div><div class="mm">${e.meta}</div></div><span class="chev">›</span></div>`;}).join('')}</div>`:`<div class="empty" style="text-align:center;color:var(--tx3);font-size:13.5px;padding:60px 40px"><div class="et">No connections yet</div>Connect with someone to start building your network.</div>`}
   <div style="height:100px"></div>${bnav('home')}`;}
 function rSaved(){
   const savedIds=Object.keys(S.saved).filter(k=>S.saved[k]);
@@ -2143,7 +2144,9 @@ function rLegal(){
   </div><div style="height:100px"></div>${bnav('home')}`;}
 function rNotifs(){
   const icons={accept:['✓','var(--tx)'],intent:['→','var(--red)'],coins:['b','var(--green)'],view:['◔','var(--tx2)'],save:['♥','var(--red)']};
-  const filt=S.notifTab==='requests'?S.notifs.filter(n=>n.type==='accept'||n.type==='intent'):S.notifs;
+  let filt=S.notifTab==='requests'?S.notifs.filter(n=>n.type==='accept'||n.type==='intent'):S.notifs;
+  // old coin notifications would lead to a screen that no longer exists
+  if(!FEATURES.coinsEnabled) filt=filt.filter(n=>n.type!=='coins');
   return `${backbar('Notifications','home')}
   <div class="nseg"><span class="nsg ${!S.notifTab||S.notifTab==='all'?'on':''}" onclick="S.notifTab='all';render()">All</span><span class="nsg ${S.notifTab==='requests'?'on':''}" onclick="S.notifTab='requests';render()">Requests</span></div>
   ${filt.length?filt.map(n=>{const e=E(n.who);const ic=icons[n.type]||['·','var(--tx2)'];const isProj=e&&e.type==='project';return `<div class="nrow ${n.unread?'unread':''}" onclick="openNotif('${n.id}')">${av(e,'nav-a'+(isProj?' sq':''))}<div class="nicon" style="background:${ic[1]}">${ic[0]}</div><div class="nb"><div class="nt">${n.type==='coins'?n.t:`<b>${e?e.n:'Someone'}</b> ${n.t}`}</div><div class="ntime">${n.time} ago</div></div>${n.unread?'<span class="undot"></span>':''}</div>`;}).join(''):'<div class="empty" style="text-align:center;color:var(--tx3);font-size:13.5px;padding:60px 40px">No notifications yet.</div>'}
@@ -2697,10 +2700,8 @@ function intentSheet(){
     </div></div>`;}
 async function sendIntent(){
   const id=S.intent;const e=E(id);const isProj=e.type==='project';
-  if(S.coins<10){
-    // With coins hidden there is nowhere to top up, so don't send the user to a
-    // hidden screen — say it neutrally and stop. The request logic below is untouched.
-    if(!FEATURES.coinsEnabled){ S.intent=null; toast('You\u2019ve reached your connection limit for now'); render(); return; }
+  // Connecting is free. Only check a balance while the coin economy is switched on.
+  if(FEATURES.coinsEnabled && S.coins<10){
     S.pendingIntent=id;S.intent=null;toast('You need 10 coins to connect');return go('buycoins');
   }
   const opts=intentOpts(e);
@@ -2752,7 +2753,8 @@ async function sendIntent(){
   }
 
   // ---- DEMO ----
-  S.coins-=10;S.hiSent[id]=true;
+  if(FEATURES.coinsEnabled) S.coins-=10;
+  S.hiSent[id]=true;
   if(isProj){
     S.appliedTo=S.appliedTo||{}; S.appliedTo[id]=true;
     S.intent=null; toast(FEATURES.coinsEnabled?`Request sent to ${e.n} · −10 coins`:`Request sent to ${e.n}`); render(); go('home');
