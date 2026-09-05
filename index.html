@@ -1228,6 +1228,29 @@ const YB = {
       return {ok:!(data&&data.error), ...(data||{})};
     }catch(e){ return {ok:false,error:String(e)}; }
   },
+  // what would stop me deleting? (projects I solely own that others are on)
+  async deletionBlockers(){
+    if(DEMO) return [];
+    try{ const {data}=await sb.rpc('my_deletion_blockers'); return data||[]; }catch(e){ return []; }
+  },
+  // Deletes the caller's own account. The edge function takes the user id from
+  // the verified token, so this cannot be pointed at anyone else.
+  async deleteAccount(confirmText){
+    if(DEMO) return {ok:true};
+    try{
+      const {data:sess}=await sb.auth.getSession();
+      const token=sess&&sess.session&&sess.session.access_token;
+      if(!token) return {ok:false,error:'not_authenticated'};
+      const r=await fetch(CFG.SUPABASE_URL+'/functions/v1/delete-account',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':CFG.SUPABASE_KEY,'Authorization':'Bearer '+token},
+        body:JSON.stringify({confirm:confirmText})
+      });
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok||d.error) return {ok:false, ...d};
+      return {ok:true, ...d};
+    }catch(e){ return {ok:false,error:String(e)}; }
+  },
   async setNotifyOptOut(optOut){
     if(DEMO) return {ok:true};
     try{
@@ -2278,8 +2301,13 @@ function rSettings(){
   <div class="setsec" style="margin-top:22px">
     <div class="setrow" onclick="doLogout()"><div class="setb"><div class="sett" style="color:var(--tx)">Log out</div></div></div>
   </div>
-  <div class="setsec">
-    <div class="setrow" onclick="confirmDelete()"><div class="setb"><div class="sett" style="color:var(--red)">Delete account</div></div></div>
+  <div class="setlbl" style="color:var(--red);margin-top:26px">Danger zone</div>
+  <div class="setsec" style="border:1px solid rgba(255,43,43,.25)">
+    <div class="setrow" onclick="go('deleteacct')">
+      <div class="setb"><div class="sett" style="color:var(--red)">Delete account</div>
+      <div class="setm">Permanently removes your profile and personal data</div></div>
+      <span class="chev" style="color:var(--red)">›</span>
+    </div>
   </div>
   <div style="text-align:center;color:var(--tx3);font-size:11.5px;padding:20px 0 100px">youbet · v1.0</div>
   ${bnav('home')}`;}
@@ -2323,11 +2351,89 @@ async function doLogout(){
   S.coins=0;S.me={n:'You',role:'',loc:'',bio:'',goodat:[],photo:null};
   S.guest=true;S.onboarding=false;S.view=null;S.stack=[];toast('Logged out');render();loadFeed();
 }
-function confirmDelete(){
-  if(!confirm('Delete your account? This cannot be undone.'))return;
-  if(!confirm('Are you absolutely sure? All your data will be permanently deleted.'))return;
-  S.coins=0;S.me={n:'You',role:'',loc:'',bio:'',goodat:[],photo:null};
-  S.guest=true;S.onboarding=false;S.view=null;S.stack=[];toast('Account deleted');render();loadFeed();
+// A session pointing at a deleted profile: sign out rather than let a scrubbed
+// account back in. Signing in with the same Google account creates a new one,
+// because delete_account() removes the auth identity link.
+async function handleDeletedAccount(){
+  try{ await YB.signOut(); }catch(e){}
+  S.coins=0; S.me={n:'You',role:'',loc:'',bio:'',goodat:[],photo:null};
+  S.guest=true; S.onboarding=false; S.view=null; S.stack=[];
+  toast('That account was deleted');
+  render(); try{ loadFeed(); }catch(e){}
+}
+
+// The old confirmDelete() only cleared local state and toasted "Account
+// deleted" — the account was never touched server-side. Replaced by a real
+// screen that requires typing the account email and calls delete-account.
+function rDeleteAccount(){
+  const email=(S.me.email||'').trim();
+  const blockers=S.deleteBlockers||[];
+  const typed=(S.deleteTyped||'').trim().toLowerCase();
+  const ready=email && typed===email.toLowerCase() && !blockers.length;
+  const blockerHtml=blockers.length?`
+    <div style="background:#FFF5F5;border:1px solid rgba(255,43,43,.3);border-radius:12px;padding:14px 16px;margin:0 20px 18px">
+      <div style="font-family:var(--head);font-weight:800;font-size:14px;color:var(--red);margin-bottom:6px">Transfer or delete these first</div>
+      <div style="font-size:13.5px;color:var(--tx2);line-height:1.5">You're the only owner of ${blockers.length===1?'a project that other people are on':'projects that other people are on'}. Deleting your account would leave ${blockers.length===1?'their team':'those teams'} without an owner.</div>
+      <div style="margin-top:10px">${blockers.map(b=>`<div style="font-size:13.5px;font-weight:700;color:var(--tx)">· ${esc(b.project_name||'Project')} <span style="font-weight:500;color:var(--tx3)">${b.members} member${b.members===1?'':'s'}</span></div>`).join('')}</div>
+    </div>`:'';
+  return `${backbar('Delete account','settings')}
+  <div style="padding:4px 20px 18px">
+    <div style="font-family:var(--head);font-weight:800;font-size:19px;letter-spacing:-.4px;margin-bottom:10px">This can't be undone.</div>
+    <div style="font-size:14px;color:var(--tx2);line-height:1.6">
+      Your profile, posts, saves and settings are deleted. Pending requests you've sent or received are withdrawn.
+      Messages you've sent stay in other people's conversations but are no longer linked to you — they'll show as
+      "Deleted user". Projects you own alone are deleted with your account.
+    </div>
+  </div>
+  ${blockerHtml}
+  <div style="padding:0 20px">
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:8px">Type <b style="color:var(--tx)">${esc(email||'your email')}</b> to confirm</div>
+    <input class="finp" id="del_confirm" autocomplete="off" autocapitalize="none" spellcheck="false"
+      placeholder="${esc(email||'your email')}"
+      value="${esc(S.deleteTyped||'')}"
+      oninput="S.deleteTyped=this.value;syncDeleteBtn()">
+  </div>
+  <button id="del_btn" class="claim" ${ready?'':'disabled'}
+    style="background:${ready?'var(--red)':'var(--br2)'};color:#fff;margin-top:16px"
+    onclick="doDeleteAccount()">Delete my account</button>
+  <div style="text-align:center;padding:14px 20px 100px"><span class="lk" onclick="back('settings')" style="font-size:13.5px;color:var(--tx2);cursor:pointer">Cancel</span></div>`;}
+
+function syncDeleteBtn(){
+  const email=(S.me.email||'').trim().toLowerCase();
+  const typed=(S.deleteTyped||'').trim().toLowerCase();
+  const ok=!!email && typed===email && !(S.deleteBlockers||[]).length;
+  const b=document.getElementById('del_btn');
+  if(b){ b.disabled=!ok; b.style.background=ok?'var(--red)':'var(--br2)'; }
+}
+
+async function loadDeleteBlockers(){
+  if(YB.demo()){ S.deleteBlockers=[]; return; }
+  try{ S.deleteBlockers=await YB.deletionBlockers(); }catch(e){ S.deleteBlockers=[]; }
+  if(S.view==='deleteacct')render();
+}
+
+async function doDeleteAccount(){
+  const email=(S.me.email||'').trim();
+  const typed=(S.deleteTyped||'').trim();
+  if(!email || typed.toLowerCase()!==email.toLowerCase()) return toast('Type your email exactly to confirm');
+  if((S.deleteBlockers||[]).length) return toast('Transfer or delete those projects first');
+  const btn=document.getElementById('del_btn'); if(btn)btn.disabled=true;
+  toast('Deleting your account…');
+  const res=await YB.deleteAccount(typed);
+  if(!res.ok){
+    if(btn)btn.disabled=false;
+    if(res.error==='owns_team_project'){ loadDeleteBlockers(); return toast('Transfer or delete those projects first'); }
+    if(res.error==='confirmation_mismatch') return toast('That email doesn’t match this account');
+    return toast(errMsg(res,'Could not delete your account'));
+  }
+  // sign out locally and drop every trace of the session
+  try{ await YB.signOut(); }catch(e){}
+  try{ localStorage.removeItem('yb_ref'); }catch(e){}
+  S.deleteTyped=''; S.deleteBlockers=[];
+  S.coins=0; S.me={n:'You',role:'',loc:'',bio:'',goodat:[],photo:null};
+  S.guest=true; S.onboarding=false; S.view=null; S.stack=[];
+  toast('Your account has been deleted');
+  render(); loadFeed();
 }
 // Reusable V2 role picker: trigger + expanded option list + "Other" free-text
 function rolePickerUI(value, ctx){
@@ -2480,6 +2586,7 @@ function obStartSignup(){obStart('signup');}
 function obStartLogin(){obStart('login');}
 function mapProfileToMe(p){
   if(!p)return;
+  if(p.deleted_at){ handleDeletedAccount(); return; }
   S.me.n = p.name || (p.email||'You').split('@')[0] || 'You';
   S.me.role = p.role || p.skill_label || '';
   S.me.loc = p.city || '';
@@ -2620,7 +2727,7 @@ function requireAuth(){
 }
 function render(){
   if(S.onboarding){app.innerHTML=rOnboard();if(S.photoTarget)app.insertAdjacentHTML('beforeend',photoSheet());window.scrollTo(0,0);return;}
-  const map={home:rHome,net:rNet,inbox:rInbox,detail:rDetail,chat:rChat,group:rGroup,applicants:rApplicants,coins:rCoins,buycoins:rBuyCoins,member:rMember,compose:rCompose,composePerson:rComposePerson,newproject:rNewProject,composeRole:rComposeRole,editRole:rEditRole,me:rMe,editme:rEditMe,settings:rSettings,notifs:rNotifs,search:rSearch,connections:rConnections,saved:rSaved,viewers:rViewers,blocked:rBlocked,help:rHelp,contact:rContact,legal:rLegal};
+  const map={home:rHome,net:rNet,inbox:rInbox,detail:rDetail,chat:rChat,group:rGroup,applicants:rApplicants,coins:rCoins,buycoins:rBuyCoins,member:rMember,compose:rCompose,composePerson:rComposePerson,newproject:rNewProject,composeRole:rComposeRole,editRole:rEditRole,me:rMe,editme:rEditMe,settings:rSettings,notifs:rNotifs,search:rSearch,connections:rConnections,saved:rSaved,viewers:rViewers,blocked:rBlocked,help:rHelp,contact:rContact,legal:rLegal,deleteacct:rDeleteAccount};
   let _v=S.view||'home';
   // coins screens are hidden behind the feature flag — fall back to the profile screen
   if(!FEATURES.coinsEnabled && (_v==='coins'||_v==='buycoins')) _v='me';
@@ -2639,12 +2746,13 @@ function go(v){
   // net + inbox are browsable as a guest (they show a sign-in prompt inside);
   // everything else account-bound still gates.
   if(!FEATURES.coinsEnabled && (v==='coins'||v==='buycoins')) v='me';
-  const gated=['me','coins','buycoins','member','connections','saved','viewers','settings','blocked','notifs','compose','composePerson','newproject','composeRole','editme','editRole'];
+  const gated=['me','coins','buycoins','member','connections','saved','viewers','settings','blocked','notifs','compose','composePerson','newproject','composeRole','editme','editRole','deleteacct'];
   if(gated.includes(v) && !requireAuth()) return;
   closeSheets();
   if(['home','net','inbox'].includes(v))S.tab=v;
   S.stack.push(S.view||'home');S.view=v;render();
   if(v==='blocked')loadBlocked();
+  if(v==='deleteacct'){ S.deleteTyped=''; loadDeleteBlockers(); }
   if(v==='me')loadMyApplicants();
   if(v==='coins'&&FEATURES.coinsEnabled)loadRewards();
   if(v==='inbox' && isSignedIn()){ S._inboxTouched=false; if((S.requests||[]).length){ S.inboxTab='reqs'; render(); } loadInbox(); loadMyApplicants(); }
