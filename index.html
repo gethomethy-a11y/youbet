@@ -1202,15 +1202,30 @@ const YB = {
     return this.saveProfileRPC({photo_url:url});
   },
   // ---- NOTIFY (email on connect/join) ----
-  async notifyConnect(toPid, fromName, note, isProject){
+  // Per-event notification email. The function re-checks the recipient's
+  // notification settings server-side, so nothing here can force a send.
+  // Fire-and-forget on purpose: a mail problem must never block the action.
+  async notifyEvent(payload){
     if(DEMO) return {ok:true};
     try{
-      await fetch(CFG.SUPABASE_URL+'/functions/v1/notify-connect', {
+      await fetch(CFG.SUPABASE_URL+'/functions/v1/notify-event', {
         method:'POST',
         headers:{'Content-Type':'application/json','apikey':CFG.SUPABASE_KEY,'Authorization':'Bearer '+CFG.SUPABASE_KEY},
-        body:JSON.stringify({to_pid:toPid, from_name:fromName||'Someone', note:note||'', is_project:!!isProject})
+        body:JSON.stringify(payload)
       });
       return {ok:true};
+    }catch(e){ return {ok:false,error:String(e)}; }
+  },
+  // per-category email preferences (profiles.notify_*)
+  async notifyPrefs(){
+    if(DEMO) return {};
+    try{ const {data}=await sb.rpc('my_notify_prefs'); return data||{}; }catch(e){ return {}; }
+  },
+  async setNotifyPref(key, value){
+    if(DEMO) return {ok:true};
+    try{ const {data,error}=await sb.rpc('set_notify_pref',{p_key:key,p_value:!!value});
+      if(error) return {ok:false,error:error.message};
+      return {ok:!(data&&data.error), ...(data||{})};
     }catch(e){ return {ok:false,error:String(e)}; }
   },
   async setNotifyOptOut(optOut){
@@ -1682,7 +1697,8 @@ function rInbox(){
     let appBanner='';
     const myProjs=Object.values(S.myprojects||{});
     const appList=[];
-    myProjs.forEach(p=>{((S.applicantsData&&S.applicantsData[p.id])||[]).filter(a=>!a.is_team&&a.status!=='accepted').forEach(a=>appList.push({...a,projId:p.id,projName:p.n})); });
+    // only genuinely pending applicants — 'declined' used to be counted here too
+    myProjs.forEach(p=>{((S.applicantsData&&S.applicantsData[p.id])||[]).filter(a=>!a.is_team&&(a.status||'pending')==='pending').forEach(a=>appList.push({...a,projId:p.id,projName:p.n})); });
     if(appList.length){
       const av2=appList.slice(0,3).map((a,i)=>{const col=(typeof AV_COLORS!=='undefined')?AV_COLORS[(a.avatar_color||0)%AV_COLORS.length]:'#111';return `<div class="mav" style="background:${col};width:34px;height:34px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:2px solid #fff;${i?'margin-left:-11px':''}">${(a.name||'?')[0]}</div>`;}).join('');
       const first=appList[0], target=first.projId;
@@ -1871,16 +1887,16 @@ function rApplicants(){
   const hidden=apps.length-shown.length;
   return `${backbar('Applicants','detail')}
   <div class="apphead"><div class="dk" style="margin:0">Applicants · ${apps.length}</div><div class="appfor">For: ${role} · ${e.n}</div></div>
-  ${shown.map(a=>{const p=E(a.id);return `<div class="approw"><div class="av" style="background:${p.c}">${p.n[0]}</div><div style="flex:1"><div class="appn">${p.n}${proBadge(p)}</div><div class="appr">${p.meta}</div><div class="appnote">"${a.note}"</div></div></div>
-  <div class="appbrow"><button class="abtn acc" onclick="acceptApplicant('${a.id}','${id}')">Accept</button><button class="abtn dec" onclick="openDetail('${a.id}')">View</button><button class="abtn dec" onclick="toast('Ignored')">Ignore</button></div>`;}).join('')}
+  ${shown.map(a=>{const p=E(a.id);const appId=a.application_id||'';return `<div class="approw"><div class="av" style="background:${p.c}">${p.n[0]}</div><div style="flex:1"><div class="appn">${p.n}${proBadge(p)}</div><div class="appr">${p.meta}</div><div class="appnote">"${a.note}"</div></div></div>
+  <div class="appbrow"><button class="abtn acc" onclick="acceptApp('${appId}','${id}','${a.id}')">Accept</button><button class="abtn dec" onclick="openDetail('${a.id}')">View</button><button class="abtn dec" onclick="declineApp('${appId}','${id}')">Decline</button></div>`;}).join('')}
   ${hidden>0?`<div class="applocked"><div class="applk"><div class="lkt">${hidden} more applicant${hidden>1?'s':''}</div><div class="lks">See everyone who applied to your roles</div><button class="lkb" onclick="go('member')">Unlock with Pro</button></div></div>`:''}
   <div style="height:100px"></div>
   ${bnav('inbox')}`;}
-function acceptApplicant(pid,proj){
-  const p=E(pid);
-  if(!S.chats.find(c=>c.id===pid))S.chats.unshift({id:pid,msgs:[{me:0,t:`Thanks for accepting me! Excited to help build ${E(proj).n}.`}],time:'now',unread:false});
-  toast(`${p.n} added — say hi`);openChat(pid);
-}
+// acceptApplicant() removed. It was demo-only code running against live data:
+// it invented an incoming message the applicant never wrote, and called no
+// backend at all — no applications.status update, no team membership. The
+// Accept button now uses acceptApp(), the same handler as the Team Space tab,
+// which calls accept_application + add_to_team and rolls back on failure.
 async function sendGroup(){
   const i=document.getElementById('groupinput');if(!i||!i.value.trim())return;
   const txt=i.value.trim(); const id=S.groupId;
@@ -1888,7 +1904,15 @@ async function sendGroup(){
   S.teamChats=S.teamChats||{}; S.teamChats[id]=S.teamChats[id]||[];
   S.teamChats[id].push({sender:S.uid, name:S.me.n, body:txt, kind:'msg'});
   render();
-  try{ const r=await YB.teamSend(id, txt); if(r&&r.ok===false){ toast(errMsg(r,'Could not send')); } }catch(e){}
+  try{
+    const r=await YB.teamSend(id, txt);
+    if(r&&r.ok===false){ toast(errMsg(r,'Could not send')); return; }
+    // notify the rest of the team; the function excludes the sender and anyone
+    // who has the chat open, and honours each member's Messages setting
+    const proj=E(id);
+    YB.notifyEvent({kind:'message', project_id:id, from_user:S.uid, from_name:S.me.n,
+                    project_name:proj?proj.n:'', body:txt});
+  }catch(e){}
 }
 async function loadTeamChat(id){
   if(YB.demo())return;
@@ -1931,7 +1955,9 @@ function rBuyCoins(){
   ${bnav('home')}`;}
 function rMember(){
   const bens=[
-    ['See who viewed & saved you',"Know who's interested before you reach out"],
+    // "See who viewed you" removed: nothing records profile views, so the
+    // screen behind it is always empty. Saved-you still works, so it stays.
+    ['See who saved you',"Know who's interested before you reach out"],
     ['2× visibility','Your card & posts shown first'],
     ['Unlimited projects & posts','Free is limited to 1 of each'],
     ['Premium badge',"A gold badge on your card, shows you're Pro"],
@@ -2226,7 +2252,11 @@ function rSettings(){
   </div>
   <div class="setlbl">Notifications</div>
   <div class="setsec">
-    ${setToggle('nEmail','Email notifications',true,'Connection requests, applicants, and your hourly summary of unread activity')}
+    ${setToggle('nConnect','New connection requests',true)}
+    ${setToggle('nMsg','Messages',true)}
+    ${setToggle('nApplic','New applicants',true)}
+    ${setToggleSoon('Profile views','Needs view tracking — not built yet')}
+    ${setToggle('nEmail','Email updates',true,'Master switch. Off stops every youbet email.')}
   </div>
   <div class="setlbl">Privacy</div>
   <div class="setsec">
@@ -2248,6 +2278,14 @@ function rSettings(){
   </div>
   <div style="text-align:center;color:var(--tx3);font-size:11.5px;padding:20px 0 100px">youbet · v1.0</div>
   ${bnav('home')}`;}
+// A switch that is deliberately inert: shown so the category is visible, but
+// wired to nothing because the underlying feature does not exist yet.
+function setToggleSoon(label,sub){
+  return `<div class="setrow" style="opacity:.55">
+    <div class="setb"><div class="sett">${label} <span style="font-size:10px;font-weight:800;letter-spacing:.4px;color:var(--tx3);border:1px solid var(--br2);border-radius:100px;padding:2px 7px;margin-left:6px;vertical-align:2px">COMING SOON</span></div><div class="setm">${sub}</div></div>
+    <button class="tgl" disabled style="cursor:not-allowed"><span class="tgldot"></span></button>
+  </div>`;
+}
 function setToggle(key,label,def,sub){
   const on=S.settings[key]!==undefined?S.settings[key]:def;
   const subline=sub?`<div class="setm">${sub}</div>`:'';
@@ -2257,10 +2295,13 @@ async function toggleSetting(key,def){
   const cur=S.settings[key]!==undefined?S.settings[key]:def;
   const next=!cur;
   S.settings[key]=next;render();
-  // nEmail is the single owner of profiles.notify_opt_out: switch OFF means
-  // opted out, and that one column governs every email youbet sends.
-  if(!YB.demo() && key==='nEmail'){
-    const res=await YB.setNotifyOptOut(!next);
+  // Each switch owns exactly one column. nEmail is the master override
+  // (stored inverted as notify_opt_out); the rest map straight across.
+  const COL={nConnect:'notify_connects', nMsg:'notify_messages', nApplic:'notify_applicants', nViews:'notify_views'};
+  if(!YB.demo() && (key==='nEmail' || COL[key])){
+    const res = key==='nEmail'
+      ? await YB.setNotifyOptOut(!next)
+      : await YB.setNotifyPref(COL[key], next);
     if(!res||!res.ok){
       // roll the switch back rather than showing a preference that was not saved
       S.settings[key]=cur;
@@ -2268,7 +2309,7 @@ async function toggleSetting(key,def){
       render();
       return;
     }
-    toast(next?'Email notifications on':'Email notifications off');
+    toast(next?'Notifications on':'Notifications off');
   }
 }
 async function doLogout(){
@@ -2446,8 +2487,13 @@ function mapProfileToMe(p){
   S.isPro = !!p.is_premium;
   S.me.projectsEver = p.projects_ever||0;
   S.me.selfpostEver = p.selfpost_ever||0;
-  // Email notifications: the switch is the inverse of the opt-out column.
-  // Loaded here so the toggle shows the stored value instead of a default.
+  // Notification switches mirror the profiles.notify_* columns directly, so the
+  // Settings screen shows what the server actually has rather than a default.
+  if(p.notify_connects   !== undefined) S.settings.nConnect = !!p.notify_connects;
+  if(p.notify_messages   !== undefined) S.settings.nMsg     = !!p.notify_messages;
+  if(p.notify_applicants !== undefined) S.settings.nApplic  = !!p.notify_applicants;
+  if(p.notify_views      !== undefined) S.settings.nViews   = !!p.notify_views;
+  // "Email updates" stays the master override; ON means not opted out.
   S.settings.nEmail = !p.notify_opt_out;
   // daily reward: did I already claim today?
   if(p.last_claim_date){
@@ -2748,13 +2794,14 @@ async function sendIntent(){
       // ALL project requests go through the Team Space as a join request — owner accepts for team-chat access
       const ar = await YB.applyToProject(id, applyRole, noteTxt);
       if(ar && ar.ok){ S.appliedTo=S.appliedTo||{}; S.appliedTo[id]=true; }
-      YB.notifyConnect(targetPid, S.me.n, noteTxt, true);
+      YB.notifyEvent({kind:'applicant', to_pid:targetPid, from_pid:S.me.pid, from_name:S.me.n,
+                      project_name:e.n, role:applyRole||'Wants to join', note:noteTxt});
       toast(`Request sent to ${e.n}`);
       render(); go('home');
       return;
     }
     // ---- person: a request is sent — NO chat opens. The chat appears only when they accept. ----
-    YB.notifyConnect(id, S.me.n, firstMsg, false);
+    YB.notifyEvent({kind:'connect', to_pid:id, from_pid:S.me.pid, from_name:S.me.n, note:firstMsg});
     S.intentMode=null;
     toast(`Request sent to ${e.n}`);
     render(); go('home');
