@@ -3899,6 +3899,11 @@ async function boot(){
   try{
     const _q=new URLSearchParams(location.search);
     const _p=_q.get('p'); if(_p) S.pendingShare=_p;
+    // ?view=inbox — deep link used by the digest email's "Open your inbox" button.
+    // Restricted to a known list so the parameter cannot be used to drive the app
+    // into an arbitrary screen.
+    const _view=_q.get('view');
+    if(_view && ['inbox','net','notifs','me'].includes(_view)) S.pendingView=_view;
     // remember who invited this visitor so a signup can be credited later
     const _ref=_q.get('ref');
     if(_ref){ S.referredBy=_ref; try{ localStorage.setItem('yb_ref',_ref); }catch(e){} }
@@ -3949,7 +3954,10 @@ async function boot(){
     });
   }
   if(YB.demo()){ try{ seedDemo(); }catch(e){} }
-  render();
+  // land on the screen the deep link asked for. go() still applies its own
+  // sign-in gating, so a signed-out visitor gets the login prompt as usual.
+  if(S.pendingView){ const _v=S.pendingView; S.pendingView=null; S.stack=[]; go(_v); }
+  else render();
   if(YB.demo()) openPendingShare();
   // guests (no session) still see the live feed straight away
   if(!isSignedIn()){ try{ loadFeed(); }catch(e){} }
