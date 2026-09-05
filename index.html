@@ -2800,7 +2800,7 @@ async function sendIntent(){
       const ar = await YB.applyToProject(id, applyRole, noteTxt);
       if(ar && ar.ok){ S.appliedTo=S.appliedTo||{}; S.appliedTo[id]=true; }
       YB.notifyEvent({kind:'applicant', to_pid:targetPid, from_pid:S.me.pid, from_name:S.me.n,
-                      project_name:e.n, role:applyRole||'Wants to join', note:noteTxt});
+                      project_id:id, project_name:e.n, role:applyRole||'Wants to join', note:noteTxt});
       toast(`Request sent to ${e.n}`);
       render(); go('home');
       return;
@@ -3039,7 +3039,8 @@ async function saveMe(){
 }
 function openGroup(id){
   const e=E(id);
-  if(!S.groupchats[id])S.groupchats[id]={msgs:e.team.map(m=>({who:m.n,c:m.c,t:m.tag==='Founder'?`Welcome! ${m.n} here — ask us anything.`:`Hey, ${m.n} on the team.`}))};
+  if(!e){ toast('That project isn’t available'); return go('inbox'); }
+  if(!S.groupchats[id])S.groupchats[id]={msgs:(e.team||[]).map(m=>({who:m.n,c:m.c,t:m.tag==='Founder'?`Welcome! ${m.n} here — ask us anything.`:`Hey, ${m.n} on the team.`}))};
   S.groupId=id;S.spaceTab='about';go('group');
   if(!YB.demo()){
     // membership may not be loaded yet (deep link) — fetch and re-render so members aren't shown the guest view
@@ -3947,6 +3948,20 @@ async function openPendingShare(){
     render();
   }
 }
+// Deep links land after boot. A plain screen can open immediately; a team chat
+// has to wait for its project to load, because openGroup reads the entity. If it
+// never arrives (not a member, deleted, slow), fall back to the inbox rather
+// than leaving the app on a blank screen.
+async function applyPendingView(){
+  const v=S.pendingView, id=S.pendingViewId;
+  S.pendingView=null; S.pendingViewId=null; S.stack=[];
+  if(v!=='team'){ go(v); return; }
+  render();
+  for(let i=0;i<20 && !E(id);i++){ await new Promise(r=>setTimeout(r,300)); }
+  if(!E(id)){ toast('Opening your inbox'); go('inbox'); return; }
+  openGroup(id);
+  spaceTab('chat');
+}
 async function boot(){
   try{
     const _q=new URLSearchParams(location.search);
@@ -3956,6 +3971,14 @@ async function boot(){
     // into an arbitrary screen.
     const _view=_q.get('view');
     if(_view && ['inbox','net','notifs','me'].includes(_view)) S.pendingView=_view;
+    // ?view=team&id=<project> opens that project's team chat (digest/notification CTA).
+    // The id must look like a uuid; anything else is ignored.
+    if(_view==='team'){
+      const _id=_q.get('id')||'';
+      if(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(_id)){
+        S.pendingView='team'; S.pendingViewId=_id;
+      }
+    }
     // remember who invited this visitor so a signup can be credited later
     const _ref=_q.get('ref');
     if(_ref){ S.referredBy=_ref; try{ localStorage.setItem('yb_ref',_ref); }catch(e){} }
@@ -4008,7 +4031,7 @@ async function boot(){
   if(YB.demo()){ try{ seedDemo(); }catch(e){} }
   // land on the screen the deep link asked for. go() still applies its own
   // sign-in gating, so a signed-out visitor gets the login prompt as usual.
-  if(S.pendingView){ const _v=S.pendingView; S.pendingView=null; S.stack=[]; go(_v); }
+  if(S.pendingView){ applyPendingView(); }
   else render();
   if(YB.demo()) openPendingShare();
   // guests (no session) still see the live feed straight away
