@@ -82,6 +82,8 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none}
 .backbtn{font-size:22px;color:var(--tx);padding:8px 10px;line-height:1}
 .backttl{font-family:var(--head);font-weight:800;font-size:16.5px}
 .chattl{display:flex;align-items:center;gap:9px;cursor:pointer;flex:1;min-width:0}
+.chatmore{font-size:20px;line-height:1;color:var(--tx3);background:none;border:none;padding:8px 10px;cursor:pointer;flex:none}
+.chatmore:hover{color:var(--tx)}
 .chattl:active{opacity:.6}
 .chatav{width:32px;height:32px;font-size:13px;border-radius:50%;flex-shrink:0}
 .chatav.sq{border-radius:8px}
@@ -1365,6 +1367,17 @@ const YB = {
       return error?{ok:false,error:error.message}:{ok:true};
     }catch(e){ return {ok:false,error:String(e)}; }
   },
+  // ---- CONNECTIONS ----
+  // Ends the connection and hides my copy of the chat. The other person keeps
+  // theirs — threads and messages are shared rows, so deleting would take their
+  // history with it. RLS has no DELETE policy on any of those tables either, so
+  // this has to be the RPC: a client-side delete would report success and do
+  // nothing at all.
+  async removeConnection(pid){
+    if(DEMO) return {ok:true};
+    try{ const {data,error}=await sb.rpc('remove_connection',{target_pid:pid}); if(error)return {ok:false,error:error.message}; return {ok:!(data&&data.error), ...(data||{})}; }
+    catch(e){ return {ok:false,error:String(e)}; }
+  },
   // ---- BLOCKING (#7) ----
   async blockUser(pid){
     if(DEMO) return {ok:true};
@@ -1771,7 +1784,9 @@ function rChat(){
     ? `<div class="dock disabled"><div class="fieldA"><div class="me">${S.me.n[0].toUpperCase()}</div><input disabled placeholder="They need to accept first…"><button class="send"><svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/></svg></button></div></div>`
     : `<div class="dock"><div class="fieldA"><div class="me">${S.me.n[0].toUpperCase()}</div><input id="chatinput" placeholder="Message ${e.n}…" onkeydown="if(event.key==='Enter')sendMsg()"><button class="send" onclick="sendMsg()"><svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/></svg></button></div></div>`;
   const openProfile = e.type==='project'?`openDetail('${c.id}')`:`openDetail('${c.id}')`;
-  const header=`<div class="backbar"><button class="backbtn" onclick="back('inbox')">‹</button><div class="chattl" onclick="${openProfile}">${av(e,'chatav'+(e.type==='project'?' sq':''))}<span class="backttl">${e.n}</span></div></div>`;
+  // person chats can be ended from here; a project chat is left via the team space
+  const rm = e.type==='project' ? '' : `<button class="chatmore" title="Remove connection" onclick="removeConnection('${c.id}')">⋯</button>`;
+  const header=`<div class="backbar"><button class="backbtn" onclick="back('inbox')">‹</button><div class="chattl" onclick="${openProfile}">${av(e,'chatav'+(e.type==='project'?' sq':''))}<span class="backttl">${e.n}</span></div>${rm}</div>`;
   return `${header}${body}${dock}${bnav('inbox')}`;}
 
 function myRole(id){
@@ -3645,6 +3660,20 @@ async function deleteProject(id){
   if(S.projects) delete S.projects[id];
   S.feed=(S.feed||[]).filter(f=>f!==id);
   toast('Project deleted');render();
+}
+// Remove a connection: my inbox loses the chat, they keep theirs. Not a delete —
+// the copy is shared — so the wording promises only what actually happens.
+async function removeConnection(id){
+  const e=E(id); const nm=e?e.n:'this person';
+  if(!confirm(`Remove your connection with ${nm}?\n\nThe chat disappears from your inbox. They keep their copy, and it comes back here if they message you again.`))return;
+  if(!YB.demo()){
+    const res=await YB.removeConnection(id);
+    if(!res.ok){ toast(errMsg(res,'Could not remove that connection')); return; }
+  }
+  S.chats=(S.chats||[]).filter(c=>c.id!==id);
+  if(S.hiSent) delete S.hiSent[id];
+  toast(`Removed ${nm}`);
+  S.stack=[]; go('inbox');
 }
 // ---- Blocking (#7) ----
 async function blockUser(id){
