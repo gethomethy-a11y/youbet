@@ -1202,15 +1202,53 @@ const YB = {
     return this.saveProfileRPC({photo_url:url});
   },
   // ---- NOTIFY (email on connect/join) ----
-  async notifyConnect(toPid, fromName, note, isProject){
+  // Per-event notification email. The function re-checks the recipient's
+  // notification settings server-side, so nothing here can force a send.
+  // Fire-and-forget on purpose: a mail problem must never block the action.
+  async notifyEvent(payload){
     if(DEMO) return {ok:true};
     try{
-      await fetch(CFG.SUPABASE_URL+'/functions/v1/notify-connect', {
+      await fetch(CFG.SUPABASE_URL+'/functions/v1/notify-event', {
         method:'POST',
         headers:{'Content-Type':'application/json','apikey':CFG.SUPABASE_KEY,'Authorization':'Bearer '+CFG.SUPABASE_KEY},
-        body:JSON.stringify({to_pid:toPid, from_name:fromName||'Someone', note:note||'', is_project:!!isProject})
+        body:JSON.stringify(payload)
       });
       return {ok:true};
+    }catch(e){ return {ok:false,error:String(e)}; }
+  },
+  // per-category email preferences (profiles.notify_*)
+  async notifyPrefs(){
+    if(DEMO) return {};
+    try{ const {data}=await sb.rpc('my_notify_prefs'); return data||{}; }catch(e){ return {}; }
+  },
+  async setNotifyPref(key, value){
+    if(DEMO) return {ok:true};
+    try{ const {data,error}=await sb.rpc('set_notify_pref',{p_key:key,p_value:!!value});
+      if(error) return {ok:false,error:error.message};
+      return {ok:!(data&&data.error), ...(data||{})};
+    }catch(e){ return {ok:false,error:String(e)}; }
+  },
+  // what would stop me deleting? (projects I solely own that others are on)
+  async deletionBlockers(){
+    if(DEMO) return [];
+    try{ const {data}=await sb.rpc('my_deletion_blockers'); return data||[]; }catch(e){ return []; }
+  },
+  // Deletes the caller's own account. The edge function takes the user id from
+  // the verified token, so this cannot be pointed at anyone else.
+  async deleteAccount(confirmText){
+    if(DEMO) return {ok:true};
+    try{
+      const {data:sess}=await sb.auth.getSession();
+      const token=sess&&sess.session&&sess.session.access_token;
+      if(!token) return {ok:false,error:'not_authenticated'};
+      const r=await fetch(CFG.SUPABASE_URL+'/functions/v1/delete-account',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':CFG.SUPABASE_KEY,'Authorization':'Bearer '+token},
+        body:JSON.stringify({confirm:confirmText})
+      });
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok||d.error) return {ok:false, ...d};
+      return {ok:true, ...d};
     }catch(e){ return {ok:false,error:String(e)}; }
   },
   async setNotifyOptOut(optOut){
@@ -1682,7 +1720,8 @@ function rInbox(){
     let appBanner='';
     const myProjs=Object.values(S.myprojects||{});
     const appList=[];
-    myProjs.forEach(p=>{((S.applicantsData&&S.applicantsData[p.id])||[]).filter(a=>!a.is_team&&a.status!=='accepted').forEach(a=>appList.push({...a,projId:p.id,projName:p.n})); });
+    // only genuinely pending applicants — 'declined' used to be counted here too
+    myProjs.forEach(p=>{((S.applicantsData&&S.applicantsData[p.id])||[]).filter(a=>!a.is_team&&(a.status||'pending')==='pending').forEach(a=>appList.push({...a,projId:p.id,projName:p.n})); });
     if(appList.length){
       const av2=appList.slice(0,3).map((a,i)=>{const col=(typeof AV_COLORS!=='undefined')?AV_COLORS[(a.avatar_color||0)%AV_COLORS.length]:'#111';return `<div class="mav" style="background:${col};width:34px;height:34px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:2px solid #fff;${i?'margin-left:-11px':''}">${(a.name||'?')[0]}</div>`;}).join('');
       const first=appList[0], target=first.projId;
@@ -1871,16 +1910,16 @@ function rApplicants(){
   const hidden=apps.length-shown.length;
   return `${backbar('Applicants','detail')}
   <div class="apphead"><div class="dk" style="margin:0">Applicants · ${apps.length}</div><div class="appfor">For: ${role} · ${e.n}</div></div>
-  ${shown.map(a=>{const p=E(a.id);return `<div class="approw"><div class="av" style="background:${p.c}">${p.n[0]}</div><div style="flex:1"><div class="appn">${p.n}${proBadge(p)}</div><div class="appr">${p.meta}</div><div class="appnote">"${a.note}"</div></div></div>
-  <div class="appbrow"><button class="abtn acc" onclick="acceptApplicant('${a.id}','${id}')">Accept</button><button class="abtn dec" onclick="openDetail('${a.id}')">View</button><button class="abtn dec" onclick="toast('Ignored')">Ignore</button></div>`;}).join('')}
+  ${shown.map(a=>{const p=E(a.id);const appId=a.application_id||'';return `<div class="approw"><div class="av" style="background:${p.c}">${p.n[0]}</div><div style="flex:1"><div class="appn">${p.n}${proBadge(p)}</div><div class="appr">${p.meta}</div><div class="appnote">"${a.note}"</div></div></div>
+  <div class="appbrow"><button class="abtn acc" onclick="acceptApp('${appId}','${id}','${a.id}')">Accept</button><button class="abtn dec" onclick="openDetail('${a.id}')">View</button><button class="abtn dec" onclick="declineApp('${appId}','${id}')">Decline</button></div>`;}).join('')}
   ${hidden>0?`<div class="applocked"><div class="applk"><div class="lkt">${hidden} more applicant${hidden>1?'s':''}</div><div class="lks">See everyone who applied to your roles</div><button class="lkb" onclick="go('member')">Unlock with Pro</button></div></div>`:''}
   <div style="height:100px"></div>
   ${bnav('inbox')}`;}
-function acceptApplicant(pid,proj){
-  const p=E(pid);
-  if(!S.chats.find(c=>c.id===pid))S.chats.unshift({id:pid,msgs:[{me:0,t:`Thanks for accepting me! Excited to help build ${E(proj).n}.`}],time:'now',unread:false});
-  toast(`${p.n} added — say hi`);openChat(pid);
-}
+// acceptApplicant() removed. It was demo-only code running against live data:
+// it invented an incoming message the applicant never wrote, and called no
+// backend at all — no applications.status update, no team membership. The
+// Accept button now uses acceptApp(), the same handler as the Team Space tab,
+// which calls accept_application + add_to_team and rolls back on failure.
 async function sendGroup(){
   const i=document.getElementById('groupinput');if(!i||!i.value.trim())return;
   const txt=i.value.trim(); const id=S.groupId;
@@ -1888,7 +1927,15 @@ async function sendGroup(){
   S.teamChats=S.teamChats||{}; S.teamChats[id]=S.teamChats[id]||[];
   S.teamChats[id].push({sender:S.uid, name:S.me.n, body:txt, kind:'msg'});
   render();
-  try{ const r=await YB.teamSend(id, txt); if(r&&r.ok===false){ toast(errMsg(r,'Could not send')); } }catch(e){}
+  try{
+    const r=await YB.teamSend(id, txt);
+    if(r&&r.ok===false){ toast(errMsg(r,'Could not send')); return; }
+    // notify the rest of the team; the function excludes the sender and anyone
+    // who has the chat open, and honours each member's Messages setting
+    const proj=E(id);
+    YB.notifyEvent({kind:'message', project_id:id, from_user:S.uid, from_name:S.me.n,
+                    project_name:proj?proj.n:'', body:txt});
+  }catch(e){}
 }
 async function loadTeamChat(id){
   if(YB.demo())return;
@@ -1931,16 +1978,23 @@ function rBuyCoins(){
   ${bnav('home')}`;}
 function rMember(){
   const bens=[
-    ['See who viewed & saved you',"Know who's interested before you reach out"],
+    ['See who saved you',"Know who's interested before you reach out"],
     ['2× visibility','Your card & posts shown first'],
     ['Unlimited projects & posts','Free is limited to 1 of each'],
     ['Premium badge',"A gold badge on your card, shows you're Pro"],
+  ];
+  // Not numbered and visibly greyed: nothing records profile views yet, so this
+  // is not part of what today's subscription buys. Move it into bens above once
+  // view tracking exists.
+  const soonPerks=[
+    ['See who viewed you','Not available yet — we\u2019ll turn it on when view tracking ships'],
   ];
   return `${backbar('youbet Pro',FEATURES.coinsEnabled?'coins':'me')}
   <div class="prom">
   <div class="phero"><div class="pk">◆ Premium · $9.99/mo</div><div class="pt">Get seen first.</div><div class="ps">Know who's interested and unlock everything.</div></div>
   <div class="plist">
     ${bens.map((b,i)=>`<div class="pli"><span class="pn">${String(i+1).padStart(2,'0')}</span><div><div class="plt">${b[0]}</div><div class="pls">${b[1]}</div></div></div>`).join('')}
+    ${soonPerks.map(b=>`<div class="pli" style="opacity:.5"><span class="pn">·</span><div><div class="plt">${b[0]} <span style="font-size:9.5px;font-weight:800;letter-spacing:.4px;border:1px solid currentColor;border-radius:100px;padding:2px 7px;margin-left:5px;vertical-align:2px">COMING SOON</span></div><div class="pls">${b[1]}</div></div></div>`).join('')}
   </div>
   <div class="pcta"><button class="pctabtn" onclick="goPro()">Go Premium · $9.99/mo</button><div class="pctasub">Cancel anytime</div></div>
   <div style="height:130px"></div>
@@ -2228,8 +2282,9 @@ function rSettings(){
   <div class="setsec">
     ${setToggle('nConnect','New connection requests',true)}
     ${setToggle('nMsg','Messages',true)}
-    ${setToggle('nViews','Profile views',false)}
-    ${setToggle('nEmail','Email updates',false)}
+    ${setToggle('nApplic','New applicants',true)}
+    ${setToggleSoon('Profile views','Needs view tracking — not built yet')}
+    ${setToggle('nEmail','Email updates',true,'Master switch. Off stops every youbet email.')}
   </div>
   <div class="setlbl">Privacy</div>
   <div class="setsec">
@@ -2246,23 +2301,48 @@ function rSettings(){
   <div class="setsec" style="margin-top:22px">
     <div class="setrow" onclick="doLogout()"><div class="setb"><div class="sett" style="color:var(--tx)">Log out</div></div></div>
   </div>
-  <div class="setsec">
-    <div class="setrow" onclick="confirmDelete()"><div class="setb"><div class="sett" style="color:var(--red)">Delete account</div></div></div>
+  <div class="setlbl" style="color:var(--red);margin-top:26px">Danger zone</div>
+  <div class="setsec" style="border:1px solid rgba(255,43,43,.25)">
+    <div class="setrow" onclick="go('deleteacct')">
+      <div class="setb"><div class="sett" style="color:var(--red)">Delete account</div>
+      <div class="setm">Permanently removes your profile and personal data</div></div>
+      <span class="chev" style="color:var(--red)">›</span>
+    </div>
   </div>
   <div style="text-align:center;color:var(--tx3);font-size:11.5px;padding:20px 0 100px">youbet · v1.0</div>
   ${bnav('home')}`;}
-function setToggle(key,label,def){
-  const on=S.settings[key]!==undefined?S.settings[key]:def;
-  return `<div class="setrow"><div class="setb"><div class="sett">${label}</div></div><button class="tgl ${on?'on':''}" onclick="toggleSetting('${key}',${def})"><span class="tgldot"></span></button></div>`;
+// A switch that is deliberately inert: shown so the category is visible, but
+// wired to nothing because the underlying feature does not exist yet.
+function setToggleSoon(label,sub){
+  return `<div class="setrow" style="opacity:.55">
+    <div class="setb"><div class="sett">${label} <span style="font-size:10px;font-weight:800;letter-spacing:.4px;color:var(--tx3);border:1px solid var(--br2);border-radius:100px;padding:2px 7px;margin-left:6px;vertical-align:2px">COMING SOON</span></div><div class="setm">${sub}</div></div>
+    <button class="tgl" disabled style="cursor:not-allowed"><span class="tgldot"></span></button>
+  </div>`;
 }
-function toggleSetting(key,def){
+function setToggle(key,label,def,sub){
+  const on=S.settings[key]!==undefined?S.settings[key]:def;
+  const subline=sub?`<div class="setm">${sub}</div>`:'';
+  return `<div class="setrow"><div class="setb"><div class="sett">${label}</div>${subline}</div><button class="tgl ${on?'on':''}" onclick="toggleSetting('${key}',${def})"><span class="tgldot"></span></button></div>`;
+}
+async function toggleSetting(key,def){
   const cur=S.settings[key]!==undefined?S.settings[key]:def;
   const next=!cur;
   S.settings[key]=next;render();
-  // Live: connection/email notifications map to profiles.notify_opt_out
-  if(!YB.demo() && (key==='nConnect'||key==='nEmail')){
-    // opted out when the toggle is OFF
-    YB.setNotifyOptOut(!next);
+  // Each switch owns exactly one column. nEmail is the master override
+  // (stored inverted as notify_opt_out); the rest map straight across.
+  const COL={nConnect:'notify_connects', nMsg:'notify_messages', nApplic:'notify_applicants', nViews:'notify_views'};
+  if(!YB.demo() && (key==='nEmail' || COL[key])){
+    const res = key==='nEmail'
+      ? await YB.setNotifyOptOut(!next)
+      : await YB.setNotifyPref(COL[key], next);
+    if(!res||!res.ok){
+      // roll the switch back rather than showing a preference that was not saved
+      S.settings[key]=cur;
+      toast(errMsg(res,'Could not save that — try again'));
+      render();
+      return;
+    }
+    toast(next?'Notifications on':'Notifications off');
   }
 }
 async function doLogout(){
@@ -2271,11 +2351,89 @@ async function doLogout(){
   S.coins=0;S.me={n:'You',role:'',loc:'',bio:'',goodat:[],photo:null};
   S.guest=true;S.onboarding=false;S.view=null;S.stack=[];toast('Logged out');render();loadFeed();
 }
-function confirmDelete(){
-  if(!confirm('Delete your account? This cannot be undone.'))return;
-  if(!confirm('Are you absolutely sure? All your data will be permanently deleted.'))return;
-  S.coins=0;S.me={n:'You',role:'',loc:'',bio:'',goodat:[],photo:null};
-  S.guest=true;S.onboarding=false;S.view=null;S.stack=[];toast('Account deleted');render();loadFeed();
+// A session pointing at a deleted profile: sign out rather than let a scrubbed
+// account back in. Signing in with the same Google account creates a new one,
+// because delete_account() removes the auth identity link.
+async function handleDeletedAccount(){
+  try{ await YB.signOut(); }catch(e){}
+  S.coins=0; S.me={n:'You',role:'',loc:'',bio:'',goodat:[],photo:null};
+  S.guest=true; S.onboarding=false; S.view=null; S.stack=[];
+  toast('That account was deleted');
+  render(); try{ loadFeed(); }catch(e){}
+}
+
+// The old confirmDelete() only cleared local state and toasted "Account
+// deleted" — the account was never touched server-side. Replaced by a real
+// screen that requires typing the account email and calls delete-account.
+function rDeleteAccount(){
+  const email=(S.me.email||'').trim();
+  const blockers=S.deleteBlockers||[];
+  const typed=(S.deleteTyped||'').trim().toLowerCase();
+  const ready=email && typed===email.toLowerCase() && !blockers.length;
+  const blockerHtml=blockers.length?`
+    <div style="background:#FFF5F5;border:1px solid rgba(255,43,43,.3);border-radius:12px;padding:14px 16px;margin:0 20px 18px">
+      <div style="font-family:var(--head);font-weight:800;font-size:14px;color:var(--red);margin-bottom:6px">Transfer or delete these first</div>
+      <div style="font-size:13.5px;color:var(--tx2);line-height:1.5">You're the only owner of ${blockers.length===1?'a project that other people are on':'projects that other people are on'}. Deleting your account would leave ${blockers.length===1?'their team':'those teams'} without an owner.</div>
+      <div style="margin-top:10px">${blockers.map(b=>`<div style="font-size:13.5px;font-weight:700;color:var(--tx)">· ${esc(b.project_name||'Project')} <span style="font-weight:500;color:var(--tx3)">${b.members} member${b.members===1?'':'s'}</span></div>`).join('')}</div>
+    </div>`:'';
+  return `${backbar('Delete account','settings')}
+  <div style="padding:4px 20px 18px">
+    <div style="font-family:var(--head);font-weight:800;font-size:19px;letter-spacing:-.4px;margin-bottom:10px">This can't be undone.</div>
+    <div style="font-size:14px;color:var(--tx2);line-height:1.6">
+      Your profile, posts, saves and settings are deleted. Pending requests you've sent or received are withdrawn.
+      Messages you've sent stay in other people's conversations but are no longer linked to you — they'll show as
+      "Deleted user". Projects you own alone are deleted with your account.
+    </div>
+  </div>
+  ${blockerHtml}
+  <div style="padding:0 20px">
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:8px">Type <b style="color:var(--tx)">${esc(email||'your email')}</b> to confirm</div>
+    <input class="finp" id="del_confirm" autocomplete="off" autocapitalize="none" spellcheck="false"
+      placeholder="${esc(email||'your email')}"
+      value="${esc(S.deleteTyped||'')}"
+      oninput="S.deleteTyped=this.value;syncDeleteBtn()">
+  </div>
+  <button id="del_btn" class="claim" ${ready?'':'disabled'}
+    style="background:${ready?'var(--red)':'var(--br2)'};color:#fff;margin-top:16px"
+    onclick="doDeleteAccount()">Delete my account</button>
+  <div style="text-align:center;padding:14px 20px 100px"><span class="lk" onclick="back('settings')" style="font-size:13.5px;color:var(--tx2);cursor:pointer">Cancel</span></div>`;}
+
+function syncDeleteBtn(){
+  const email=(S.me.email||'').trim().toLowerCase();
+  const typed=(S.deleteTyped||'').trim().toLowerCase();
+  const ok=!!email && typed===email && !(S.deleteBlockers||[]).length;
+  const b=document.getElementById('del_btn');
+  if(b){ b.disabled=!ok; b.style.background=ok?'var(--red)':'var(--br2)'; }
+}
+
+async function loadDeleteBlockers(){
+  if(YB.demo()){ S.deleteBlockers=[]; return; }
+  try{ S.deleteBlockers=await YB.deletionBlockers(); }catch(e){ S.deleteBlockers=[]; }
+  if(S.view==='deleteacct')render();
+}
+
+async function doDeleteAccount(){
+  const email=(S.me.email||'').trim();
+  const typed=(S.deleteTyped||'').trim();
+  if(!email || typed.toLowerCase()!==email.toLowerCase()) return toast('Type your email exactly to confirm');
+  if((S.deleteBlockers||[]).length) return toast('Transfer or delete those projects first');
+  const btn=document.getElementById('del_btn'); if(btn)btn.disabled=true;
+  toast('Deleting your account…');
+  const res=await YB.deleteAccount(typed);
+  if(!res.ok){
+    if(btn)btn.disabled=false;
+    if(res.error==='owns_team_project'){ loadDeleteBlockers(); return toast('Transfer or delete those projects first'); }
+    if(res.error==='confirmation_mismatch') return toast('That email doesn’t match this account');
+    return toast(errMsg(res,'Could not delete your account'));
+  }
+  // sign out locally and drop every trace of the session
+  try{ await YB.signOut(); }catch(e){}
+  try{ localStorage.removeItem('yb_ref'); }catch(e){}
+  S.deleteTyped=''; S.deleteBlockers=[];
+  S.coins=0; S.me={n:'You',role:'',loc:'',bio:'',goodat:[],photo:null};
+  S.guest=true; S.onboarding=false; S.view=null; S.stack=[];
+  toast('Your account has been deleted');
+  render(); loadFeed();
 }
 // Reusable V2 role picker: trigger + expanded option list + "Other" free-text
 function rolePickerUI(value, ctx){
@@ -2428,6 +2586,7 @@ function obStartSignup(){obStart('signup');}
 function obStartLogin(){obStart('login');}
 function mapProfileToMe(p){
   if(!p)return;
+  if(p.deleted_at){ handleDeletedAccount(); return; }
   S.me.n = p.name || (p.email||'You').split('@')[0] || 'You';
   S.me.role = p.role || p.skill_label || '';
   S.me.loc = p.city || '';
@@ -2440,6 +2599,14 @@ function mapProfileToMe(p){
   S.isPro = !!p.is_premium;
   S.me.projectsEver = p.projects_ever||0;
   S.me.selfpostEver = p.selfpost_ever||0;
+  // Notification switches mirror the profiles.notify_* columns directly, so the
+  // Settings screen shows what the server actually has rather than a default.
+  if(p.notify_connects   !== undefined) S.settings.nConnect = !!p.notify_connects;
+  if(p.notify_messages   !== undefined) S.settings.nMsg     = !!p.notify_messages;
+  if(p.notify_applicants !== undefined) S.settings.nApplic  = !!p.notify_applicants;
+  if(p.notify_views      !== undefined) S.settings.nViews   = !!p.notify_views;
+  // "Email updates" stays the master override; ON means not opted out.
+  S.settings.nEmail = !p.notify_opt_out;
   // daily reward: did I already claim today?
   if(p.last_claim_date){
     const today=new Date().toISOString().slice(0,10);
@@ -2560,7 +2727,7 @@ function requireAuth(){
 }
 function render(){
   if(S.onboarding){app.innerHTML=rOnboard();if(S.photoTarget)app.insertAdjacentHTML('beforeend',photoSheet());window.scrollTo(0,0);return;}
-  const map={home:rHome,net:rNet,inbox:rInbox,detail:rDetail,chat:rChat,group:rGroup,applicants:rApplicants,coins:rCoins,buycoins:rBuyCoins,member:rMember,compose:rCompose,composePerson:rComposePerson,newproject:rNewProject,composeRole:rComposeRole,editRole:rEditRole,me:rMe,editme:rEditMe,settings:rSettings,notifs:rNotifs,search:rSearch,connections:rConnections,saved:rSaved,viewers:rViewers,blocked:rBlocked,help:rHelp,contact:rContact,legal:rLegal};
+  const map={home:rHome,net:rNet,inbox:rInbox,detail:rDetail,chat:rChat,group:rGroup,applicants:rApplicants,coins:rCoins,buycoins:rBuyCoins,member:rMember,compose:rCompose,composePerson:rComposePerson,newproject:rNewProject,composeRole:rComposeRole,editRole:rEditRole,me:rMe,editme:rEditMe,settings:rSettings,notifs:rNotifs,search:rSearch,connections:rConnections,saved:rSaved,viewers:rViewers,blocked:rBlocked,help:rHelp,contact:rContact,legal:rLegal,deleteacct:rDeleteAccount};
   let _v=S.view||'home';
   // coins screens are hidden behind the feature flag — fall back to the profile screen
   if(!FEATURES.coinsEnabled && (_v==='coins'||_v==='buycoins')) _v='me';
@@ -2579,12 +2746,13 @@ function go(v){
   // net + inbox are browsable as a guest (they show a sign-in prompt inside);
   // everything else account-bound still gates.
   if(!FEATURES.coinsEnabled && (v==='coins'||v==='buycoins')) v='me';
-  const gated=['me','coins','buycoins','member','connections','saved','viewers','settings','blocked','notifs','compose','composePerson','newproject','composeRole','editme','editRole'];
+  const gated=['me','coins','buycoins','member','connections','saved','viewers','settings','blocked','notifs','compose','composePerson','newproject','composeRole','editme','editRole','deleteacct'];
   if(gated.includes(v) && !requireAuth()) return;
   closeSheets();
   if(['home','net','inbox'].includes(v))S.tab=v;
   S.stack.push(S.view||'home');S.view=v;render();
   if(v==='blocked')loadBlocked();
+  if(v==='deleteacct'){ S.deleteTyped=''; loadDeleteBlockers(); }
   if(v==='me')loadMyApplicants();
   if(v==='coins'&&FEATURES.coinsEnabled)loadRewards();
   if(v==='inbox' && isSignedIn()){ S._inboxTouched=false; if((S.requests||[]).length){ S.inboxTab='reqs'; render(); } loadInbox(); loadMyApplicants(); }
@@ -2729,7 +2897,7 @@ async function sendIntent(){
     if(isProj && !targetPid){ toast('This project has no owner to contact'); return; }
     S.intent=null;
     toast('Sending…');
-    // do_connect spends the 10 coins and creates the request. For a "say hi" we pass the
+    // do_connect creates the request (connecting is free). For a "say hi" we pass the
     // note so it becomes the first chat message; for a request we pass NO note (no chat).
     const res = await YB.connect(targetPid, connectNote);
     if(!res.ok){ toast(errMsg(res,'Could not send')); return; }
@@ -2739,13 +2907,14 @@ async function sendIntent(){
       // ALL project requests go through the Team Space as a join request — owner accepts for team-chat access
       const ar = await YB.applyToProject(id, applyRole, noteTxt);
       if(ar && ar.ok){ S.appliedTo=S.appliedTo||{}; S.appliedTo[id]=true; }
-      YB.notifyConnect(targetPid, S.me.n, noteTxt, true);
+      YB.notifyEvent({kind:'applicant', to_pid:targetPid, from_pid:S.me.pid, from_name:S.me.n,
+                      project_id:id, project_name:e.n, role:applyRole||'Wants to join', note:noteTxt});
       toast(`Request sent to ${e.n}`);
       render(); go('home');
       return;
     }
     // ---- person: a request is sent — NO chat opens. The chat appears only when they accept. ----
-    YB.notifyConnect(id, S.me.n, firstMsg, false);
+    YB.notifyEvent({kind:'connect', to_pid:id, from_pid:S.me.pid, from_name:S.me.n, note:firstMsg});
     S.intentMode=null;
     toast(`Request sent to ${e.n}`);
     render(); go('home');
@@ -2978,7 +3147,8 @@ async function saveMe(){
 }
 function openGroup(id){
   const e=E(id);
-  if(!S.groupchats[id])S.groupchats[id]={msgs:e.team.map(m=>({who:m.n,c:m.c,t:m.tag==='Founder'?`Welcome! ${m.n} here — ask us anything.`:`Hey, ${m.n} on the team.`}))};
+  if(!e){ toast('That project isn’t available'); return go('inbox'); }
+  if(!S.groupchats[id])S.groupchats[id]={msgs:(e.team||[]).map(m=>({who:m.n,c:m.c,t:m.tag==='Founder'?`Welcome! ${m.n} here — ask us anything.`:`Hey, ${m.n} on the team.`}))};
   S.groupId=id;S.spaceTab='about';go('group');
   if(!YB.demo()){
     // membership may not be loaded yet (deep link) — fetch and re-render so members aren't shown the guest view
@@ -3886,10 +4056,37 @@ async function openPendingShare(){
     render();
   }
 }
+// Deep links land after boot. A plain screen can open immediately; a team chat
+// has to wait for its project to load, because openGroup reads the entity. If it
+// never arrives (not a member, deleted, slow), fall back to the inbox rather
+// than leaving the app on a blank screen.
+async function applyPendingView(){
+  const v=S.pendingView, id=S.pendingViewId;
+  S.pendingView=null; S.pendingViewId=null; S.stack=[];
+  if(v!=='team'){ go(v); return; }
+  render();
+  for(let i=0;i<20 && !E(id);i++){ await new Promise(r=>setTimeout(r,300)); }
+  if(!E(id)){ toast('Opening your inbox'); go('inbox'); return; }
+  openGroup(id);
+  spaceTab('chat');
+}
 async function boot(){
   try{
     const _q=new URLSearchParams(location.search);
     const _p=_q.get('p'); if(_p) S.pendingShare=_p;
+    // ?view=inbox — deep link used by the digest email's "Open your inbox" button.
+    // Restricted to a known list so the parameter cannot be used to drive the app
+    // into an arbitrary screen.
+    const _view=_q.get('view');
+    if(_view && ['inbox','net','notifs','me'].includes(_view)) S.pendingView=_view;
+    // ?view=team&id=<project> opens that project's team chat (digest/notification CTA).
+    // The id must look like a uuid; anything else is ignored.
+    if(_view==='team'){
+      const _id=_q.get('id')||'';
+      if(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(_id)){
+        S.pendingView='team'; S.pendingViewId=_id;
+      }
+    }
     // remember who invited this visitor so a signup can be credited later
     const _ref=_q.get('ref');
     if(_ref){ S.referredBy=_ref; try{ localStorage.setItem('yb_ref',_ref); }catch(e){} }
@@ -3940,7 +4137,10 @@ async function boot(){
     });
   }
   if(YB.demo()){ try{ seedDemo(); }catch(e){} }
-  render();
+  // land on the screen the deep link asked for. go() still applies its own
+  // sign-in gating, so a signed-out visitor gets the login prompt as usual.
+  if(S.pendingView){ applyPendingView(); }
+  else render();
   if(YB.demo()) openPendingShare();
   // guests (no session) still see the live feed straight away
   if(!isSignedIn()){ try{ loadFeed(); }catch(e){} }
