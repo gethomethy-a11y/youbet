@@ -1993,20 +1993,22 @@ function rBuyCoins(){
   ${bnav('home')}`;}
 function rMember(){
   const bens=[
-    ['See who saved you',"Know who's interested before you reach out"],
     ['2× visibility','Your card & posts shown first'],
     ['Unlimited projects & posts','Free is limited to 1 of each'],
     ['Premium badge',"A gold badge on your card, shows you're Pro"],
   ];
-  // Not numbered and visibly greyed: nothing records profile views yet, so this
-  // is not part of what today's subscription buys. Move it into bens above once
-  // view tracking exists.
+  // Not numbered and visibly greyed: neither of these can be shown yet, so
+  // neither is part of what today's subscription buys. Nothing records profile
+  // views at all, and while saves are stored there is no read path for "who
+  // saved me" — my_saves() returns what I saved. Move them into bens above as
+  // each one is actually built.
   const soonPerks=[
+    ['See who saved you','Not available yet — saves are recorded, the list isn\u2019t built'],
     ['See who viewed you','Not available yet — we\u2019ll turn it on when view tracking ships'],
   ];
   return `${backbar('youbet Pro',FEATURES.coinsEnabled?'coins':'me')}
   <div class="prom">
-  <div class="phero"><div class="pk">◆ Premium · $9.99/mo</div><div class="pt">Get seen first.</div><div class="ps">Know who's interested and unlock everything.</div></div>
+  <div class="phero"><div class="pk">◆ Premium · $9.99/mo</div><div class="pt">Get seen first.</div><div class="ps">Top of the feed, no posting limits, and the Pro badge.</div></div>
   <div class="plist">
     ${bens.map((b,i)=>`<div class="pli"><span class="pn">${String(i+1).padStart(2,'0')}</span><div><div class="plt">${b[0]}</div><div class="pls">${b[1]}</div></div></div>`).join('')}
     ${soonPerks.map(b=>`<div class="pli" style="opacity:.5"><span class="pn">·</span><div><div class="plt">${b[0]} <span style="font-size:9.5px;font-weight:800;letter-spacing:.4px;border:1px solid currentColor;border-radius:100px;padding:2px 7px;margin-left:5px;vertical-align:2px">COMING SOON</span></div><div class="pls">${b[1]}</div></div></div>`).join('')}
@@ -2143,10 +2145,13 @@ function rMe(){
   <div class="sec">
     <div class="crow" onclick="go('connections')"><div class="cic"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg></div><div class="ct">Connections</div><span class="cn">${conns.length}</span><span class="chev">›</span></div>
     <div class="crow" onclick="go('saved')"><div class="cic"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></div><div class="ct">Saved</div><span class="cn">${savedIds.length}</span><span class="chev">›</span></div>
-    <div class="crow ${S.isPro?'':'lock'}" onclick="${S.isPro?"go('viewers')":"go('member')"}"><div class="cic"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><div class="ct">Who viewed you</div>${S.isPro?`<span class="cn">${S.viewers.length}</span>`:`<span class="clockic">🔒</span>`}<span class="chev">›</span></div>
+    <!-- Not a padlock and not a link: nothing records profile views, so Pro
+         unlocking this only ever opened an empty screen. Same treatment as the
+         Settings toggle and the perks list until view tracking exists. -->
+    <div class="crow" style="opacity:.55;cursor:default"><div class="cic"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><div class="ct">Who viewed you</div><span style="font-size:9.5px;font-weight:800;letter-spacing:.4px;color:var(--tx3);border:1px solid currentColor;border-radius:100px;padding:2px 7px">COMING SOON</span></div>
   </div>
   ${FEATURES.coinsEnabled?`<div class="coincard" onclick="go('coins')"><span class="m red" style="width:26px;height:26px;font-size:12px">b</span><span class="cnum">${S.coins}</span><span class="cunit">coins</span><span class="cgo">Open ›</span></div>`:''}
-  ${S.isPro?'':`<div class="pro" onclick="go('member')"><div class="pt">Go Premium</div><div class="ps">See who viewed you & unlock everything.</div><span class="pb">$9.99/mo ›</span></div>`}
+  ${S.isPro?'':`<div class="pro" onclick="go('member')"><div class="pt">Go Premium</div><div class="ps">Get shown first and post without limits.</div><span class="pb">$9.99/mo ›</span></div>`}
   <div style="height:100px"></div>
   ${bnav('home')}`;}
 function rConnections(){
