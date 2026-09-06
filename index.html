@@ -2349,7 +2349,7 @@ async function doLogout(){
   if(!confirm('Log out of youbet?'))return;
   try{ await YB.signOut(); }catch(e){}
   S.coins=0;S.me={n:'You',role:'',loc:'',bio:'',goodat:[],photo:null};
-  S.guest=true;S.onboarding=false;S.view=null;S.stack=[];toast('Logged out');render();loadFeed();
+  S.guest=true;S.onboarding=false;S.view=null;S.stack=[];S.deepLinked=false;toast('Logged out');render();loadFeed();
 }
 // A session pointing at a deleted profile: sign out rather than let a scrubbed
 // account back in. Signing in with the same Google account creates a new one,
@@ -2357,7 +2357,7 @@ async function doLogout(){
 async function handleDeletedAccount(){
   try{ await YB.signOut(); }catch(e){}
   S.coins=0; S.me={n:'You',role:'',loc:'',bio:'',goodat:[],photo:null};
-  S.guest=true; S.onboarding=false; S.view=null; S.stack=[];
+  S.guest=true; S.onboarding=false; S.view=null; S.stack=[]; S.deepLinked=false;
   toast('That account was deleted');
   render(); try{ loadFeed(); }catch(e){}
 }
@@ -4003,8 +4003,13 @@ async function routeSignedInUser(user){
   if(prof){ mapProfileToMe(prof); await syncCoins(); }
   else { S.me.email=user.email||S.me.email; }
   if(prof && prof.onboarded){
-    // returning, complete user -> straight into the app
-    S.onboarding=false; S.view=null; S.stack=[]; render(); loadFeed();
+    // returning, complete user -> straight into the app.
+    // A deep link owns the screen: this runs again whenever a late auth event
+    // arrives before loadFeed has finished, and resetting the view there was
+    // what sent ?view= links back to the home feed.
+    S.onboarding=false;
+    if(!S.pendingView && !S.deepLinked){ S.view=null; S.stack=[]; }
+    render(); loadFeed();
   } else {
     // new user (e.g. first Google sign-in) -> finish profile setup
     S.onboarding=true; OB.mode='signup'; OB.step='role';
@@ -4057,16 +4062,33 @@ async function openPendingShare(){
   }
 }
 // Deep links land after boot. A plain screen can open immediately; a team chat
-// has to wait for its project to load, because openGroup reads the entity. If it
-// never arrives (not a member, deleted, slow), fall back to the inbox rather
-// than leaving the app on a blank screen.
+// needs its project first, because openGroup reads the entity.
+//
+// This used to poll E(id) for six seconds, hoping the feed would happen to
+// contain the project. It usually did not: the feed only carries live projects,
+// so a link to a deleted one — or to a project the visitor cannot see — sat on
+// the home feed for six silent seconds, which reads as "the link did nothing".
+// Worse, a late auth event landing inside that window reset the view to home and
+// the fallback never showed. Ask the server for the project instead and answer
+// straight away, either the chat or the inbox.
 async function applyPendingView(){
   const v=S.pendingView, id=S.pendingViewId;
   S.pendingView=null; S.pendingViewId=null; S.stack=[];
+  S.deepLinked=true;   // this screen was asked for; boot must not reset it to home
   if(v!=='team'){ go(v); return; }
-  render();
-  for(let i=0;i<20 && !E(id);i++){ await new Promise(r=>setTimeout(r,300)); }
-  if(!E(id)){ toast('Opening your inbox'); go('inbox'); return; }
+  let e=E(id);
+  if(!e){
+    try{
+      const r=await YB.entityById(id);
+      if(r && r.kind==='project' && r.entity){
+        S.projects=S.projects||{}; S.projects[r.entity.id]=r.entity;
+        S.projWork=S.projWork||{}; S.projWork[r.entity.id]=r.entity.work_tags||[];
+        S.links=S.links||{};       S.links[r.entity.id]=r.entity.links||[];
+        e=E(id);
+      }
+    }catch(_){}
+  }
+  if(!e){ toast('That project isn’t available — opening your inbox'); go('inbox'); return; }
   openGroup(id);
   spaceTab('chat');
 }
