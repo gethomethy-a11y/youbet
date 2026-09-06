@@ -2897,7 +2897,7 @@ async function sendIntent(){
     if(isProj && !targetPid){ toast('This project has no owner to contact'); return; }
     S.intent=null;
     toast('Sending…');
-    // do_connect spends the 10 coins and creates the request. For a "say hi" we pass the
+    // do_connect creates the request (connecting is free). For a "say hi" we pass the
     // note so it becomes the first chat message; for a request we pass NO note (no chat).
     const res = await YB.connect(targetPid, connectNote);
     if(!res.ok){ toast(errMsg(res,'Could not send')); return; }
